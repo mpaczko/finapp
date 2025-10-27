@@ -1,208 +1,86 @@
-import React,{useState, useEffect} from 'react';
-import { supabase } from './createClient';
-import './App.css'
+import React, { useEffect, useState } from "react";
+import { supabase } from "./createClient";
+import { useDispatch } from "react-redux";
+import ExpenseDialog from "./components/ExpenseDialog";
+import { setExpenses } from "./store/expensesSlice/expensesSlice";
+import ElementsTable from "./components/AllExpensesTable";
+import { setCategories } from "./store/categoriesSlice/categoriesSlice";
+import CategoriesSummaryTable from "./components/CategoriesSummaryTable";
+import { format, startOfMonth, endOfMonth } from "date-fns";
+import { pl } from "date-fns/locale";
 
 const App = () => {
+  const dispatch = useDispatch();
 
-  const [users,setUsers]=useState([])
+  const [selectedMonth, setSelectedMonth] = useState(
+    format(new Date(), "yyyy-MM") // domyślnie aktualny miesiąc
+  );
 
-  const [user,setUser]=useState({
-    name:'',age:''
-  })
+  // 🔹 Funkcja pobierająca wydatki tylko z wybranego miesiąca
+  async function fetchExpenses(month) {
+    const startDate = format(
+      startOfMonth(new Date(month + "-01")),
+      "yyyy-MM-dd"
+    );
+    const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
 
-  const [user2,setUser2]=useState({
-    id:'',name:'',age:''
-  })
+    const { data, error } = await supabase
+      .from("expenses")
+      .select("*")
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: false });
 
+    if (error) {
+      console.error("Błąd podczas pobierania wydatków:", error);
+    }
 
+    if (data) {
+      dispatch(setExpenses(data));
+    }
+  }
 
-  console.log(user2)
-
+  async function fetchCategories() {
+    const { data, error } = await supabase.from("categories").select("*");
+    if (error) console.error(error);
+    if (data) dispatch(setCategories(data));
+  }
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
-  
+    fetchExpenses(selectedMonth);
+    fetchCategories();
+  }, [selectedMonth]);
 
-  async function fetchUsers(){
-    const {data} = await supabase
-      .from('users')
-      .select('*')
-      setUsers(data)
-
-
-
-  }
-
-  function handleChange(event){
-    
-    setUser(prevFormData=>{
-      return{
-        ...prevFormData,
-        [event.target.name]:event.target.value
-      }
-    })
-  }
-
-  function handleChange2(event){
-    
-    setUser2(prevFormData=>{
-      return{
-        ...prevFormData,
-        [event.target.name]:event.target.value
-      }
-    })
-  }
-
-  async function createUser(){
-    await supabase
-    .from('users')
-    .insert({ name: user.name, age: user.age })
-
-  fetchUsers()    
-
-
-  }
-
-  async function deleteUser(userId){
-
-    const { data, error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userId)
-
-    fetchUsers()
-    
-    
-    if (error){
-      console.log(error)
-    }
-
-    if (data){
-      console.log(data)
-    }
-
-
-
-
-  }
-
-   function displayUser(userId){
-
-    users.map((user)=>{
-
-        if(user.id==userId){
-          setUser2({ id:user.id,name:user.name,age:user.age})
-        }
-      
-
-
-
-    })
-
-   }
-
-
-   async function updateUser(userId){
-
-    const { data, error } = await supabase
-      .from('users')
-      .update({ id:user2.id,name:user2.name,age:user2.age})
-      .eq('id', userId)
-
-      fetchUsers()
-
-
-
-      if (error){
-        console.log(error)
-      }
-  
-      if (data){
-        console.log(data)
-      }
-
-
-   }
+  const readableMonth = format(new Date(selectedMonth + "-01"), "LLLL yyyy", {
+    locale: pl,
+  });
 
   return (
-    <div>
+    <div className="min-h-screen">
+      <nav className="fixed top-0 left-0 right-0 z-10 bg-white shadow-md flex items-center justify-between px-6 py-4">
+        <div className="flex flex-row gap-3 items-center">
+          <h1 className="text-xl font-semibold text-gray-800">Budżet</h1>
 
-      {/* FORM 1 */}
-      <form onSubmit={createUser}>
-        <input 
-          type="text"
-          placeholder="Name"
-          name='name'
-          onChange={handleChange}
-        
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="rounded border px-3 py-1 text-sm font-bold"
+          />
+        </div>
+
+        <ExpenseDialog fetchExpenses={() => fetchExpenses(selectedMonth)} />
+      </nav>
+
+      <main className="pt-20 flex flex-wrap justify-between gap-2 px-6">
+        <CategoriesSummaryTable selectedMonth={selectedMonth} />
+        <ElementsTable
+          fetchExpenses={() => fetchExpenses(selectedMonth)}
+          selectedMonth={selectedMonth}
         />
-        <input 
-          type="number"
-          placeholder="Age"
-          name='age'
-          onChange={handleChange}
-        
-        />
-        <button type='submit'>Create</button>
-
-      </form>
-
-
-
-
-      {/* FORM 2 */}
-      <form onSubmit={()=>updateUser(user2.id)}>
-        <input 
-          type="text"
-          name='name'
-          onChange={handleChange2}
-          defaultValue={user2.name}
-        
-        />
-        <input 
-          type="number"
-          name='age'
-          onChange={handleChange2}
-          defaultValue={user2.age}
-
-        
-        />
-        <button type='submit'>Save Changes</button>
-
-      </form>
-
-
-
-      <table>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Actions</th>
-
-          </tr>
-        </thead>
-
-        <tbody>
-          {users.map((user)=>
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
-              <td>{user.age}</td>
-              <td>
-                <button onClick={()=>{deleteUser(user.id)}}>Delete</button>
-                <button onClick={()=>{displayUser(user.id)}}>Edit</button>
-              
-              </td>
-
-            </tr>
-          )}
-        </tbody>
-      </table>
+      </main>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
