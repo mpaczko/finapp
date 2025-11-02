@@ -1,11 +1,4 @@
-import { useState } from "react";
-import { useAppSelector } from "../../store/reduxHook";
-
-interface CategorySummary {
-  name: string;
-  actual: number;
-  planned: number;
-}
+import { useBudgetSummary } from "./useBudgetSummary";
 
 const pastelColors = [
   "bg-pink-100",
@@ -25,43 +18,34 @@ const pastelColors = [
 ];
 
 const CategoriesSummaryTable = () => {
-  const expenses = useAppSelector((state) => state.expenses);
-  const categories = useAppSelector((state) => state.categories.items);
-
-  const [plannedMap, setPlannedMap] = useState<Record<string, number>>({});
-
-  const summary: CategorySummary[] = categories.map((cat) => {
-    const actualSum = expenses.items
-      .filter((exp) => exp.category === cat.name)
-      .reduce((sum, exp) => sum + exp.cost, 0);
-
-    return {
-      name: cat.name,
-      planned: plannedMap[cat.name] ?? 0,
-      actual: actualSum,
-    };
-  });
-
-  const handlePlannedChange = (category: string, value: string) => {
-    const numeric = parseFloat(value.replace(",", "."));
-    setPlannedMap((prev) => ({
-      ...prev,
-      [category]: isNaN(numeric) ? 0 : numeric,
-    }));
-  };
+  const {
+    summary,
+    totals,
+    editingCategory,
+    inputValue,
+    setEditingCategory,
+    setInputValue,
+    savePlannedValue,
+    loading,
+  } = useBudgetSummary();
 
   return (
     <div className="overflow-x-auto p-4">
       <h2 className="text-xl font-semibold text-gray-800 pb-5">
         Podsumowanie wydatków według kategorii
       </h2>
+
+      {loading && (
+        <div className="text-sm text-gray-500 mb-2">⏳ Zapisuję zmiany...</div>
+      )}
+
       <table className="min-w-[50%] border border-gray-200 bg-white rounded-xl shadow">
         <thead>
           <tr className="bg-gray-100 text-left">
             <th className="px-4 py-2 border-b">Kategoria</th>
-            <th className="px-4 py-2 border-b">Planowane</th>
-            <th className="px-4 py-2 border-b">Wydatki</th>
-            <th className="px-4 py-2 border-b">Różnica</th>
+            <th className="px-4 py-2 border-b text-right">Planowane</th>
+            <th className="px-4 py-2 border-b text-right">Wydatki</th>
+            <th className="px-4 py-2 border-b text-right">Różnica</th>
           </tr>
         </thead>
         <tbody>
@@ -73,23 +57,60 @@ const CategoriesSummaryTable = () => {
               } text-gray-800`}
             >
               <td className="px-4 py-2 border-b">{row.name}</td>
-              <td className="px-4 py-2 border-b">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={row.planned}
-                  onChange={(e) =>
-                    handlePlannedChange(row.name, e.target.value)
-                  }
-                  className="w-24 px-2 py-1 border rounded text-right"
-                />
+              <td
+                className="px-4 py-2 border-b text-right cursor-pointer"
+                onClick={() => {
+                  setEditingCategory(row.name);
+                  setInputValue(row.planned.toString());
+                }}
+              >
+                {editingCategory === row.name ? (
+                  <input
+                    type="number"
+                    autoFocus
+                    step="0.01"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onBlur={() => {
+                      const newValue = parseFloat(inputValue) || 0;
+                      savePlannedValue(row.name, newValue);
+                      setEditingCategory(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const newValue = parseFloat(inputValue) || 0;
+                        savePlannedValue(row.name, newValue);
+                        setEditingCategory(null);
+                      }
+                      if (e.key === "Escape") setEditingCategory(null);
+                    }}
+                    className="w-24 px-2 py-1 border rounded text-right"
+                  />
+                ) : (
+                  `${row.planned.toFixed(2)} zł`
+                )}
               </td>
-              <td className="px-4 py-2 border-b">{row.actual.toFixed(2)} zł</td>
-              <td className="px-4 py-2 border-b">
+              <td className="px-4 py-2 border-b text-right">
+                {row.actual.toFixed(2)} zł
+              </td>
+              <td className="px-4 py-2 border-b text-right">
                 {(row.planned - row.actual).toFixed(2)} zł
               </td>
             </tr>
           ))}
+
+          <tr className="font-semibold bg-gray-200 text-gray-900">
+            <td className="px-4 py-2 border-t">Suma</td>
+            <td className="px-4 py-2 border-t text-right">
+              {totals.planned.toFixed(2)} zł
+            </td>
+            <td className="px-4 py-2 border-t text-right">
+              {totals.actual.toFixed(2)} zł
+            </td>
+            <td className="px-4 py-2 border-t text-right">
+              {totals.diff.toFixed(2)} zł
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

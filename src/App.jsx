@@ -8,6 +8,7 @@ import { setCategories } from "./store/categoriesSlice/categoriesSlice";
 import CategoriesSummaryTable from "./components/CategoriesSummaryTable";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { pl } from "date-fns/locale";
+import { setSelectedBudget } from "./store/selectedBudgetSlice/selectedBudgetSlice";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -46,8 +47,19 @@ const App = () => {
     if (data) dispatch(setCategories(data));
   }
 
+  async function fetchBudget(month) {
+    const { data, error } = await supabase
+      .from("budgets")
+      .select("*")
+      .eq("month", month);
+
+    if (error) console.error(error);
+    if (data) dispatch(setSelectedBudget(data));
+  }
+
   useEffect(() => {
     fetchExpenses(selectedMonth);
+    fetchBudget(selectedMonth);
     fetchCategories();
   }, [selectedMonth]);
 
