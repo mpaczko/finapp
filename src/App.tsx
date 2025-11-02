@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "./createClient";
 import { useDispatch } from "react-redux";
 import ExpenseDialog from "./components/ExpenseDialog";
@@ -7,18 +7,15 @@ import ElementsTable from "./components/AllExpensesTable";
 import { setCategories } from "./store/categoriesSlice/categoriesSlice";
 import CategoriesSummaryTable from "./components/CategoriesSummaryTable";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { pl } from "date-fns/locale";
 import { setSelectedBudget } from "./store/selectedBudgetSlice/selectedBudgetSlice";
+import { useAppSelector } from "./store/reduxHook";
+import { setSelectedMonth } from "./store/configSlice/configSlice";
 
 const App = () => {
   const dispatch = useDispatch();
+  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
 
-  const [selectedMonth, setSelectedMonth] = useState(
-    format(new Date(), "yyyy-MM") // domyślnie aktualny miesiąc
-  );
-
-  // 🔹 Funkcja pobierająca wydatki tylko z wybranego miesiąca
-  async function fetchExpenses(month) {
+  async function fetchExpenses(month: string) {
     const startDate = format(
       startOfMonth(new Date(month + "-01")),
       "yyyy-MM-dd"
@@ -47,7 +44,7 @@ const App = () => {
     if (data) dispatch(setCategories(data));
   }
 
-  async function fetchBudget(month) {
+  async function fetchBudget(month: string) {
     const { data, error } = await supabase
       .from("budgets")
       .select("*")
@@ -63,10 +60,6 @@ const App = () => {
     fetchCategories();
   }, [selectedMonth]);
 
-  const readableMonth = format(new Date(selectedMonth + "-01"), "LLLL yyyy", {
-    locale: pl,
-  });
-
   return (
     <div className="min-h-screen">
       <nav className="fixed top-0 left-0 right-0 z-10 bg-white shadow-md flex items-center justify-between px-6 py-4">
@@ -76,20 +69,17 @@ const App = () => {
           <input
             type="month"
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+            onChange={(e) => dispatch(setSelectedMonth(e.target.value))}
             className="rounded border px-3 py-1 text-sm font-bold"
           />
         </div>
 
-        <ExpenseDialog fetchExpenses={() => fetchExpenses(selectedMonth)} />
+        <ExpenseDialog />
       </nav>
 
       <main className="pt-20 flex flex-wrap justify-between gap-2 px-6">
-        <CategoriesSummaryTable selectedMonth={selectedMonth} />
-        <ElementsTable
-          fetchExpenses={() => fetchExpenses(selectedMonth)}
-          selectedMonth={selectedMonth}
-        />
+        <CategoriesSummaryTable />
+        <ElementsTable onDelete={() => fetchExpenses(selectedMonth)} />
       </main>
     </div>
   );

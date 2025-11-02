@@ -8,13 +8,15 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { ComboboxCategories } from "./ComboboxCategories";
-import { supabase } from "../../createClient";
 import { useDispatch } from "react-redux";
 import FormInput from "../../components/Form/FormInput";
 import { setExpenses } from "../../store/expensesSlice/expensesSlice";
 import { IExpense } from "../../types/expenseType";
 import FormDatePicker from "../../components/Form/FormDatePicker";
 import { Button } from "../../components/ui/Button";
+import { supabase } from "../../createClient";
+import { useAppSelector } from "../../store/reduxHook";
+import { startOfMonth, format, endOfMonth } from "date-fns";
 
 type Props = {
   expense?: IExpense;
@@ -22,16 +24,33 @@ type Props = {
 };
 
 const ExpenseForm = ({ expense, onClose }: Props) => {
+  const dispatch = useDispatch();
+  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+
   const methods = useForm<IAddExpenseForm>({
     defaultValues: defaultValues,
     resolver: yupResolver(formSchema()),
   });
   const { reset, handleSubmit } = methods;
 
-  const dispatch = useDispatch();
+  async function fetchExpenses(month: string) {
+    const startDate = format(
+      startOfMonth(new Date(month + "-01")),
+      "yyyy-MM-dd"
+    );
+    const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
 
-  async function fetchExpenses() {
-    const { data } = await supabase.from("expenses").select("*");
+    const { data, error } = await supabase
+      .from("expenses")
+      .select("*")
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: false });
+
+    if (error) {
+      console.error("Błąd podczas pobierania wydatków:", error);
+    }
+
     if (data) {
       dispatch(setExpenses(data));
     }
@@ -50,7 +69,7 @@ const ExpenseForm = ({ expense, onClose }: Props) => {
       await supabase.from("expenses").insert(data);
     }
 
-    await fetchExpenses();
+    await fetchExpenses(selectedMonth);
     reset(defaultValues);
     onClose?.();
   }

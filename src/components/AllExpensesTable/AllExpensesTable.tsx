@@ -7,10 +7,11 @@ import React, { useState } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 
 interface IProps {
-  fetchExpenses: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
-const ElementsTable: React.FC<IProps> = ({ fetchExpenses }) => {
+const ElementsTable = (props: IProps) => {
+  const { onDelete } = props;
   const expenses = useAppSelector((state) => state.expenses);
 
   const [filters, setFilters] = useState({
@@ -22,7 +23,7 @@ const ElementsTable: React.FC<IProps> = ({ fetchExpenses }) => {
 
   const handleDelete = async (id: number) => {
     await supabase.from("expenses").delete().eq("id", id);
-    fetchExpenses();
+    onDelete();
   };
 
   const filteredExpenses = expenses.items.filter((el) => {
