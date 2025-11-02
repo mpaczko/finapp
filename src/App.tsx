@@ -3,13 +3,13 @@ import { supabase } from "./createClient";
 import { useDispatch } from "react-redux";
 import ExpenseDialog from "./components/ExpenseDialog";
 import { setExpenses } from "./store/expensesSlice/expensesSlice";
-import ElementsTable from "./components/AllExpensesTable";
 import { setCategories } from "./store/categoriesSlice/categoriesSlice";
-import CategoriesSummaryTable from "./components/CategoriesSummaryTable";
+import CategoriesSummaryTable from "./modules/CategoriesSummaryTable";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { setSelectedBudget } from "./store/selectedBudgetSlice/selectedBudgetSlice";
 import { useAppSelector } from "./store/reduxHook";
 import { setSelectedMonth } from "./store/configSlice/configSlice";
+import ElementsTable from "./modules/AllExpensesTable";
 
 const App = () => {
   const dispatch = useDispatch();
