@@ -10,14 +10,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
+
+import { useAppSelector } from "../../../store/reduxHook";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../components/ui/Form/Form";
-import { Button } from "../../../components/ui/Button";
+} from "../../../ui/Form";
+import { Button } from "../../../ui/Button";
 import {
   Command,
   CommandEmpty,
@@ -25,8 +27,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../../../components/ui/Command";
-import { useAppSelector } from "../../../store/reduxHook";
+} from "../../../ui/Command";
 
 type ComboboxCategoriesProps = {
   name: string;

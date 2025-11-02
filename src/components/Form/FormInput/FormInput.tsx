@@ -8,8 +8,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../ui/Form/Form";
-import Input from "../../ui/Input";
+} from "../../../ui/Form";
+import Input from "../../../ui/Input";
 
 type IProps<T> = {
   name: keyof T;

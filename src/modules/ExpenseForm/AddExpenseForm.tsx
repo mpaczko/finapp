@@ -13,10 +13,10 @@ import FormInput from "../../components/Form/FormInput";
 import { setExpenses } from "../../store/expensesSlice/expensesSlice";
 import { IExpense } from "../../types/expenseType";
 import FormDatePicker from "../../components/Form/FormDatePicker";
-import { Button } from "../../components/ui/Button";
 import { supabase } from "../../createClient";
 import { useAppSelector } from "../../store/reduxHook";
 import { startOfMonth, format, endOfMonth } from "date-fns";
+import { Button } from "../../ui/Button";
 
 type Props = {
   expense?: IExpense;
