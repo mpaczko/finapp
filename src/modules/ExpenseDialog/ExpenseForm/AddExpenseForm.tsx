@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   defaultValues,
@@ -31,7 +31,7 @@ const ExpenseForm = ({ expense, onClose }: Props) => {
     defaultValues: defaultValues,
     resolver: yupResolver(formSchema()),
   });
-  const { reset, handleSubmit } = methods;
+  const { reset, handleSubmit, control } = methods;
 
   async function fetchExpenses(month: string) {
     const startDate = format(

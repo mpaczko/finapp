@@ -1,9 +1,6 @@
-"use client";
-
-import * as React from "react";
-import { Check, ChevronsUpDown, Command } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-
 import {
   Popover,
   PopoverContent,
@@ -25,10 +22,11 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  Command,
 } from "../../../../ui/Command";
 
 type ComboboxCategoriesProps = {
-  name: string;
+  name: "category";
   label?: string;
   className?: string;
 };
@@ -39,7 +37,8 @@ export function ComboboxCategories({
   className,
 }: ComboboxCategoriesProps) {
   const { control } = useFormContext();
-  const categories = useAppSelector((state) => state.categories.items);
+  const categories = useAppSelector((state) => state.categories.items) || [];
+  const [open, setOpen] = useState(false);
 
   return (
     <FormField
@@ -53,7 +52,7 @@ export function ComboboxCategories({
             </FormLabel>
           )}
           <FormControl>
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -65,32 +64,37 @@ export function ComboboxCategories({
                 >
                   <span className="truncate">
                     {field.value
-                      ? categories.find((fw) => fw.name === field.value)?.name
-                      : "Wybierz kategorie..."}
+                      ? categories.find((c) => c.name === field.value)?.name
+                      : "Wybierz kategorię..."}
                   </span>
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-80 p-0 overflow-y-auto">
-                <Command className="h-80">
-                  <CommandInput placeholder="Wyszukaj kategorie..." />
-                  <CommandList className="overflow-y-auto">
+
+              <PopoverContent
+                className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto"
+                align="start"
+              >
+                <Command className="h-full">
+                  <CommandInput placeholder="Wyszukaj kategorię..." />
+                  <CommandList className="overflow-y-auto max-h-72">
                     <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
                     <CommandGroup>
-                      {categories.map((categories) => (
+                      {categories.map((category) => (
                         <CommandItem
-                          key={categories.id}
-                          value={categories.name}
-                          onSelect={(currentValue) =>
-                            field.onChange(
-                              currentValue === field.value ? "" : currentValue
-                            )
-                          }
+                          key={category.id}
+                          value={category.name}
+                          onSelect={(currentValue) => {
+                            const newValue =
+                              currentValue === field.value ? "" : currentValue;
+                            field.onChange(newValue);
+                            setOpen(false); // close popover on selection
+                          }}
                           className="cursor-pointer"
                         >
-                          <span className="truncate">{categories.name}</span>
-                          {field.value === categories.name && (
-                            <Check className="mr-0 ml-auto h-4 w-4" />
+                          <span className="truncate">{category.name}</span>
+                          {field.value === category.name && (
+                            <Check className="ml-auto h-4 w-4" />
                           )}
                         </CommandItem>
                       ))}
