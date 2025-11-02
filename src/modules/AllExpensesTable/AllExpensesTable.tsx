@@ -2,9 +2,9 @@ import { useAppSelector } from "../../store/reduxHook";
 import { supabase } from "../../createClient";
 import { parseISO, format } from "date-fns";
 import { pl } from "date-fns/locale";
-import React, { useState } from "react";
+import { useState } from "react";
 import ExpenseFilters from "./ExpenseFilters";
-import ExpenseDialog from "../../components/ExpenseDialog";
+import ExpenseDialog from "../ExpenseDialog";
 
 interface IProps {
   onDelete: () => Promise<void>;

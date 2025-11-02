@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import ExpenseForm from "../../modules/ExpenseForm";
 import { IExpense } from "../../types/expenseType";
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
   DialogTrigger,
 } from "../../ui/Dialog";
 import { Button } from "../../ui/Button";
+import ExpenseForm from "./ExpenseForm";
 
 type Props = {
   expense?: IExpense;

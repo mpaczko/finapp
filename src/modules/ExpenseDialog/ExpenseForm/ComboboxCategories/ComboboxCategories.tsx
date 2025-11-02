@@ -1,33 +1,31 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Command } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-import { cn } from "../../../lib/utils";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-
-import { useAppSelector } from "../../../store/reduxHook";
+import { useAppSelector } from "../../../../store/reduxHook";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../ui/Form";
-import { Button } from "../../../ui/Button";
+} from "../../../../ui/Form";
+import { cn } from "../../../../lib/utils";
+import { Button } from "../../../../ui/Button";
 import {
-  Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "../../../ui/Command";
+} from "../../../../ui/Command";
 
 type ComboboxCategoriesProps = {
   name: string;
@@ -73,10 +71,7 @@ export function ComboboxCategories({
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-[--radix-popover-trigger-width] p-0 h-80 overflow-y-auto"
-                align="start"
-              >
+              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-80 p-0 overflow-y-auto">
                 <Command className="h-80">
                   <CommandInput placeholder="Wyszukaj kategorie..." />
                   <CommandList className="overflow-y-auto">

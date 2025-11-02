@@ -1,4 +1,3 @@
-import React from "react";
 import { useController, FieldValues, Path } from "react-hook-form";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";

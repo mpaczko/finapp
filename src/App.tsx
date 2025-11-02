@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { supabase } from "./createClient";
 import { useDispatch } from "react-redux";
-import ExpenseDialog from "./components/ExpenseDialog";
+import ExpenseDialog from "./modules/ExpenseDialog";
 import { setExpenses } from "./store/expensesSlice/expensesSlice";
 import { setCategories } from "./store/categoriesSlice/categoriesSlice";
 import CategoriesSummaryTable from "./modules/CategoriesSummaryTable";
