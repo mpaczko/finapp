@@ -2,7 +2,7 @@ import { useAppSelector } from "../../store/reduxHook";
 import { supabase } from "../../createClient";
 import { parseISO, format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 import ExpenseDialog from "../ExpenseDialog";
 
@@ -13,13 +13,24 @@ interface IProps {
 const ElementsTable = (props: IProps) => {
   const { onDelete } = props;
   const expenses = useAppSelector((state) => state.expenses);
+  const category = useAppSelector((state) => state.config.selectedCategory);
 
   const [filters, setFilters] = useState({
-    search: "",
-    date: "",
+    category: "",
+    startDate: "",
+    endDate: "",
     minCost: "",
     maxCost: "",
   });
+
+  useEffect(() => {
+    setFilters((prev) => {
+      if (prev.category === category) {
+        return { ...prev, category: "" };
+      }
+      return { ...prev, category };
+    });
+  }, [category]);
 
   const handleDelete = async (id: number) => {
     await supabase.from("expenses").delete().eq("id", id);
@@ -27,29 +38,38 @@ const ElementsTable = (props: IProps) => {
   };
 
   const filteredExpenses = expenses.items.filter((el) => {
-    const searchValue = filters.search.toLowerCase();
+    const searchValue = filters.category.toLowerCase();
+
+    const dateString = el.date
+      ? format(parseISO(String(el.date)), "yyyy-MM-dd")
+      : "";
 
     const matchesSearch = searchValue
-      ? el.name.toLowerCase().includes(searchValue) ||
-        el.category.toLowerCase().includes(searchValue)
+      ? el.category.toLowerCase().includes(searchValue)
       : true;
 
-    const matchesDate = filters.date
-      ? format(parseISO(String(el.date)), "yyyy-MM-dd") === filters.date
-      : true;
+    const elDate = el.date ? parseISO(String(el.date)) : null;
+
+    const matchesStart =
+      filters.startDate && elDate
+        ? elDate >= parseISO(filters.startDate)
+        : true;
+
+    const matchesEnd =
+      filters.endDate && elDate ? elDate <= parseISO(filters.endDate) : true;
 
     const min = parseFloat(filters.minCost.replace(",", ".")) || 0;
     const max = parseFloat(filters.maxCost.replace(",", ".")) || Infinity;
     const matchesCost = el.cost >= min && el.cost <= max;
 
-    return matchesSearch && matchesDate && matchesCost;
+    return matchesSearch && matchesStart && matchesEnd && matchesCost;
   });
 
   return (
     <div className="overflow-x-auto p-4">
       <h2 className="text-xl font-semibold text-gray-800 pb-5">Moje wydatki</h2>
 
-      <ExpenseFilters onFilterChange={setFilters} />
+      <ExpenseFilters filters={filters} onFilterChange={setFilters} />
 
       <table className="min-w-[50%] border border-gray-200 bg-white rounded-xl shadow">
         <thead>

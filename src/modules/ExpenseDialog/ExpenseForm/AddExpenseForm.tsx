@@ -7,7 +7,7 @@ import {
 } from "./addExpenseForm.config";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { ComboboxCategories } from "./ComboboxCategories";
+import { ComboboxCategories } from "../../../components/ComboboxCategories";
 import { useDispatch } from "react-redux";
 import { startOfMonth, format, endOfMonth } from "date-fns";
 import { IExpense } from "../../../types/expenseType";

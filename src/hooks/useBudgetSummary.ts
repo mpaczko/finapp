@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAppSelector } from "../../store/reduxHook";
-import { supabase } from "../../createClient";
+import { useAppSelector } from "../store/reduxHook";
+import { supabase } from "../createClient";
 
 export interface CategorySummary {
   name: string;
-  actual: number;
-  planned: number;
+  actual: string;
+  planned: string;
 }
 
 export const useBudgetSummary = () => {
@@ -13,10 +13,17 @@ export const useBudgetSummary = () => {
   const categories = useAppSelector((state) => state.categories.items);
   const budget = useAppSelector((state) => state.budget.items?.[0]);
 
+  const { income, previous_month_savings } = budget || {};
+
   const [plannedMap, setPlannedMap] = useState<Record<string, number>>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  const toFixedSafe = (value: number | undefined | null) => {
+    const num = Number(value);
+    return isNaN(num) ? "0.00" : num.toFixed(2);
+  };
 
   useEffect(() => {
     if (budget && categories.length > 0) {
@@ -24,11 +31,11 @@ export const useBudgetSummary = () => {
       categories.forEach((cat) => {
         const key = cat.key || cat.name;
         const plannedValue = (budget as any)[key];
-        if (plannedValue !== undefined) {
-          newMap[cat.name] = plannedValue;
-        }
+        newMap[cat.name] = plannedValue ?? 0;
       });
       setPlannedMap(newMap);
+    } else {
+      setPlannedMap({});
     }
   }, [budget, categories]);
 
@@ -37,22 +44,48 @@ export const useBudgetSummary = () => {
       .filter((exp) => exp.category === cat.name)
       .reduce((sum, exp) => sum + exp.cost, 0);
 
+    const plannedValue = plannedMap[cat.name] ?? 0;
+
     return {
       name: cat.name,
-      planned: plannedMap[cat.name] ?? 0,
-      actual: actualSum,
+      planned: toFixedSafe(plannedValue),
+      actual: toFixedSafe(actualSum),
     };
   });
 
+  const plannedSum = summary.reduce(
+    (sum, row) => sum + parseFloat(row.planned),
+    0
+  );
+
+  const actualSum = summary.reduce(
+    (sum, row) => sum + parseFloat(row.actual),
+    0
+  );
+
+  const currentDay = new Date().getDate();
+  const isEarlyMonth = currentDay < 8;
+
+  const savingsCurrent = isEarlyMonth
+    ? (previous_month_savings ?? 0) - actualSum
+    : (previous_month_savings ?? 0) + (income ?? 0) - actualSum;
+
+  const savingsEndMonth =
+    (previous_month_savings ?? 0) + (income ?? 0) - plannedSum;
+
   const totals = {
-    planned: summary.reduce((sum, row) => sum + row.planned, 0),
-    actual: summary.reduce((sum, row) => sum + row.actual, 0),
-    diff: 0,
+    income: toFixedSafe(income),
+    planned: toFixedSafe(plannedSum),
+    actual: toFixedSafe(actualSum),
+    diff: toFixedSafe(plannedSum - actualSum),
+    previous_month_savings: previous_month_savings || 0,
+
+    diffIncomePlanned: toFixedSafe((income ?? 0) - plannedSum),
+    diffIncomeActual: toFixedSafe((income ?? 0) - actualSum),
+
+    savingsCurrent: toFixedSafe(savingsCurrent),
+    savingsEndMonth: toFixedSafe(savingsEndMonth),
   };
-
-  totals.diff = totals.planned - totals.actual;
-
-  totals["diff"] = totals.planned - totals.actual;
 
   const savePlannedValue = async (category: string, newValue: number) => {
     if (!budget) return;

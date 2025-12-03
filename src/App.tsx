@@ -10,6 +10,7 @@ import { setSelectedBudget } from "./store/selectedBudgetSlice/selectedBudgetSli
 import { useAppSelector } from "./store/reduxHook";
 import { setSelectedMonth } from "./store/configSlice/configSlice";
 import ElementsTable from "./modules/AllExpensesTable";
+import SummaryTable from "./modules/SummaryTable";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -77,9 +78,12 @@ const App = () => {
         <ExpenseDialog />
       </nav>
 
-      <main className="pt-20 flex flex-wrap justify-between gap-2 px-6">
+      <main className="pt-20 flex flex-wrap gap-2 px-6 pb-20">
         <CategoriesSummaryTable />
-        <ElementsTable onDelete={() => fetchExpenses(selectedMonth)} />
+        <div>
+          <SummaryTable />
+          <ElementsTable onDelete={() => fetchExpenses(selectedMonth)} />
+        </div>
       </main>
     </div>
   );

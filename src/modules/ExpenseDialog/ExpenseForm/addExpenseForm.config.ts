@@ -34,4 +34,3 @@ export const defaultValues: IAddExpenseForm = {
   date: new Date().toISOString().split("T")[0], // keep as yyyy-MM-dd
   cost: 0,
 };
-``;

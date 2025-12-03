@@ -4,6 +4,8 @@ export type Budget = {
   id: number;
   created_at: string;
   month: string;
+  previous_month_savings: number;
+  income: number;
   rent: number;
   media: number;
   home_stuff: number;

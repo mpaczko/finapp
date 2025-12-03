@@ -6,16 +6,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { useAppSelector } from "../../../../store/reduxHook";
+import { useAppSelector } from "../../store/reduxHook";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../../ui/Form";
-import { cn } from "../../../../lib/utils";
-import { Button } from "../../../../ui/Button";
+} from "../../ui/Form";
+import { cn } from "../../lib/utils";
+import { Button } from "../../ui/Button";
 import {
   CommandEmpty,
   CommandGroup,
@@ -23,7 +23,7 @@ import {
   CommandItem,
   CommandList,
   Command,
-} from "../../../../ui/Command";
+} from "../../ui/Command";
 
 type ComboboxCategoriesProps = {
   name: "category";
@@ -37,7 +37,7 @@ export function ComboboxCategories({
   className,
 }: ComboboxCategoriesProps) {
   const { control } = useFormContext();
-  const categories = useAppSelector((state) => state.categories.items) || [];
+  const categories = useAppSelector((state) => state.categories.items);
   const [open, setOpen] = useState(false);
 
   return (

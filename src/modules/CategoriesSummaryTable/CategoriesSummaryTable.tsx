@@ -1,4 +1,6 @@
-import { useBudgetSummary } from "./useBudgetSummary";
+import { useBudgetSummary } from "../../hooks/useBudgetSummary";
+import { setSelectedCategory } from "../../store/configSlice/configSlice";
+import { useAppDispatch } from "../../store/reduxHook";
 
 const pastelColors = [
   "bg-pink-100",
@@ -29,6 +31,10 @@ const CategoriesSummaryTable = () => {
     loading,
   } = useBudgetSummary();
 
+  const dispatch = useAppDispatch();
+  const setCategory = (category: string) =>
+    dispatch(setSelectedCategory(category));
+
   return (
     <div className="overflow-x-auto p-4">
       <h2 className="text-xl font-semibold text-gray-800 pb-5">
@@ -56,7 +62,12 @@ const CategoriesSummaryTable = () => {
                 pastelColors[index % pastelColors.length]
               } text-gray-800`}
             >
-              <td className="px-4 py-2 border-b">{row.name}</td>
+              <td
+                className="px-4 py-2 border-b cursor-pointer"
+                onClick={() => setCategory(row.name)}
+              >
+                {row.name}
+              </td>
               <td
                 className="px-4 py-2 border-b text-right cursor-pointer"
                 onClick={() => {
@@ -87,14 +98,12 @@ const CategoriesSummaryTable = () => {
                     className="w-24 px-2 py-1 border rounded text-right"
                   />
                 ) : (
-                  `${row.planned.toFixed(2)} zł`
+                  `${row.planned} zł`
                 )}
               </td>
+              <td className="px-4 py-2 border-b text-right">{row.actual} zł</td>
               <td className="px-4 py-2 border-b text-right">
-                {row.actual.toFixed(2)} zł
-              </td>
-              <td className="px-4 py-2 border-b text-right">
-                {(row.planned - row.actual).toFixed(2)} zł
+                {(Number(row.planned) - Number(row.actual)).toFixed(2)} zł
               </td>
             </tr>
           ))}
@@ -102,14 +111,12 @@ const CategoriesSummaryTable = () => {
           <tr className="font-semibold bg-gray-200 text-gray-900">
             <td className="px-4 py-2 border-t">Suma</td>
             <td className="px-4 py-2 border-t text-right">
-              {totals.planned.toFixed(2)} zł
+              {totals.planned} zł
             </td>
             <td className="px-4 py-2 border-t text-right">
-              {totals.actual.toFixed(2)} zł
+              {totals.actual} zł
             </td>
-            <td className="px-4 py-2 border-t text-right">
-              {totals.diff.toFixed(2)} zł
-            </td>
+            <td className="px-4 py-2 border-t text-right">{totals.diff} zł</td>
           </tr>
         </tbody>
       </table>

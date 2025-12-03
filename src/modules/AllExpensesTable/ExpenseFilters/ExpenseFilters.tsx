@@ -1,65 +1,88 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { ComboboxCategoriesStandalone } from "../../../components/ComboboxCategories";
 
 interface ExpenseFiltersProps {
+  filters: {
+    category: string;
+    startDate: string;
+    endDate: string;
+    minCost: string;
+    maxCost: string;
+  };
   onFilterChange: (filters: {
-    search: string;
-    date: string;
+    category: string;
+    startDate: string;
+    endDate: string;
     minCost: string;
     maxCost: string;
   }) => void;
 }
 
-const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({ onFilterChange }) => {
-  const [search, setSearch] = useState("");
-  const [date, setDate] = useState("");
-  const [minCost, setMinCost] = useState("");
-  const [maxCost, setMaxCost] = useState("");
-
-  useEffect(() => {
-    onFilterChange({ search, date, minCost, maxCost });
-  }, [search, date, minCost, maxCost, onFilterChange]);
+const ExpenseFilters = ({ filters, onFilterChange }: ExpenseFiltersProps) => {
+  const updateFilter = (key: keyof typeof filters, value: string) => {
+    onFilterChange({ ...filters, [key]: value });
+  };
 
   const handleClear = () => {
-    setSearch("");
-    setDate("");
-    setMinCost("");
-    setMaxCost("");
+    onFilterChange({
+      category: "",
+      startDate: "",
+      endDate: "",
+      minCost: "",
+      maxCost: "",
+    });
   };
 
   return (
     <div className="flex flex-wrap gap-4 mb-4">
-      <input
-        type="text"
-        placeholder="Szukaj po nazwie lub kategorii..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="px-3 py-2 border rounded w-60"
+      <ComboboxCategoriesStandalone
+        className="max-w-70"
+        value={filters.category}
+        onChange={(val) => updateFilter("category", val)}
       />
+
       <input
         type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
+        value={filters.startDate}
+        onChange={(e) => {
+          updateFilter("startDate", e.target.value);
+
+          if (filters.endDate && e.target.value > filters.endDate) {
+            updateFilter("endDate", e.target.value);
+          }
+        }}
         className="px-3 py-2 border rounded"
       />
+
+      <input
+        type="date"
+        value={filters.endDate}
+        min={filters.startDate || undefined}
+        onChange={(e) => updateFilter("endDate", e.target.value)}
+        className="px-3 py-2 border rounded"
+      />
+
       <input
         type="number"
         step="0.01"
         placeholder="Min koszt"
-        value={minCost}
-        onChange={(e) => setMinCost(e.target.value)}
+        value={filters.minCost}
+        onChange={(e) => updateFilter("minCost", e.target.value)}
         className="px-3 py-2 border rounded w-24"
       />
+
       <input
         type="number"
         step="0.01"
         placeholder="Max koszt"
-        value={maxCost}
-        onChange={(e) => setMaxCost(e.target.value)}
+        value={filters.maxCost}
+        onChange={(e) => updateFilter("maxCost", e.target.value)}
         className="px-3 py-2 border rounded w-24"
       />
+
       <button
         onClick={handleClear}
-        className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 cursor-pointer"
       >
         Wyczyść filtry
       </button>
