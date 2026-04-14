@@ -14,11 +14,12 @@ import { Button } from "../../ui/Button";
 import ExpenseForm from "./ExpenseForm";
 
 type Props = {
+  isEdit?: boolean;
   expense?: IExpense;
   triggerLabel?: string;
 };
 
-const ExpenseDialog = ({ expense, triggerLabel }: Props) => {
+const ExpenseDialog = ({ isEdit, expense, triggerLabel }: Props) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,7 +35,11 @@ const ExpenseDialog = ({ expense, triggerLabel }: Props) => {
             {expense ? "Edytuj wydatek" : "Wprowadź swój wydatek"}
           </DialogTitle>
         </DialogHeader>
-        <ExpenseForm expense={expense} onClose={() => setOpen(false)} />
+        <ExpenseForm
+          isEdit={isEdit}
+          expense={expense}
+          onClose={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );

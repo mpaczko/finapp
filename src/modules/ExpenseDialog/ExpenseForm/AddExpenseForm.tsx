@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   defaultValues,
@@ -19,24 +19,26 @@ import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
 
 type Props = {
+  isEdit?: boolean;
   expense?: IExpense;
   onClose?: () => void;
 };
 
-const ExpenseForm = ({ expense, onClose }: Props) => {
+const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
   const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<IAddExpenseForm>({
     defaultValues: defaultValues,
     resolver: yupResolver(formSchema()),
   });
-  const { reset, handleSubmit, control } = methods;
+  const { reset, handleSubmit } = methods;
 
   async function fetchExpenses(month: string) {
     const startDate = format(
       startOfMonth(new Date(month + "-01")),
-      "yyyy-MM-dd"
+      "yyyy-MM-dd",
     );
     const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
 
@@ -63,15 +65,23 @@ const ExpenseForm = ({ expense, onClose }: Props) => {
   }, [expense, methods]);
 
   async function onSubmit(data: IAddExpenseForm) {
-    if (expense?.id) {
-      await supabase.from("expenses").update(data).eq("id", expense.id);
-    } else {
-      await supabase.from("expenses").insert(data);
-    }
+    if (isSubmitting) return;
 
-    await fetchExpenses(selectedMonth);
-    reset(defaultValues);
-    onClose?.();
+    setIsSubmitting(true);
+
+    try {
+      if (expense?.id) {
+        await supabase.from("expenses").update(data).eq("id", expense.id);
+      } else {
+        await supabase.from("expenses").insert(data);
+      }
+
+      await fetchExpenses(selectedMonth);
+      reset(defaultValues);
+      onClose?.();
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -106,8 +116,13 @@ const ExpenseForm = ({ expense, onClose }: Props) => {
           </div>
 
           <div className="w-full flex justify-end">
-            <Button type="submit" variant="ghost" className="ml-auto">
-              {expense ? "Zapisz" : "Dodaj"}
+            <Button
+              type="submit"
+              variant="ghost"
+              className="ml-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Zapisywanie..." : isEdit ? "Zapisz" : "Dodaj"}
             </Button>
           </div>
         </form>

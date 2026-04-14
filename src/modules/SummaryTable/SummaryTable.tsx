@@ -3,8 +3,6 @@ import { useBudgetSummary } from "../../hooks/useBudgetSummary";
 const SummaryTable = () => {
   const { totals, loading } = useBudgetSummary();
 
-  const totalSavings = "76382.00";
-
   return (
     <div className="p-4 flex flex-col gap-4 items-start">
       <h2 className="text-xl font-semibold text-gray-800 pb-5">
@@ -79,12 +77,12 @@ const SummaryTable = () => {
             <th className="px-4 py-2 border-b w-[300px]">
               Planowany stan oszczędnośći pod koniec miesiąca
             </th>
-            <th className="px-4 py-2 border-b w-[300px] text-left whitespace-nowrap">
+            {/* <th className="px-4 py-2 border-b w-[300px] text-left whitespace-nowrap">
               Szacowana wartość inwestycji
             </th>
             <th className="px-4 py-2 border-b w-[300px] text-left whitespace-nowrap">
               Oszczędności łącznie
-            </th>
+            </th> */}
           </tr>
         </thead>
         <tbody>
@@ -101,13 +99,13 @@ const SummaryTable = () => {
               {totals.savingsEndMonth} zł
             </td>
 
-            <td className="px-4 py-2 border-b font-semibold text-purple-700">
-              {/* TODO: szacowana wartość inwestycji */}
+            {/* <td className="px-4 py-2 border-b font-semibold text-purple-700">
+              {totalInvestments} zł
             </td>
 
             <td className="px-4 py-2 border-b font-semibold text-blue-700">
               {totalSavings} zł
-            </td>
+            </td> */}
           </tr>
         </tbody>
       </table>

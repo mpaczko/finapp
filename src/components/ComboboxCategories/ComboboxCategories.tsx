@@ -59,7 +59,7 @@ export function ComboboxCategories({
                   role="combobox"
                   aria-expanded={!!field.value}
                   className={cn(
-                    "flex-1 min-w-0 w-full h-10 justify-between text-left truncate"
+                    "flex-1 min-w-0 w-full h-10 justify-between text-left truncate",
                   )}
                 >
                   <span className="truncate">
@@ -85,6 +85,7 @@ export function ComboboxCategories({
                           key={category.id}
                           value={category.name}
                           onSelect={(currentValue) => {
+                            console.log(currentValue);
                             const newValue =
                               currentValue === field.value ? "" : currentValue;
                             field.onChange(newValue);

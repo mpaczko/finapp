@@ -101,7 +101,17 @@ const CategoriesSummaryTable = () => {
                   `${row.planned} zł`
                 )}
               </td>
-              <td className="px-4 py-2 border-b text-right">{row.actual} zł</td>
+              <td
+                className={`px-4 py-2 border-b text-right font-semibold ${
+                  Number(row.actual) > Number(row.planned)
+                    ? "text-red-500"
+                    : Number(row.actual) === Number(row.planned)
+                      ? "text-indigo-600"
+                      : "text-green-600"
+                }`}
+              >
+                {row.actual} zł
+              </td>
               <td className="px-4 py-2 border-b text-right">
                 {(Number(row.planned) - Number(row.actual)).toFixed(2)} zł
               </td>

@@ -1,3 +1,3 @@
-import { IAddExpenseForm } from "../modules/ExpenseForm/addExpenseForm.config";
+import { IAddExpenseForm } from "../modules/ExpenseDialog/ExpenseForm/addExpenseForm.config";
 
-export type IExpense = IAddExpenseForm & { id?: number };
+export type IExpense = IAddExpenseForm & { id?: string };

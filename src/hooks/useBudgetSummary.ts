@@ -13,7 +13,7 @@ export const useBudgetSummary = () => {
   const categories = useAppSelector((state) => state.categories.items);
   const budget = useAppSelector((state) => state.budget.items?.[0]);
 
-  const { income, previous_month_savings } = budget || {};
+  const { income, previous_month_savings, month: year_n_month } = budget || {};
 
   const [plannedMap, setPlannedMap] = useState<Record<string, number>>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -63,8 +63,22 @@ export const useBudgetSummary = () => {
     0
   );
 
-  const currentDay = new Date().getDate();
-  const isEarlyMonth = currentDay < 8;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1–12
+
+  let isCurrentMonth = false;
+
+  if (typeof year_n_month === "string") {
+    const [budgetYearStr, budgetMonthStr] = year_n_month.split("-");
+    const budgetYear = Number(budgetYearStr);
+    const budgetMonth = Number(budgetMonthStr);
+
+    isCurrentMonth = budgetYear === currentYear && budgetMonth === currentMonth;
+  }
+
+  const currentDay = now.getDate();
+  const isEarlyMonth = isCurrentMonth && currentDay < 8;
 
   const savingsCurrent = isEarlyMonth
     ? (previous_month_savings ?? 0) - actualSum
@@ -78,6 +92,7 @@ export const useBudgetSummary = () => {
     planned: toFixedSafe(plannedSum),
     actual: toFixedSafe(actualSum),
     diff: toFixedSafe(plannedSum - actualSum),
+
     previous_month_savings: previous_month_savings || 0,
 
     diffIncomePlanned: toFixedSafe((income ?? 0) - plannedSum),
@@ -89,6 +104,7 @@ export const useBudgetSummary = () => {
 
   const savePlannedValue = async (category: string, newValue: number) => {
     if (!budget) return;
+
     const key =
       categories.find((cat) => cat.name === category)?.key || category;
 

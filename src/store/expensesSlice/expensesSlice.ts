@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // import { supabase } from "../../createClient";
 
 export type Expense = {
-  id: number;
+  id: string;
   created_at: string;
   name: string;
   category: string;

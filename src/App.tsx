@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { supabase } from "./createClient";
 import { useDispatch } from "react-redux";
 import ExpenseDialog from "./modules/ExpenseDialog";
@@ -11,6 +11,7 @@ import { useAppSelector } from "./store/reduxHook";
 import { setSelectedMonth } from "./store/configSlice/configSlice";
 import ElementsTable from "./modules/AllExpensesTable";
 import SummaryTable from "./modules/SummaryTable";
+import MultipleExpenses from "./modules/MultipleExpenses";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const App = () => {
   async function fetchExpenses(month: string) {
     const startDate = format(
       startOfMonth(new Date(month + "-01")),
-      "yyyy-MM-dd"
+      "yyyy-MM-dd",
     );
     const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
 
@@ -75,7 +76,10 @@ const App = () => {
           />
         </div>
 
-        <ExpenseDialog />
+        <div className="flex gap-5">
+          <MultipleExpenses />
+          <ExpenseDialog />
+        </div>
       </nav>
 
       <main className="pt-20 flex flex-wrap gap-2 px-6 pb-20">
