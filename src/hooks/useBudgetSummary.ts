@@ -55,12 +55,12 @@ export const useBudgetSummary = () => {
 
   const plannedSum = summary.reduce(
     (sum, row) => sum + parseFloat(row.planned),
-    0
+    0,
   );
 
   const actualSum = summary.reduce(
     (sum, row) => sum + parseFloat(row.actual),
-    0
+    0,
   );
 
   const now = new Date();

@@ -17,6 +17,7 @@ import { setExpenses } from "../../../store/expensesSlice/expensesSlice";
 import FormDatePicker from "../../../components/Form/FormDatePicker";
 import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
+import { getUserId } from "../../../utils/getUserIdHelper";
 
 type Props = {
   isEdit?: boolean;
@@ -30,9 +31,10 @@ const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<IAddExpenseForm>({
-    defaultValues: defaultValues,
+    defaultValues,
     resolver: yupResolver(formSchema()),
   });
+
   const { reset, handleSubmit } = methods;
 
   async function fetchExpenses(month: string) {
@@ -49,20 +51,15 @@ const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
       .lte("date", endDate)
       .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Błąd podczas pobierania wydatków:", error);
-    }
-
-    if (data) {
-      dispatch(setExpenses(data));
-    }
+    if (error) console.error(error);
+    if (data) dispatch(setExpenses(data));
   }
 
   useEffect(() => {
     if (expense) {
       reset(expense);
     }
-  }, [expense, methods]);
+  }, [expense, reset]);
 
   async function onSubmit(data: IAddExpenseForm) {
     if (isSubmitting) return;
@@ -70,10 +67,18 @@ const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
     setIsSubmitting(true);
 
     try {
+      const userId = await getUserId();
+      if (!userId) return;
+
+      const payload = {
+        ...data,
+        user_id: userId,
+      };
+
       if (expense?.id) {
-        await supabase.from("expenses").update(data).eq("id", expense.id);
+        await supabase.from("expenses").update(payload).eq("id", expense.id);
       } else {
-        await supabase.from("expenses").insert(data);
+        await supabase.from("expenses").insert(payload);
       }
 
       await fetchExpenses(selectedMonth);
