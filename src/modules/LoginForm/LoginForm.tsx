@@ -6,15 +6,19 @@ import { supabase } from "../../createClient";
 import FormInput from "../../components/Form/FormInput";
 import { Button } from "../../ui/Button";
 
-type LoginFormValues = {
+type FormValues = {
   email: string;
   password: string;
 };
 
-export default function LoginForm() {
+type Props = {
+  onSwitchToRegister: () => void;
+};
+
+export default function LoginForm({ onSwitchToRegister }: Props) {
   const [loading, setLoading] = useState(false);
 
-  const methods = useForm<LoginFormValues>({
+  const methods = useForm<FormValues>({
     defaultValues: {
       email: "",
       password: "",
@@ -23,7 +27,7 @@ export default function LoginForm() {
 
   const { handleSubmit } = methods;
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     if (loading) return;
 
     setLoading(true);
@@ -43,7 +47,7 @@ export default function LoginForm() {
   return (
     <FormProvider {...methods}>
       <form
-        className="flex flex-col gap-4 w-[370px] p-10 rounded-2xl shadow-sm"
+        className="flex flex-col gap-4 w-[370px] p-10 rounded-2xl shadow-sm border"
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormInput
@@ -53,14 +57,25 @@ export default function LoginForm() {
           autoComplete="email"
           className="w-full"
         />
+
         <FormInput
           name="password"
           label="Hasło"
           type="password"
           autoComplete="current-password"
         />
+
         <Button type="submit" disabled={loading} className="mt-4">
           {loading ? "Logowanie..." : "Zaloguj"}
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-sm mt-2"
+          onClick={onSwitchToRegister}
+        >
+          Nie masz konta? Zarejestruj się
         </Button>
       </form>
     </FormProvider>

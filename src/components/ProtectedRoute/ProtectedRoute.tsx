@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../createClient";
 import LoginForm from "../../modules/LoginForm";
+import RegisterForm from "../../modules/RegisterForm";
 
 export default function ProtectedRoute({
   children,
@@ -9,6 +10,7 @@ export default function ProtectedRoute({
 }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isRegister, setIsRegister] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -31,7 +33,11 @@ export default function ProtectedRoute({
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoginForm />
+        {isRegister ? (
+          <RegisterForm onSwitchToLogin={() => setIsRegister(false)} />
+        ) : (
+          <LoginForm onSwitchToRegister={() => setIsRegister(true)} />
+        )}
       </div>
     );
   }

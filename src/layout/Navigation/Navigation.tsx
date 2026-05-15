@@ -49,7 +49,7 @@ const Nav = ({ userId }: Props) => {
           </Button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+            <div className="absolute right-0 mt-2 w-40 bg-white border-0 rounded shadow-md z-50">
               <Button
                 variant="ghost"
                 className="w-full justify-start text-red-500"
