@@ -79,10 +79,12 @@ const ExpensesDialog = () => {
             const { id, ...expenseWithoutId } = expense;
 
             return (
-              <div key={id} className=" border p-3 rounded">
+              <div key={id} className="border p-3 rounded">
                 <ExpenseForm
                   expense={expenseWithoutId}
                   onClose={() => handleRemoveExpense(id)}
+                  onRemove={() => handleRemoveExpense(id)}
+                  showRemoveButton={expenses.length > 1}
                 />
               </div>
             );

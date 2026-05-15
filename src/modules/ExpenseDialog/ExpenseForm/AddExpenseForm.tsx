@@ -23,9 +23,17 @@ type Props = {
   isEdit?: boolean;
   expense?: IExpense;
   onClose?: () => void;
+  onRemove?: () => void;
+  showRemoveButton?: boolean;
 };
 
-const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
+const ExpenseForm = ({
+  isEdit,
+  expense,
+  onClose,
+  onRemove,
+  showRemoveButton,
+}: Props) => {
   const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,13 +128,19 @@ const ExpenseForm = ({ isEdit, expense, onClose }: Props) => {
             </div>
           </div>
 
-          <div className="w-full flex justify-end">
-            <Button
-              type="submit"
-              variant="ghost"
-              className="ml-auto"
-              disabled={isSubmitting}
-            >
+          <div className="w-full flex justify-end gap-2">
+            {showRemoveButton && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={onRemove}
+                disabled={isSubmitting}
+              >
+                Usuń
+              </Button>
+            )}
+
+            <Button type="submit" variant="ghost" disabled={isSubmitting}>
               {isSubmitting ? "Zapisywanie..." : isEdit ? "Zapisz" : "Dodaj"}
             </Button>
           </div>
