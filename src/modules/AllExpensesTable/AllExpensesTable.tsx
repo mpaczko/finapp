@@ -5,6 +5,7 @@ import { pl } from "date-fns/locale";
 import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 import ExpenseDialog from "../ExpenseDialog";
+import Pagination from "../../ui/Pagination/Pagination";
 
 interface IProps {
   onDelete: () => Promise<void>;
@@ -26,6 +27,8 @@ const ElementsTable = ({ onDelete }: IProps) => {
     minCost: "",
     maxCost: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -33,6 +36,10 @@ const ElementsTable = ({ onDelete }: IProps) => {
       category: prev.category === category ? "" : category,
     }));
   }, [category]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   const handleDelete = async (id?: string) => {
     if (!id) return;
@@ -64,6 +71,15 @@ const ElementsTable = ({ onDelete }: IProps) => {
     return matchesSearch && matchesStart && matchesEnd && matchesCost;
   });
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE),
+  );
+  const paginatedExpenses = filteredExpenses.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
   const rowColorByDate = useMemo(() => {
     const map = new Map<string, string>();
     let index = 0;
@@ -81,12 +97,12 @@ const ElementsTable = ({ onDelete }: IProps) => {
   }, [filteredExpenses]);
 
   return (
-    <div className="overflow-x-auto p-4">
+    <div className="overflow-x-auto p-4 min-h-[720px]">
       <h2 className="text-xl font-semibold text-gray-800 pb-5">Moje wydatki</h2>
 
       <ExpenseFilters filters={filters} onFilterChange={setFilters} />
 
-      <table className="min-w-[50%] border border-gray-200 rounded-xl shadow">
+      <table className="w-full min-w-full border border-gray-200 rounded-xl shadow">
         <thead>
           <tr className="bg-gray-200 text-left">
             <th className="px-4 py-2 border-b">Nazwa</th>
@@ -98,7 +114,7 @@ const ElementsTable = ({ onDelete }: IProps) => {
         </thead>
 
         <tbody>
-          {filteredExpenses.map((el) => {
+          {paginatedExpenses.map((el) => {
             const dateKey = getDateKey(el.date);
             const rowBg = rowColorByDate.get(dateKey) ?? "bg-white";
 
@@ -124,6 +140,19 @@ const ElementsTable = ({ onDelete }: IProps) => {
           })}
         </tbody>
       </table>
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-gray-600">
+          Pokazano {paginatedExpenses.length} z {filteredExpenses.length}{" "}
+          wydatków
+        </p>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 };
