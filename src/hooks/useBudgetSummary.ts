@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAppSelector } from "../store/reduxHook";
+import { useAppSelector, useAppDispatch } from "../store/reduxHook";
 import { supabase } from "../createClient";
+import { setSelectedBudget } from "../store/selectedBudgetSlice/selectedBudgetSlice";
 
 export interface CategorySummary {
   name: string;
@@ -15,9 +16,13 @@ export const useBudgetSummary = () => {
 
   const { income, previous_month_savings, month: year_n_month } = budget || {};
 
+  const dispatch = useAppDispatch();
+
   const [plannedMap, setPlannedMap] = useState<Record<string, number>>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState<string>("");
+  const [editingIncome, setEditingIncome] = useState(false);
+  const [incomeInputValue, setIncomeInputValue] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const toFixedSafe = (value: number | undefined | null) => {
@@ -120,14 +125,40 @@ export const useBudgetSummary = () => {
     if (error) console.error("Błąd podczas zapisu:", error);
   };
 
+  const saveIncomeValue = async (newValue: number) => {
+    if (!budget) return;
+
+    setLoading(true);
+
+    const { error } = await supabase
+      .from("budgets")
+      .update({ income: newValue })
+      .eq("id", budget.id);
+
+    setLoading(false);
+    if (error) {
+      console.error("Błąd podczas zapisu przychodu:", error);
+      return;
+    }
+
+    // Update local redux state so UI refreshes instantly
+    const updatedBudget = { ...(budget as any), income: newValue };
+    dispatch(setSelectedBudget([updatedBudget]));
+  };
+
   return {
     summary,
     totals,
     editingCategory,
     inputValue,
+    editingIncome,
+    incomeInputValue,
     loading,
     setEditingCategory,
     setInputValue,
+    setEditingIncome,
+    setIncomeInputValue,
     savePlannedValue,
+    saveIncomeValue,
   };
 };

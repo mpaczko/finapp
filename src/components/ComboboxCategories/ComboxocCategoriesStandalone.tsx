@@ -47,7 +47,7 @@ export function ComboboxCategoriesStandalone({
             variant="outline"
             role="combobox"
             aria-expanded={!!value}
-            className="flex-1 min-w-0 w-full h-10 justify-between text-left truncate"
+            className="flex-1 min-w-0 w-full h-10 justify-between text-left truncate rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200"
           >
             <span className="truncate">
               {value
@@ -59,7 +59,7 @@ export function ComboboxCategoriesStandalone({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto"
+          className="w-[--radix-popover-trigger-width] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-lg max-h-80"
           align="start"
         >
           <Command className="h-full">

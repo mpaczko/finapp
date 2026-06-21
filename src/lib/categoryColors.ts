@@ -1,0 +1,33 @@
+export const categoryBgClasses = [
+  "bg-pink-100",
+  "bg-green-100",
+  "bg-blue-100",
+  "bg-yellow-100",
+  "bg-purple-100",
+  "bg-orange-100",
+  "bg-teal-100",
+  "bg-indigo-100",
+  "bg-rose-100",
+  "bg-lime-100",
+  "bg-cyan-100",
+  "bg-fuchsia-100",
+  "bg-amber-100",
+  "bg-violet-100",
+];
+
+export const categoryChartColors = [
+  "#fbcfe8",
+  "#bbf7d0",
+  "#bfdbfe",
+  "#fde68a",
+  "#ddd6fe",
+  "#fed7aa",
+  "#99f6e4",
+  "#c7d2fe",
+  "#fecdd3",
+  "#d9f99d",
+  "#a5f3fc",
+  "#f5d0fe",
+  "#fde68a",
+  "#ede9fe",
+];
