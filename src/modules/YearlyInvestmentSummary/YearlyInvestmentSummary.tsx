@@ -18,6 +18,7 @@ type ComparisonCardProps = {
   planned: number | null;
   actual: number | null;
   loading: boolean;
+  baseColor: string;
 };
 
 const ComparisonCard = ({
@@ -25,6 +26,7 @@ const ComparisonCard = ({
   planned,
   actual,
   loading,
+  baseColor,
 }: ComparisonCardProps) => {
   const difference = useMemo(
     () => (Number(planned || 0) - Number(actual || 0)).toFixed(2),
@@ -33,7 +35,16 @@ const ComparisonCard = ({
 
   return (
     <div className="flex h-full min-h-[150px] w-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <p className="text-sm font-medium leading-5 text-slate-500">{title}</p>
+      {/* <p className="text-sm font-medium leading-5 text-slate-500">{title}</p> */}
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
+          style={{ backgroundColor: baseColor }}
+        />
+        <span className="text-sm font-medium leading-5 text-slate-500">
+          {title}
+        </span>
+      </div>
 
       <div className="mt-auto space-y-2 pt-5">
         <div className="grid grid-cols-[90px_1fr] items-center text-sm text-slate-700">
@@ -310,6 +321,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
             planned={travelPlanned}
             actual={travelActual}
             loading={loadingTravel}
+            baseColor="rgb(254, 205, 211)"
           />
         </div>
 
@@ -319,6 +331,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
             planned={clothesPlanned}
             actual={clothesActual}
             loading={loadingClothes}
+            baseColor="rgb(165, 243, 252)"
           />
         </div>
       </div>
