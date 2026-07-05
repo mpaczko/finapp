@@ -12,9 +12,32 @@ interface IProps {
 }
 
 const ROW_COLORS = ["bg-white", "bg-gray-100"];
+const ROWS_PER_PAGE_OPTIONS = [8, 15, 20, 50] as const;
+type RowsPerPage = (typeof ROWS_PER_PAGE_OPTIONS)[number];
+const DEFAULT_ROWS_PER_PAGE: RowsPerPage = 8;
+const ROWS_PER_PAGE_STORAGE_KEY = "allExpensesRowsPerPage";
 
 const getDateKey = (date: string | Date) =>
   format(new Date(date), "yyyy-MM-dd");
+
+const isRowsPerPageOption = (value: number): value is RowsPerPage =>
+  ROWS_PER_PAGE_OPTIONS.some((option) => option === value);
+
+const getInitialRowsPerPage = (): RowsPerPage => {
+  if (typeof window === "undefined") return DEFAULT_ROWS_PER_PAGE;
+
+  try {
+    const savedValue = Number(
+      window.localStorage.getItem(ROWS_PER_PAGE_STORAGE_KEY),
+    );
+
+    return isRowsPerPageOption(savedValue)
+      ? savedValue
+      : DEFAULT_ROWS_PER_PAGE;
+  } catch {
+    return DEFAULT_ROWS_PER_PAGE;
+  }
+};
 
 const ElementsTable = ({ onDelete }: IProps) => {
   const expenses = useAppSelector((state) => state.expenses);
@@ -29,7 +52,8 @@ const ElementsTable = ({ onDelete }: IProps) => {
     maxCost: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 20;
+  const [rowsPerPage, setRowsPerPage] =
+    useState<RowsPerPage>(getInitialRowsPerPage);
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -40,7 +64,18 @@ const ElementsTable = ({ onDelete }: IProps) => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [filters, rowsPerPage]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        ROWS_PER_PAGE_STORAGE_KEY,
+        rowsPerPage.toString(),
+      );
+    } catch {
+      // Ignore storage errors; pagination still works for the current session.
+    }
+  }, [rowsPerPage]);
 
   const handleDelete = async (id?: string) => {
     if (!id) return;
@@ -81,11 +116,11 @@ const ElementsTable = ({ onDelete }: IProps) => {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE),
+    Math.ceil(filteredExpenses.length / rowsPerPage),
   );
   const paginatedExpenses = filteredExpenses.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage,
   );
 
   const rowColorByDate = useMemo(() => {
@@ -116,9 +151,9 @@ const ElementsTable = ({ onDelete }: IProps) => {
         <table className="w-full min-w-full table-fixed">
           <thead>
             <tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-              <th className="w-[34%] px-4 py-3">Nazwa</th>
-              <th className="w-[24%] px-4 py-3">Kategoria</th>
-              <th className="w-[20%] px-4 py-3">Data</th>
+              <th className="w-[38%] px-4 py-3">Nazwa</th>
+              <th className="w-[20%] px-4 py-3">Kategoria</th>
+              <th className="w-[10%] px-4 py-3">Data</th>
               <th className="w-[10%] px-4 py-3">Koszt</th>
               <th className="w-[12%] px-4 py-3 text-center">Akcje</th>
             </tr>
@@ -173,11 +208,38 @@ const ElementsTable = ({ onDelete }: IProps) => {
           wydatków
         </p>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">Wiersze:</span>
+            <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white">
+              {ROWS_PER_PAGE_OPTIONS.map((option) => {
+                const isActive = rowsPerPage === option;
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setRowsPerPage(option)}
+                    className={`px-3 py-1.5 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-slate-900 text-white"
+                        : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </div>
   );

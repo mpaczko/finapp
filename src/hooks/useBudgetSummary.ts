@@ -23,6 +23,10 @@ export const useBudgetSummary = () => {
   const [inputValue, setInputValue] = useState<string>("");
   const [editingIncome, setEditingIncome] = useState(false);
   const [incomeInputValue, setIncomeInputValue] = useState<string>("");
+  const [editingPreviousMonthSavings, setEditingPreviousMonthSavings] =
+    useState(false);
+  const [previousMonthSavingsInputValue, setPreviousMonthSavingsInputValue] =
+    useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const toFixedSafe = (value: number | undefined | null) => {
@@ -146,6 +150,29 @@ export const useBudgetSummary = () => {
     dispatch(setSelectedBudget([updatedBudget]));
   };
 
+  const savePreviousMonthSavingsValue = async (newValue: number) => {
+    if (!budget) return;
+
+    setLoading(true);
+
+    const { error } = await supabase
+      .from("budgets")
+      .update({ previous_month_savings: newValue })
+      .eq("id", budget.id);
+
+    setLoading(false);
+    if (error) {
+      console.error("Błąd podczas zapisu oszczędności:", error);
+      return;
+    }
+
+    const updatedBudget = {
+      ...(budget as any),
+      previous_month_savings: newValue,
+    };
+    dispatch(setSelectedBudget([updatedBudget]));
+  };
+
   return {
     summary,
     totals,
@@ -153,12 +180,17 @@ export const useBudgetSummary = () => {
     inputValue,
     editingIncome,
     incomeInputValue,
+    editingPreviousMonthSavings,
+    previousMonthSavingsInputValue,
     loading,
     setEditingCategory,
     setInputValue,
     setEditingIncome,
     setIncomeInputValue,
+    setEditingPreviousMonthSavings,
+    setPreviousMonthSavingsInputValue,
     savePlannedValue,
     saveIncomeValue,
+    savePreviousMonthSavingsValue,
   };
 };

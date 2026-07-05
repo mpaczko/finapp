@@ -23,19 +23,24 @@ const Nav = ({ userId }: Props) => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm border-b border-slate-100 flex items-center justify-between px-6 py-4">
-      <div className="flex flex-row gap-3 items-center">
-        <h1 className="text-xl font-semibold text-gray-800">Budżet</h1>
+    <nav className="fixed top-0 left-0 right-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-slate-100 bg-white px-6 py-3 shadow-sm">
+      <div />
+
+      <div className="flex items-center justify-center gap-4">
+        <h1 className="text-2xl font-semibold text-slate-900">Budżet</h1>
 
         <input
+          name="month"
           type="month"
           value={selectedMonth}
+          aria-label="Wybierz miesiąc budżetu"
+          onClick={(e) => e.currentTarget.showPicker?.()}
           onChange={(e) => dispatch(setSelectedMonth(e.target.value))}
-          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+          className="max-w-[195px] cursor-pointer appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-5 py-2.5 text-center text-lg font-semibold text-slate-900 shadow-sm outline-none transition hover:border-slate-300 hover:bg-white hover:shadow-md focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100 [color-scheme:light] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
         />
       </div>
 
-      <div className="flex gap-5 items-center">
+      <div className="flex items-center justify-end gap-5">
         <MultipleExpenses />
         <ExpenseDialog />
 

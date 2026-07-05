@@ -18,8 +18,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-lavender px-3 py-2 text-sm text-gray shadow-sm  ring-offset-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-spun-pearl",
-          className
+          "flex h-10 w-full rounded-md border border-indigo-100 px-3 py-2 text-sm text-gray shadow-sm  ring-offset-white focus:outline focus:outline-offset-2 focus:outline-spun-pearl",
+          className,
         )}
         ref={ref}
         onChange={handleChange}
@@ -27,7 +27,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         min="0"
       />
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

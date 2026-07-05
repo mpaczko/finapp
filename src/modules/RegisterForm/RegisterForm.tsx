@@ -50,7 +50,7 @@ export default function RegisterForm({ onSwitchToLogin }: Props) {
   return (
     <FormProvider {...methods}>
       <form
-        className="flex flex-col gap-4 w-[370px] p-10 rounded-2xl shadow-sm border"
+        className="flex flex-col gap-4 w-[370px] p-10 rounded-2xl shadow-sm"
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormInput
