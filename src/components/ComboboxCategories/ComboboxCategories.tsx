@@ -45,7 +45,9 @@ export function ComboboxCategories({
       name={name}
       control={control}
       render={({ field }) => (
-        <FormItem className={cn("text-start flex-1 min-w-0 w-full", className)}>
+        <FormItem
+          className={cn("text-start flex-1 min-w-[200px] w-full", className)}
+        >
           {label && (
             <FormLabel className="flex gap-1 font-lexend text-sm font-normal">
               {label}
@@ -85,7 +87,6 @@ export function ComboboxCategories({
                           key={category.id}
                           value={category.name}
                           onSelect={(currentValue) => {
-                            console.log(currentValue);
                             const newValue =
                               currentValue === field.value ? "" : currentValue;
                             field.onChange(newValue);
