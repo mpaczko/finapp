@@ -9,15 +9,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { ComboboxCategories } from "../../../components/ComboboxCategories";
 import { useDispatch } from "react-redux";
-import { startOfMonth, format, endOfMonth } from "date-fns";
 import { IExpense } from "../../../types/expenseType";
 import { useAppSelector } from "../../../store/reduxHook";
-import { supabase } from "../../../createClient";
 import { setExpenses } from "../../../store/expensesSlice/expensesSlice";
 import FormDatePicker from "../../../components/Form/FormDatePicker";
 import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
-import { getUserId } from "../../../utils/getUserIdHelper";
+import { expensesApi } from "../../../lib/expensesApi";
 
 type Props = {
   isEdit?: boolean;
@@ -46,21 +44,8 @@ const ExpenseForm = ({
   const { reset, handleSubmit } = methods;
 
   async function fetchExpenses(month: string) {
-    const startDate = format(
-      startOfMonth(new Date(month + "-01")),
-      "yyyy-MM-dd",
-    );
-    const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
-
-    const { data, error } = await supabase
-      .from("expenses")
-      .select("*")
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: false });
-
-    if (error) console.error(error);
-    if (data) dispatch(setExpenses(data));
+    const data = await expensesApi.listByMonth(month);
+    dispatch(setExpenses(data));
   }
 
   useEffect(() => {
@@ -75,18 +60,10 @@ const ExpenseForm = ({
     setIsSubmitting(true);
 
     try {
-      const userId = await getUserId();
-      if (!userId) return;
-
-      const payload = {
-        ...data,
-        user_id: userId,
-      };
-
       if (expense?.id) {
-        await supabase.from("expenses").update(payload).eq("id", expense.id);
+        await expensesApi.update(expense.id, data);
       } else {
-        await supabase.from("expenses").insert(payload);
+        await expensesApi.create(data);
       }
 
       await fetchExpenses(selectedMonth);

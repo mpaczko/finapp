@@ -34,7 +34,7 @@ export function ComboboxCategoriesStandalone({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={cn("text-start flex-1 min-w-0 w-full", className)}>
+    <div className={cn("text-start flex-1 min-w-[200px] w-full", className)}>
       {label && (
         <label className="flex gap-1 font-lexend text-sm font-normal">
           {label}

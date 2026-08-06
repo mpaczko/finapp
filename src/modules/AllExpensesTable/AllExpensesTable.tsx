@@ -1,11 +1,11 @@
 import { useAppSelector } from "../../store/reduxHook";
-import { supabase } from "../../createClient";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 import ExpenseDialog from "../ExpenseDialog";
 import Pagination from "../../ui/Pagination/Pagination";
+import { expensesApi } from "../../lib/expensesApi";
 
 interface IProps {
   onDelete: () => Promise<void>;
@@ -80,7 +80,7 @@ const ElementsTable = ({ onDelete }: IProps) => {
   const handleDelete = async (id?: string) => {
     if (!id) return;
 
-    await supabase.from("expenses").delete().eq("id", id);
+    await expensesApi.remove(id);
     onDelete();
   };
 

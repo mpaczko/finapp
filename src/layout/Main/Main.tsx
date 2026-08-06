@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { format, startOfMonth, endOfMonth } from "date-fns";
 import { supabase } from "../../createClient";
 import { setExpenses } from "../../store/expensesSlice/expensesSlice";
 import { setCategories } from "../../store/categoriesSlice/categoriesSlice";
@@ -10,6 +9,7 @@ import CategoriesSummaryTable from "../../modules/CategoriesSummaryTable";
 import SummaryTable from "../../modules/SummaryTable";
 import ElementsTable from "../../modules/AllExpensesTable";
 import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
+import { expensesApi } from "../../lib/expensesApi";
 
 type Props = {
   userId: string | null;
@@ -23,22 +23,8 @@ const Main = ({ userId, selectedMonth }: Props) => {
   async function fetchExpenses(month: string) {
     if (!userId) return;
 
-    const startDate = format(
-      startOfMonth(new Date(month + "-01")),
-      "yyyy-MM-dd",
-    );
-
-    const endDate = format(endOfMonth(new Date(month + "-01")), "yyyy-MM-dd");
-
-    const { data } = await supabase
-      .from("expenses")
-      .select("*")
-      .eq("user_id", userId)
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: false });
-
-    if (data) dispatch(setExpenses(data));
+    const data = await expensesApi.listByMonth(month);
+    dispatch(setExpenses(data));
   }
 
   async function fetchCategories() {
