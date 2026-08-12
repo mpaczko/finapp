@@ -61,7 +61,13 @@ const ExpenseForm = ({
 
     try {
       if (expense?.id) {
-        await expensesApi.update(expense.id, data);
+        const updateData: IAddExpenseForm = {
+          name: data.name,
+          category: data.category,
+          date: data.date,
+          cost: data.cost,
+        };
+        await expensesApi.update(expense.id, updateData);
       } else {
         await expensesApi.create(data);
       }
