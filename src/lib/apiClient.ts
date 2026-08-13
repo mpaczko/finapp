@@ -29,6 +29,12 @@ export const apiRequest = async <T>(
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
+  } else {
+    // When AUTH is disabled locally, backend expects x-user-id header
+    const localUserId = import.meta.env.VITE_LOCAL_USER_ID;
+    if (localUserId) {
+      headers.set("x-user-id", localUserId);
+    }
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -41,6 +47,12 @@ export const apiRequest = async <T>(
     const errorBody = await response.json().catch(() => null);
     const message =
       errorBody?.message ?? `API request failed with status ${response.status}`;
+
+    console.error(`API Error [${response.status}]:`, {
+      url: `${API_BASE_URL}${path}`,
+      message,
+      errorBody,
+    });
 
     throw new Error(Array.isArray(message) ? message.join(", ") : message);
   }

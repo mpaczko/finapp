@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "../store/reduxHook";
-import { supabase } from "../createClient";
 import { setSelectedBudget } from "../store/selectedBudgetSlice/selectedBudgetSlice";
+import { budgetsApi } from "../lib/budgetsApi";
 
 export interface CategorySummary {
   name: string;
@@ -120,13 +120,16 @@ export const useBudgetSummary = () => {
     setLoading(true);
     setPlannedMap((prev) => ({ ...prev, [category]: newValue }));
 
-    const { error } = await supabase
-      .from("budgets")
-      .update({ [key]: newValue })
-      .eq("id", budget.id);
-
-    setLoading(false);
-    if (error) console.error("Błąd podczas zapisu:", error);
+    try {
+      const updatedBudget = await budgetsApi.update(budget.id, {
+        [key]: newValue,
+      } as any);
+      dispatch(setSelectedBudget([updatedBudget]));
+    } catch (error) {
+      console.error("Błąd podczas zapisu:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const saveIncomeValue = async (newValue: number) => {
@@ -134,20 +137,16 @@ export const useBudgetSummary = () => {
 
     setLoading(true);
 
-    const { error } = await supabase
-      .from("budgets")
-      .update({ income: newValue })
-      .eq("id", budget.id);
-
-    setLoading(false);
-    if (error) {
+    try {
+      const updatedBudget = await budgetsApi.update(budget.id, {
+        income: newValue,
+      });
+      dispatch(setSelectedBudget([updatedBudget]));
+    } catch (error) {
       console.error("Błąd podczas zapisu przychodu:", error);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    // Update local redux state so UI refreshes instantly
-    const updatedBudget = { ...(budget as any), income: newValue };
-    dispatch(setSelectedBudget([updatedBudget]));
   };
 
   const savePreviousMonthSavingsValue = async (newValue: number) => {
@@ -155,22 +154,16 @@ export const useBudgetSummary = () => {
 
     setLoading(true);
 
-    const { error } = await supabase
-      .from("budgets")
-      .update({ previous_month_savings: newValue })
-      .eq("id", budget.id);
-
-    setLoading(false);
-    if (error) {
+    try {
+      const updatedBudget = await budgetsApi.update(budget.id, {
+        previous_month_savings: newValue,
+      });
+      dispatch(setSelectedBudget([updatedBudget]));
+    } catch (error) {
       console.error("Błąd podczas zapisu oszczędności:", error);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    const updatedBudget = {
-      ...(budget as any),
-      previous_month_savings: newValue,
-    };
-    dispatch(setSelectedBudget([updatedBudget]));
   };
 
   return {

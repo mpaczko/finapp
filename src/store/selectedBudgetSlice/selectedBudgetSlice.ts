@@ -20,6 +20,7 @@ export type Budget = {
   clothes: number;
   investments: number;
   others: number;
+  ip_box: number;
 };
 
 type BudgetState = {

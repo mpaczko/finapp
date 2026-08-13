@@ -10,6 +10,7 @@ import SummaryTable from "../../modules/SummaryTable";
 import ElementsTable from "../../modules/AllExpensesTable";
 import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
 import { expensesApi } from "../../lib/expensesApi";
+import { budgetsApi } from "../../lib/budgetsApi";
 
 type Props = {
   userId: string | null;
@@ -41,13 +42,8 @@ const Main = ({ userId, selectedMonth }: Props) => {
   async function fetchBudget(month: string) {
     if (!userId) return;
 
-    const { data } = await supabase
-      .from("budgets")
-      .select("*")
-      .eq("month", month)
-      .eq("user_id", userId);
-
-    if (data) dispatch(setSelectedBudget(data));
+    const data = await budgetsApi.listByMonth(month);
+    dispatch(setSelectedBudget(data));
   }
 
   useEffect(() => {

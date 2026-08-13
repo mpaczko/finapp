@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateBudgetDto } from "./dto/create-budget.dto";
@@ -51,20 +50,15 @@ export class BudgetsService {
 
   async upsert(userId: string, dto: CreateBudgetDto) {
     const data = this.toBudgetNumberData(dto);
-    const budget = await this.prisma.budget.upsert({
-      where: {
-        user_id_month: {
-          user_id: userId,
-          month: dto.month,
-        },
-      },
-      create: {
-        month: dto.month,
-        user_id: userId,
-        ...data,
-      },
-      update: data,
+    const existing = await this.prisma.budget.findFirst({
+      where: { user_id: userId, month: dto.month },
+      orderBy: { id: "asc" },
     });
+    const budget = existing
+      ? await this.prisma.budget.update({ where: { id: existing.id }, data })
+      : await this.prisma.budget.create({
+          data: { month: dto.month, user_id: userId, ...data },
+        });
 
     return this.mapBudget(budget);
   }
@@ -89,14 +83,14 @@ export class BudgetsService {
     return this.mapBudget(budget);
   }
 
-  private toBudgetData(payload: BudgetPayload): Prisma.BudgetUncheckedUpdateInput {
-    const data: Record<string, number | string> = this.toBudgetNumberData(payload);
+  private toBudgetData(payload: BudgetPayload): BudgetPayload {
+    const data: BudgetPayload = { ...this.toBudgetNumberData(payload) };
 
     if (payload.month) {
       data.month = payload.month;
     }
 
-    return data as Prisma.BudgetUncheckedUpdateInput;
+    return data;
   }
 
   private toBudgetNumberData(payload: BudgetPayload): BudgetNumberData {
@@ -112,9 +106,9 @@ export class BudgetsService {
   }
 
   private mapBudget(budget: {
-    id: number;
+    id: number | bigint;
     created_at: Date;
-    month: string;
+    month: string | null;
     previous_month_savings: unknown;
     income: unknown;
     rent: unknown;
@@ -134,9 +128,9 @@ export class BudgetsService {
     ip_box: unknown;
   }) {
     return {
-      id: budget.id,
+      id: Number(budget.id),
       created_at: budget.created_at.toISOString(),
-      month: budget.month,
+      month: budget.month ?? "",
       previous_month_savings: toNumber(budget.previous_month_savings),
       income: toNumber(budget.income),
       rent: toNumber(budget.rent),
