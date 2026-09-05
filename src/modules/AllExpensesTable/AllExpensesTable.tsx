@@ -147,15 +147,17 @@ const ElementsTable = ({ onDelete }: IProps) => {
         <ExpenseFilters filters={filters} onFilterChange={setFilters} />
       </div>
 
-      <div className="mx-auto max-w-[1360px] overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-        <table className="w-full min-w-full table-fixed">
+      <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-sm">
+        <table className="w-full min-w-[680px] table-fixed">
           <thead>
             <tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-              <th className="w-[38%] px-4 py-3">Nazwa</th>
-              <th className="w-[20%] px-4 py-3">Kategoria</th>
-              <th className="w-[10%] px-4 py-3">Data</th>
-              <th className="w-[10%] px-4 py-3">Koszt</th>
-              <th className="w-[12%] px-4 py-3 text-center">Akcje</th>
+              <th className="w-[26%] px-4 py-3">Nazwa</th>
+              <th className="w-[23%] px-4 py-3">Kategoria</th>
+              <th className="w-[14%] px-2 py-3 whitespace-nowrap">Data</th>
+              <th className="w-[13%] px-2 py-3 whitespace-nowrap">Koszt</th>
+              <th className="w-[24%] px-2 py-3 text-center whitespace-nowrap">
+                Akcje
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -174,14 +176,14 @@ const ElementsTable = ({ onDelete }: IProps) => {
                   <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
                     <span className="block truncate">{el.category}</span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
+                  <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
                     {format(new Date(el.date), "dd.MM.yyyy", { locale: pl })}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
+                  <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
                     {el.cost.toFixed(2)} zł
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                  <td className="px-2 py-3 text-center">
+                    <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
                       <ExpenseDialog
                         expense={el}
                         isEdit
