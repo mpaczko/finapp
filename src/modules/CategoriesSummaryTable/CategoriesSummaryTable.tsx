@@ -261,7 +261,17 @@ const CategoriesSummaryTable = () => {
                 Suma wszystkich wydatków
               </span>
 
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-4">
+                <div className="rounded-xl bg-white/10 p-2.5">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
+                    Przychód
+                  </div>
+
+                  <div className="mt-1 text-sm font-bold tabular-nums text-blue-200 sm:text-base">
+                    {totals.income} zł
+                  </div>
+                </div>
+
                 <div className="rounded-xl bg-white/10 p-2.5">
                   <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
                     Planowane
