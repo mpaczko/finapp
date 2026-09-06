@@ -18,6 +18,7 @@ export interface CreateBudgetPayload {
   transport?: number;
   clothes?: number;
   investments?: number;
+  company_cost?: number;
   others?: number;
   ip_box?: number;
 }

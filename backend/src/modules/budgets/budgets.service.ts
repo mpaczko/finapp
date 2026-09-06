@@ -22,6 +22,7 @@ const budgetNumericFields = [
   "transport",
   "clothes",
   "investments",
+  "company_cost",
   "others",
   "ip_box",
 ] as const;
@@ -124,6 +125,7 @@ export class BudgetsService {
     transport: unknown;
     clothes: unknown;
     investments: unknown;
+    company_cost: unknown;
     others: unknown;
     ip_box: unknown;
   }) {
@@ -146,6 +148,7 @@ export class BudgetsService {
       transport: toNumber(budget.transport),
       clothes: toNumber(budget.clothes),
       investments: toNumber(budget.investments),
+      company_cost: toNumber(budget.company_cost),
       others: toNumber(budget.others),
       ip_box: toNumber(budget.ip_box),
     };

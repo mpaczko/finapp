@@ -51,6 +51,7 @@ model Budget {
   transport              Float?
   clothes                Float?
   investments            Float?
+  company_cost           Float?
   others                 Float?
   ip_box                 Float?
   user_id                String?  @db.Uuid
