@@ -6,7 +6,6 @@ import { setExpenses } from "../../store/expensesSlice/expensesSlice";
 import { setCategories } from "../../store/categoriesSlice/categoriesSlice";
 import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
 import CategoriesSummaryTable from "../../modules/CategoriesSummaryTable";
-import SummaryTable from "../../modules/SummaryTable";
 import ElementsTable from "../../modules/AllExpensesTable";
 import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
 import { expensesApi } from "../../lib/expensesApi";
@@ -78,13 +77,12 @@ const Main = ({ userId, selectedMonth }: Props) => {
   }
 
   return (
-    <main className="grid grid-cols-1 gap-6 px-6 pb-20 pt-20 xl:grid-cols-2 xl:items-start">
+    <main className="grid grid-cols-1 gap-4 px-4 pb-20 pt-25 sm:px-6 xl:grid-cols-2 xl:items-start">
       <div className="min-w-0">
         <CategoriesSummaryTable />
       </div>
-      <div className="min-w-0">
+      <div className="grid min-w-0 gap-8">
         <YearlyInvestmentSummary userId={userId} />
-        <SummaryTable />
         <ElementsTable
           onDelete={async () => {
             await fetchExpenses(selectedMonth);

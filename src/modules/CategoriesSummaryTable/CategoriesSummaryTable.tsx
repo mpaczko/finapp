@@ -1,9 +1,11 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
 import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch } from "../../store/reduxHook";
+import { Pencil } from "lucide-react";
 
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import { categoryChartColors } from "../../lib/categoryColors";
+import SummaryTable from "../SummaryTable";
 
 const CategoriesSummaryTable = () => {
   const {
@@ -11,9 +13,14 @@ const CategoriesSummaryTable = () => {
     totals,
     editingCategory,
     inputValue,
+    editingIncome,
+    incomeInputValue,
     setEditingCategory,
     setInputValue,
+    setEditingIncome,
+    setIncomeInputValue,
     savePlannedValue,
+    saveIncomeValue,
     loading,
   } = useBudgetSummary();
 
@@ -216,15 +223,13 @@ const CategoriesSummaryTable = () => {
   );
 
   return (
-    <div className="grid min-w-0 gap-3 p-3 sm:gap-4 sm:p-4">
+    <div className="grid min-w-0 gap-8 p-4">
       <h2 className="text-lg font-semibold text-gray-800 sm:text-xl">
         Podsumowanie wydatków według kategorii
       </h2>
 
-      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] 2xl:items-start">
-        {/* LEWA KOLUMNA */}
-        <div className="grid min-w-0 auto-rows-max content-start gap-4">
-          {/* GŁÓWNE KATEGORIE */}
+      <div className="grid min-w-0 gap-8 min-[2400px]:grid-cols-[minmax(0,1fr)_minmax(420px,1fr)] min-[2400px]:items-start">
+        <div className="grid min-w-0 auto-rows-max content-start gap-8">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
               <h3 className="text-sm font-semibold text-slate-800">
@@ -238,8 +243,6 @@ const CategoriesSummaryTable = () => {
 
             {renderTable(primarySummary)}
           </div>
-
-          {/* KATEGORIE DODATKOWE */}
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
               <h3 className="text-sm font-semibold text-slate-800">
@@ -253,15 +256,66 @@ const CategoriesSummaryTable = () => {
 
             {renderTable(secondarySummary)}
           </div>
-
-          {/* ŁĄCZNE PODSUMOWANIE */}
           <div className="rounded-2xl border border-slate-200 bg-slate-950 p-3 text-sm text-white shadow-md">
             <div className="grid gap-3">
               <span className="text-sm font-semibold">
                 Suma wszystkich wydatków
               </span>
 
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-4">
+                <div className="rounded-xl bg-white/10 p-2.5">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
+                    Przychód
+                  </div>
+
+                  <div className="mt-1 text-sm font-bold tabular-nums text-blue-200 sm:text-base">
+                    {editingIncome ? (
+                      <input
+                        type="number"
+                        autoFocus
+                        step="0.01"
+                        value={incomeInputValue}
+                        onChange={(e) => setIncomeInputValue(e.target.value)}
+                        onBlur={() => {
+                          const newValue = parseFloat(incomeInputValue) || 0;
+
+                          saveIncomeValue(newValue);
+                          setEditingIncome(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const newValue = parseFloat(incomeInputValue) || 0;
+
+                            saveIncomeValue(newValue);
+                            setEditingIncome(false);
+                          }
+
+                          if (e.key === "Escape") {
+                            setEditingIncome(false);
+                          }
+                        }}
+                        className="w-full max-w-[120px] rounded border border-blue-200 bg-white/10 px-1.5 py-1 text-right text-sm text-blue-100 outline-none transition focus:border-blue-100 focus:ring-1 focus:ring-blue-100"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <span>{totals.income} zł</span>
+                        <button
+                          type="button"
+                          aria-label="Edytuj przychód"
+                          title="Edytuj"
+                          onClick={() => {
+                            setEditingIncome(true);
+                            setIncomeInputValue(totals.income);
+                          }}
+                          className="rounded p-1 text-blue-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        >
+                          <Pencil size={14} aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="rounded-xl bg-white/10 p-2.5">
                   <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
                     Planowane
@@ -300,21 +354,20 @@ const CategoriesSummaryTable = () => {
               </div>
             </div>
           </div>
+          <SummaryTable />
         </div>
-
-        {/* PRAWA KOLUMNA */}
         <div className="min-w-0">
-          {loading && (
+          {loading ? (
             <div className="mb-2 text-xs text-gray-500">
               ⏳ Zapisuję zmiany...
             </div>
+          ) : (
+            <CategoryBudgetBars
+              rows={summary}
+              colorMap={categoryColorMap}
+              onSelectCategory={setCategory}
+            />
           )}
-
-          <CategoryBudgetBars
-            rows={summary}
-            colorMap={categoryColorMap}
-            onSelectCategory={setCategory}
-          />
         </div>
       </div>
     </div>

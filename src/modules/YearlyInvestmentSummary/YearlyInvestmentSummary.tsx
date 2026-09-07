@@ -263,7 +263,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
   }, [year, userId, travelCategoryName, clothesCategoryName]);
 
   return (
-    <div className="mt-5 w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div className="w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <p className="text-lg font-semibold text-slate-900">
@@ -292,7 +292,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-sm font-medium text-slate-500">
             Inwestycje — łączne wydatki w danym roku
