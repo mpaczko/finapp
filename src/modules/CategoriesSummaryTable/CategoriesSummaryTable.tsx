@@ -1,6 +1,7 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
 import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch } from "../../store/reduxHook";
+import { Pencil } from "lucide-react";
 
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import { categoryChartColors } from "../../lib/categoryColors";
@@ -11,9 +12,14 @@ const CategoriesSummaryTable = () => {
     totals,
     editingCategory,
     inputValue,
+    editingIncome,
+    incomeInputValue,
     setEditingCategory,
     setInputValue,
+    setEditingIncome,
+    setIncomeInputValue,
     savePlannedValue,
+    saveIncomeValue,
     loading,
   } = useBudgetSummary();
 
@@ -268,7 +274,51 @@ const CategoriesSummaryTable = () => {
                   </div>
 
                   <div className="mt-1 text-sm font-bold tabular-nums text-blue-200 sm:text-base">
-                    {totals.income} zł
+                    {editingIncome ? (
+                      <input
+                        type="number"
+                        autoFocus
+                        step="0.01"
+                        value={incomeInputValue}
+                        onChange={(e) => setIncomeInputValue(e.target.value)}
+                        onBlur={() => {
+                          const newValue = parseFloat(incomeInputValue) || 0;
+
+                          saveIncomeValue(newValue);
+                          setEditingIncome(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const newValue =
+                              parseFloat(incomeInputValue) || 0;
+
+                            saveIncomeValue(newValue);
+                            setEditingIncome(false);
+                          }
+
+                          if (e.key === "Escape") {
+                            setEditingIncome(false);
+                          }
+                        }}
+                        className="w-full max-w-[120px] rounded border border-blue-200 bg-white/10 px-1.5 py-1 text-right text-sm text-blue-100 outline-none transition focus:border-blue-100 focus:ring-1 focus:ring-blue-100"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <span>{totals.income} zł</span>
+                        <button
+                          type="button"
+                          aria-label="Edytuj przychód"
+                          title="Edytuj"
+                          onClick={() => {
+                            setEditingIncome(true);
+                            setIncomeInputValue(totals.income);
+                          }}
+                          className="rounded p-1 text-blue-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        >
+                          <Pencil size={14} aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

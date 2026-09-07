@@ -1,4 +1,5 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
+import { Pencil } from "lucide-react";
 
 const SummaryTable = () => {
   const {
@@ -27,7 +28,7 @@ const SummaryTable = () => {
                 Łączna suma oszczędnośći na stan poprzedniego miesiąca
               </th>
               <th className="w-1/3 px-4 py-3 border-b border-slate-100">
-                Oszczędności obecnie
+                Saldo w danym miesiącu
               </th>
               <th className="w-1/3 px-4 py-3 border-b border-slate-100">
                 Planowany stan oszczędnośći pod koniec miesiąca
@@ -36,15 +37,7 @@ const SummaryTable = () => {
           </thead>
           <tbody>
             <tr>
-              <td
-                className="px-4 py-3 border-b border-slate-100 text-sm font-bold text-emerald-700 tabular-nums whitespace-nowrap cursor-pointer"
-                onClick={() => {
-                  setEditingPreviousMonthSavings(true);
-                  setPreviousMonthSavingsInputValue(
-                    totals.previous_month_savings.toFixed(2),
-                  );
-                }}
-              >
+              <td className="px-4 py-3 border-b border-slate-100 text-sm font-bold text-emerald-700 tabular-nums whitespace-nowrap">
                 {editingPreviousMonthSavings ? (
                   <input
                     type="number"
@@ -74,7 +67,23 @@ const SummaryTable = () => {
                     className="w-32 px-2 py-1 border rounded text-right"
                   />
                 ) : (
-                  `${totals.previous_month_savings.toFixed(2)} zł`
+                  <div className="flex items-center gap-2">
+                    <span>{totals.previous_month_savings.toFixed(2)} zł</span>
+                    <button
+                      type="button"
+                      aria-label="Edytuj oszczędności z poprzedniego miesiąca"
+                      title="Edytuj"
+                      onClick={() => {
+                        setEditingPreviousMonthSavings(true);
+                        setPreviousMonthSavingsInputValue(
+                          totals.previous_month_savings.toFixed(2),
+                        );
+                      }}
+                      className="rounded p-1 text-emerald-600 transition hover:bg-emerald-50 hover:text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    >
+                      <Pencil size={14} aria-hidden="true" />
+                    </button>
+                  </div>
                 )}
               </td>
 
