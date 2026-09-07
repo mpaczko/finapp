@@ -140,12 +140,10 @@ const ElementsTable = ({ onDelete }: IProps) => {
   }, [filteredExpenses]);
 
   return (
-    <div className="overflow-x-auto p-4 min-h-[720px]">
-      <h2 className="text-xl font-semibold text-gray-800 pb-5">Moje wydatki</h2>
+    <div className="flex min-h-[720px] min-w-0 flex-col gap-4 overflow-x-auto">
+      <h2 className="text-xl font-semibold text-gray-800">Moje wydatki</h2>
 
-      <div className="mb-4">
-        <ExpenseFilters filters={filters} onFilterChange={setFilters} />
-      </div>
+      <ExpenseFilters filters={filters} onFilterChange={setFilters} />
 
       <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-sm">
         <table className="w-full min-w-[680px] table-fixed">
@@ -204,7 +202,7 @@ const ElementsTable = ({ onDelete }: IProps) => {
         </table>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">
           Pokazano {paginatedExpenses.length} z {filteredExpenses.length}{" "}
           wydatków

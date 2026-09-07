@@ -223,13 +223,13 @@ const CategoriesSummaryTable = () => {
   );
 
   return (
-    <div className="grid min-w-0 gap-3 p-3 sm:gap-4 sm:p-4">
+    <div className="grid min-w-0 gap-8 p-4">
       <h2 className="text-lg font-semibold text-gray-800 sm:text-xl">
         Podsumowanie wydatków według kategorii
       </h2>
 
-      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] 2xl:items-start">
-        <div className="grid min-w-0 auto-rows-max content-start gap-4">
+      <div className="grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] 2xl:items-start">
+        <div className="grid min-w-0 auto-rows-max content-start gap-8">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
               <h3 className="text-sm font-semibold text-slate-800">

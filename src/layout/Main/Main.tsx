@@ -77,11 +77,11 @@ const Main = ({ userId, selectedMonth }: Props) => {
   }
 
   return (
-    <main className="grid grid-cols-1 gap-4 px-4 pb-20 pt-20 sm:px-6 xl:grid-cols-2 xl:items-start">
+    <main className="grid grid-cols-1 gap-4 px-4 pb-20 pt-25 sm:px-6 xl:grid-cols-2 xl:items-start">
       <div className="min-w-0">
         <CategoriesSummaryTable />
       </div>
-      <div className="grid min-w-0 gap-4">
+      <div className="grid min-w-0 gap-8">
         <YearlyInvestmentSummary userId={userId} />
         <ElementsTable
           onDelete={async () => {
