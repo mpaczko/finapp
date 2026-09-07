@@ -5,6 +5,7 @@ import { Pencil } from "lucide-react";
 
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import { categoryChartColors } from "../../lib/categoryColors";
+import SummaryTable from "../SummaryTable";
 
 const CategoriesSummaryTable = () => {
   const {
@@ -228,9 +229,7 @@ const CategoriesSummaryTable = () => {
       </h2>
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] 2xl:items-start">
-        {/* LEWA KOLUMNA */}
         <div className="grid min-w-0 auto-rows-max content-start gap-4">
-          {/* GŁÓWNE KATEGORIE */}
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
               <h3 className="text-sm font-semibold text-slate-800">
@@ -244,8 +243,6 @@ const CategoriesSummaryTable = () => {
 
             {renderTable(primarySummary)}
           </div>
-
-          {/* KATEGORIE DODATKOWE */}
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
               <h3 className="text-sm font-semibold text-slate-800">
@@ -259,8 +256,6 @@ const CategoriesSummaryTable = () => {
 
             {renderTable(secondarySummary)}
           </div>
-
-          {/* ŁĄCZNE PODSUMOWANIE */}
           <div className="rounded-2xl border border-slate-200 bg-slate-950 p-3 text-sm text-white shadow-md">
             <div className="grid gap-3">
               <span className="text-sm font-semibold">
@@ -289,8 +284,7 @@ const CategoriesSummaryTable = () => {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
-                            const newValue =
-                              parseFloat(incomeInputValue) || 0;
+                            const newValue = parseFloat(incomeInputValue) || 0;
 
                             saveIncomeValue(newValue);
                             setEditingIncome(false);
@@ -360,21 +354,20 @@ const CategoriesSummaryTable = () => {
               </div>
             </div>
           </div>
+          <SummaryTable />
         </div>
-
-        {/* PRAWA KOLUMNA */}
         <div className="min-w-0">
-          {loading && (
+          {loading ? (
             <div className="mb-2 text-xs text-gray-500">
               ⏳ Zapisuję zmiany...
             </div>
+          ) : (
+            <CategoryBudgetBars
+              rows={summary}
+              colorMap={categoryColorMap}
+              onSelectCategory={setCategory}
+            />
           )}
-
-          <CategoryBudgetBars
-            rows={summary}
-            colorMap={categoryColorMap}
-            onSelectCategory={setCategory}
-          />
         </div>
       </div>
     </div>

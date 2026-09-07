@@ -13,7 +13,7 @@ const SummaryTable = () => {
   } = useBudgetSummary();
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4 p-4">
+    <div className="flex w-full min-w-0 flex-col gap-4 pb-4">
       <h2 className="text-xl font-semibold text-slate-900 pt-3 pb-2">
         Podsumowanie ogólne wybranego miesiąca
       </h2>
