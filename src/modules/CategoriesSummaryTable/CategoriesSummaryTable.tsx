@@ -228,7 +228,7 @@ const CategoriesSummaryTable = () => {
         Podsumowanie wydatków według kategorii
       </h2>
 
-      <div className="grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] 2xl:items-start">
+      <div className="grid min-w-0 gap-8 min-[2400px]:grid-cols-[minmax(0,1fr)_minmax(420px,1fr)] min-[2400px]:items-start">
         <div className="grid min-w-0 auto-rows-max content-start gap-8">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">

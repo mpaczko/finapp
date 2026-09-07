@@ -111,7 +111,7 @@ const CategoryBudgetBars = ({
               onClick={() => onSelectCategory(row.name)}
               className="group grid gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 text-left transition hover:border-slate-200 hover:bg-white hover:shadow-sm cursor-pointer"
             >
-              <div className="grid gap-2 2xl:grid-cols-[120px_minmax(0,1fr)_120px] 2xl:items-center">
+              <div className="grid gap-2 min-[3200px]:grid-cols-[120px_minmax(0,1fr)_120px] min-[3200px]:items-center">
                 <div className="flex min-w-0 items-center gap-2">
                   <span
                     className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
@@ -158,7 +158,7 @@ const CategoryBudgetBars = ({
                   </div>
                 </div>
 
-                <div className="grid gap-1 text-xs 2xl:text-right">
+                <div className="grid gap-1 text-xs min-[3200px]:text-right">
                   <span className="text-slate-500">
                     Plan:{" "}
                     <strong className="font-semibold text-slate-800">

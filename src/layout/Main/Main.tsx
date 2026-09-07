@@ -88,7 +88,6 @@ const Main = ({ userId, selectedMonth }: Props) => {
             await fetchExpenses(selectedMonth);
           }}
         />
-        n
       </div>
     </main>
   );
