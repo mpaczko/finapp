@@ -1,7 +1,7 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
 import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch } from "../../store/reduxHook";
-import { Pencil } from "lucide-react";
+import { Check, Pencil, Undo2 } from "lucide-react";
 
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import { categoryChartColors } from "../../lib/categoryColors";
@@ -15,12 +15,14 @@ const CategoriesSummaryTable = () => {
     inputValue,
     editingIncome,
     incomeInputValue,
+    incomeReceived,
     setEditingCategory,
     setInputValue,
     setEditingIncome,
     setIncomeInputValue,
     savePlannedValue,
     saveIncomeValue,
+    setIncomeReceived,
     loading,
   } = useBudgetSummary();
 
@@ -313,6 +315,32 @@ const CategoriesSummaryTable = () => {
                         </button>
                       </div>
                     )}
+
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => setIncomeReceived(!incomeReceived)}
+                      className={`mt-2 inline-flex items-center gap-1 rounded px-1.5 py-1 text-[11px] font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        incomeReceived
+                          ? "bg-emerald-400/20 text-emerald-100 hover:bg-emerald-400/30"
+                          : "bg-amber-400/20 text-amber-100 hover:bg-amber-400/30"
+                      }`}
+                      aria-label={
+                        incomeReceived
+                          ? "Cofnij potwierdzenie wpływu"
+                          : "Potwierdź otrzymanie wypłaty"
+                      }
+                    >
+                      {incomeReceived ? (
+                        <>
+                          <Check size={13} aria-hidden="true" />
+                          Wpłata potwierdzona
+                          <Undo2 size={13} aria-hidden="true" />
+                        </>
+                      ) : (
+                        <>Potwierdź otrzymanie wypłaty</>
+                      )}
+                    </button>
                   </div>
                 </div>
 

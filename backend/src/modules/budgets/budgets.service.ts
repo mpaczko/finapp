@@ -84,6 +84,42 @@ export class BudgetsService {
     return this.mapBudget(budget);
   }
 
+  async confirmIncome(userId: string, id: number) {
+    await this.findOwnedBudget(userId, id);
+
+    // `income_received_at` is intentionally set by the server, so the client
+    // cannot decide when a payment was received.
+    const budget = await (this.prisma.budget.update as any)({
+      where: { id },
+      data: { income_received_at: new Date() },
+    });
+
+    return this.mapBudget(budget);
+  }
+
+  async unconfirmIncome(userId: string, id: number) {
+    await this.findOwnedBudget(userId, id);
+
+    const budget = await (this.prisma.budget.update as any)({
+      where: { id },
+      data: { income_received_at: null },
+    });
+
+    return this.mapBudget(budget);
+  }
+
+  private async findOwnedBudget(userId: string, id: number) {
+    const budget = await this.prisma.budget.findFirst({
+      where: { id, user_id: userId },
+    });
+
+    if (!budget) {
+      throw new NotFoundException("Budget not found");
+    }
+
+    return budget;
+  }
+
   private toBudgetData(payload: BudgetPayload): BudgetPayload {
     const data: BudgetPayload = { ...this.toBudgetNumberData(payload) };
 
@@ -110,6 +146,7 @@ export class BudgetsService {
     id: number | bigint;
     created_at: Date;
     month: string | null;
+    income_received_at?: Date | null;
     previous_month_savings: unknown;
     income: unknown;
     rent: unknown;
@@ -133,6 +170,7 @@ export class BudgetsService {
       id: Number(budget.id),
       created_at: budget.created_at.toISOString(),
       month: budget.month ?? "",
+      income_received_at: budget.income_received_at?.toISOString() ?? null,
       previous_month_savings: toNumber(budget.previous_month_savings),
       income: toNumber(budget.income),
       rent: toNumber(budget.rent),

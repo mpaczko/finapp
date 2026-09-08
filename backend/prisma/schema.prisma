@@ -38,6 +38,7 @@ model Budget {
   month                  String?  @db.Text
   previous_month_savings Float?
   income                 Float?
+  income_received_at     DateTime? @db.Timestamptz(6)
   rent                   Float?
   media                  Float?
   home_stuff             Float?

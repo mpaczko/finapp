@@ -6,6 +6,7 @@ export type Budget = {
   month: string;
   previous_month_savings: number;
   income: number;
+  income_received_at: string | null;
   rent: number;
   media: number;
   home_stuff: number;

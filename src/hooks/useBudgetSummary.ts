@@ -14,7 +14,7 @@ export const useBudgetSummary = () => {
   const categories = useAppSelector((state) => state.categories.items);
   const budget = useAppSelector((state) => state.budget.items?.[0]);
 
-  const { income, previous_month_savings, month: year_n_month } = budget || {};
+  const { income, previous_month_savings, income_received_at } = budget || {};
 
   const dispatch = useAppDispatch();
 
@@ -72,26 +72,11 @@ export const useBudgetSummary = () => {
     0,
   );
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1–12
-
-  let isCurrentMonth = false;
-
-  if (typeof year_n_month === "string") {
-    const [budgetYearStr, budgetMonthStr] = year_n_month.split("-");
-    const budgetYear = Number(budgetYearStr);
-    const budgetMonth = Number(budgetMonthStr);
-
-    isCurrentMonth = budgetYear === currentYear && budgetMonth === currentMonth;
-  }
-
-  const currentDay = now.getDate();
-  const isEarlyMonth = isCurrentMonth && currentDay < 8;
-
-  const savingsCurrent = isEarlyMonth
-    ? (previous_month_savings ?? 0) - actualSum
-    : (previous_month_savings ?? 0) + (income ?? 0) - actualSum;
+  const incomeReceived = Boolean(income_received_at);
+  const savingsCurrent =
+    (previous_month_savings ?? 0) +
+    (incomeReceived ? (income ?? 0) : 0) -
+    actualSum;
 
   const savingsEndMonth =
     (previous_month_savings ?? 0) + (income ?? 0) - plannedSum;
@@ -166,9 +151,27 @@ export const useBudgetSummary = () => {
     }
   };
 
+  const setIncomeReceived = async (received: boolean) => {
+    if (!budget) return;
+
+    setLoading(true);
+
+    try {
+      const updatedBudget = received
+        ? await budgetsApi.confirmIncome(budget.id)
+        : await budgetsApi.unconfirmIncome(budget.id);
+      dispatch(setSelectedBudget([updatedBudget]));
+    } catch (error) {
+      console.error("Błąd podczas zmiany statusu wypłaty:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     summary,
     totals,
+    incomeReceived,
     editingCategory,
     inputValue,
     editingIncome,
@@ -185,5 +188,6 @@ export const useBudgetSummary = () => {
     savePlannedValue,
     saveIncomeValue,
     savePreviousMonthSavingsValue,
+    setIncomeReceived,
   };
 };
