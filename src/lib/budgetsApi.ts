@@ -40,4 +40,14 @@ export const budgetsApi = {
       method: "PATCH",
       body: budget,
     }),
+
+  confirmIncome: (id: number) =>
+    apiRequest<Budget>(`/budgets/${id}/income/confirm`, {
+      method: "POST",
+    }),
+
+  unconfirmIncome: (id: number) =>
+    apiRequest<Budget>(`/budgets/${id}/income/confirm`, {
+      method: "DELETE",
+    }),
 };

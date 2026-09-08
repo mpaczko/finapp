@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { OptionalMonthQueryDto } from "../../common/dto/optional-month-query.dto";
@@ -28,5 +28,21 @@ export class BudgetsController {
     @Body() dto: UpdateBudgetDto,
   ) {
     return this.budgetsService.update(user.id, id, dto);
+  }
+
+  @Post(":id/income/confirm")
+  confirmIncome(
+    @CurrentUser() user: AuthUser,
+    @Param("id", ParseIntPipe) id: number,
+  ) {
+    return this.budgetsService.confirmIncome(user.id, id);
+  }
+
+  @Delete(":id/income/confirm")
+  unconfirmIncome(
+    @CurrentUser() user: AuthUser,
+    @Param("id", ParseIntPipe) id: number,
+  ) {
+    return this.budgetsService.unconfirmIncome(user.id, id);
   }
 }
