@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Pencil } from "lucide-react";
 import { supabase } from "../../createClient";
+import { budgetsApi } from "../../lib/budgetsApi";
+import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
+import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
 
 const INVESTMENT_CATEGORY_NAME = "inwestycje";
 
@@ -72,6 +76,8 @@ const ComparisonCard = ({
 
 const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
   const currentYear = new Date().getFullYear();
+  const dispatch = useAppDispatch();
+  const selectedBudget = useAppSelector((state) => state.budget.items?.[0]);
 
   const [year, setYear] = useState<number>(currentYear);
 
@@ -93,6 +99,37 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
   const [loadingInvestment, setLoadingInvestment] = useState(false);
   const [loadingTravel, setLoadingTravel] = useState(false);
   const [loadingClothes, setLoadingClothes] = useState(false);
+  const [editingIpBox, setEditingIpBox] = useState(false);
+  const [ipBoxInputValue, setIpBoxInputValue] = useState("");
+  const [savingIpBox, setSavingIpBox] = useState(false);
+  const [ipBoxRefreshKey, setIpBoxRefreshKey] = useState(0);
+
+  const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
+  const selectedMonthBelongsToYear = selectedBudget?.month.startsWith(
+    `${year}-`,
+  );
+
+  const saveIpBoxValue = async () => {
+    if (!selectedBudget) return;
+
+    const value = Number(ipBoxInputValue);
+    if (!Number.isFinite(value) || value < 0) return;
+
+    setSavingIpBox(true);
+
+    try {
+      const updatedBudget = await budgetsApi.update(selectedBudget.id, {
+        ip_box: value,
+      });
+      dispatch(setSelectedBudget([updatedBudget]));
+      setIpBoxRefreshKey((current) => current + 1);
+      setEditingIpBox(false);
+    } catch (error) {
+      console.error("Błąd podczas zapisu kwoty IP Box:", error);
+    } finally {
+      setSavingIpBox(false);
+    }
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -260,7 +297,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
     fetchPlannedValues();
     fetchTravelActual();
     fetchClothesActual();
-  }, [year, userId, travelCategoryName, clothesCategoryName]);
+  }, [year, userId, travelCategoryName, clothesCategoryName, ipBoxRefreshKey]);
 
   return (
     <div className="w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -305,7 +342,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
           </p>
         </div>
 
-        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-slate-200 bg-slate-50 p-4">
           <p className="text-sm font-medium text-slate-500">
             IP Box — szacowany zwrot za dany rok dotychczas
           </p>
@@ -313,6 +350,58 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
           <p className="mt-auto text-2xl font-bold text-slate-900">
             {ipBoxSum == null ? "Ładowanie…" : `${ipBoxSum.toFixed(2)} zł`}
           </p>
+
+          {selectedBudget && selectedMonthBelongsToYear && (
+            <div className="mt-2 border-t border-slate-200 pt-2">
+              <div className="flex items-center justify-between gap-2 text-xs font-medium text-slate-500">
+                <span>Kwota dla {selectedBudget.month}</span>
+                {editingIpBox ? null : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIpBoxInputValue(selectedMonthIpBox.toFixed(2));
+                      setEditingIpBox(true);
+                    }}
+                    className="rounded p-1 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    aria-label="Edytuj kwotę IP Box dla wybranego miesiąca"
+                    title="Edytuj kwotę IP Box"
+                  >
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+
+              {editingIpBox ? (
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    autoFocus
+                    value={ipBoxInputValue}
+                    onChange={(event) => setIpBoxInputValue(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") saveIpBoxValue();
+                      if (event.key === "Escape") setEditingIpBox(false);
+                    }}
+                    className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-right text-sm font-semibold text-slate-900 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                  />
+                  <button
+                    type="button"
+                    disabled={savingIpBox}
+                    onClick={saveIpBoxValue}
+                    className="rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Zapisz
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedMonthIpBox.toFixed(2)} zł
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="min-w-0">
