@@ -1,7 +1,4 @@
-// expensesSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-// import { IAddExpenseForm } from "@/modules/AddExpenseForm/addExpenseForm.config";
-// import { supabase } from "../../createClient";
 
 export type Expense = {
   id: string;

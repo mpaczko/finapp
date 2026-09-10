@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { supabase } from "../../createClient";
 import { setExpenses } from "../../store/expensesSlice/expensesSlice";
 import { setCategories } from "../../store/categoriesSlice/categoriesSlice";
 import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
@@ -10,6 +9,7 @@ import ElementsTable from "../../modules/AllExpensesTable";
 import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
 import { expensesApi } from "../../lib/expensesApi";
 import { budgetsApi } from "../../lib/budgetsApi";
+import { categoriesApi } from "../../lib/categoriesApi";
 
 type Props = {
   userId: string | null;
@@ -30,12 +30,8 @@ const Main = ({ userId, selectedMonth }: Props) => {
   async function fetchCategories() {
     if (!userId) return;
 
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("user_id", userId);
-
-    if (data) dispatch(setCategories(data));
+    const data = await categoriesApi.list();
+    dispatch(setCategories(data));
   }
 
   async function fetchBudget(month: string) {
