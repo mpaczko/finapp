@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pencil } from "lucide-react";
-import { budgetsApi } from "../../lib/budgetsApi";
-import { summaryApi, YearlySummary } from "../../lib/summaryApi";
-import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
-import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
+import { useBudgetQuery, useUpdateBudgetMutation } from "../../features/budgets/queries";
+import { useYearlySummaryQuery } from "../../features/summary/queries";
 
 type YearlyInvestmentSummaryProps = {
   userId: string | null;
+  selectedMonth: string;
 };
 
 type ComparisonCardProps = {
@@ -66,19 +65,21 @@ const ComparisonCard = ({
   );
 };
 
-const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
+const YearlyInvestmentSummary = ({
+  userId,
+  selectedMonth,
+}: YearlyInvestmentSummaryProps) => {
   const currentYear = new Date().getFullYear();
-  const dispatch = useAppDispatch();
-  const selectedBudget = useAppSelector((state) => state.budget.items?.[0]);
-
   const [year, setYear] = useState<number>(currentYear);
-
-  const [summary, setSummary] = useState<YearlySummary | null>(null);
-  const [loading, setLoading] = useState(false);
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
-  const [savingIpBox, setSavingIpBox] = useState(false);
-  const [ipBoxRefreshKey, setIpBoxRefreshKey] = useState(0);
+  const { data: budgets = [] } = useBudgetQuery(selectedMonth, Boolean(userId));
+  const selectedBudget = budgets[0];
+  const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
+  const { data: summary, isLoading: loading } = useYearlySummaryQuery(
+    year,
+    Boolean(userId),
+  );
 
   const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
   const selectedMonthBelongsToYear = selectedBudget?.month.startsWith(
@@ -91,45 +92,16 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
     const value = Number(ipBoxInputValue);
     if (!Number.isFinite(value) || value < 0) return;
 
-    setSavingIpBox(true);
-
     try {
-      const updatedBudget = await budgetsApi.update(selectedBudget.id, {
-        ip_box: value,
+      await updateBudgetMutation.mutateAsync({
+        id: selectedBudget.id,
+        budget: { ip_box: value },
       });
-      dispatch(setSelectedBudget([updatedBudget]));
-      setIpBoxRefreshKey((current) => current + 1);
       setEditingIpBox(false);
     } catch (error) {
       console.error("Błąd podczas zapisu kwoty IP Box:", error);
-    } finally {
-      setSavingIpBox(false);
     }
   };
-
-  useEffect(() => {
-    if (!userId) return;
-
-    let isCurrent = true;
-    setLoading(true);
-
-    summaryApi
-      .getYearly(year)
-      .then((data) => {
-        if (isCurrent) setSummary(data);
-      })
-      .catch((error) => {
-        console.error("Błąd podczas pobierania rocznego podsumowania:", error);
-        if (isCurrent) setSummary(null);
-      })
-      .finally(() => {
-        if (isCurrent) setLoading(false);
-      });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [year, userId, ipBoxRefreshKey]);
 
   return (
     <div className="w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -222,7 +194,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
                   />
                   <button
                     type="button"
-                    disabled={savingIpBox}
+                    disabled={updateBudgetMutation.isPending}
                     onClick={saveIpBoxValue}
                     className="rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >

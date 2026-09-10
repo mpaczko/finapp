@@ -1,6 +1,12 @@
-import { Category } from "../store/categoriesSlice/categoriesSlice";
 import { apiRequest } from "./apiClient";
 
+export type Category = {
+  id: number;
+  created_at: string;
+  name: string;
+  key: string;
+};
+
 export const categoriesApi = {
-  list: () => apiRequest<Category[]>("/categories"),
+  list: (signal?: AbortSignal) => apiRequest<Category[]>("/categories", { signal }),
 };

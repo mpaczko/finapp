@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { useAppSelector } from "../../store/reduxHook";
+import { useCategoriesQuery } from "../../features/categories/queries";
 import {
   FormControl,
   FormField,
@@ -37,7 +37,7 @@ export function ComboboxCategories({
   className,
 }: ComboboxCategoriesProps) {
   const { control } = useFormContext();
-  const categories = useAppSelector((state) => state.categories.items);
+  const { data: categories = [] } = useCategoriesQuery();
   const [open, setOpen] = useState(false);
 
   return (

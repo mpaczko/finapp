@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useAppSelector, useAppDispatch } from "../store/reduxHook";
-import { setSelectedBudget } from "../store/selectedBudgetSlice/selectedBudgetSlice";
-import { budgetsApi } from "../lib/budgetsApi";
+import { useAppSelector } from "../store/reduxHook";
+import { useBudgetQuery, useSetIncomeReceivedMutation, useUpdateBudgetMutation } from "../features/budgets/queries";
+import { useCategoriesQuery } from "../features/categories/queries";
+import { useExpensesQuery } from "../features/expenses/queries";
 
 export interface CategorySummary {
   name: string;
@@ -10,13 +11,16 @@ export interface CategorySummary {
 }
 
 export const useBudgetSummary = () => {
-  const expenses = useAppSelector((state) => state.expenses);
-  const categories = useAppSelector((state) => state.categories.items);
-  const budget = useAppSelector((state) => state.budget.items?.[0]);
+  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+  const { data: expenses = [] } = useExpensesQuery(selectedMonth);
+  const { data: categories = [] } = useCategoriesQuery();
+  const { data: budgets = [] } = useBudgetQuery(selectedMonth);
+  const budget = budgets[0];
 
   const { income, previous_month_savings, income_received_at } = budget || {};
 
-  const dispatch = useAppDispatch();
+  const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
+  const setIncomeReceivedMutation = useSetIncomeReceivedMutation(selectedMonth);
 
   const [plannedMap, setPlannedMap] = useState<Record<string, number>>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -27,7 +31,6 @@ export const useBudgetSummary = () => {
     useState(false);
   const [previousMonthSavingsInputValue, setPreviousMonthSavingsInputValue] =
     useState<string>("");
-  const [loading, setLoading] = useState(false);
 
   const toFixedSafe = (value: number | undefined | null) => {
     const num = Number(value);
@@ -49,7 +52,7 @@ export const useBudgetSummary = () => {
   }, [budget, categories]);
 
   const summary: CategorySummary[] = categories.map((cat) => {
-    const actualSum = expenses.items
+    const actualSum = expenses
       .filter((exp) => exp.category === cat.name)
       .reduce((sum, exp) => sum + exp.cost, 0);
 
@@ -102,69 +105,51 @@ export const useBudgetSummary = () => {
     const key =
       categories.find((cat) => cat.name === category)?.key || category;
 
-    setLoading(true);
     setPlannedMap((prev) => ({ ...prev, [category]: newValue }));
 
     try {
-      const updatedBudget = await budgetsApi.update(budget.id, {
-        [key]: newValue,
-      } as any);
-      dispatch(setSelectedBudget([updatedBudget]));
+      await updateBudgetMutation.mutateAsync({
+        id: budget.id,
+        budget: { [key]: newValue } as any,
+      });
     } catch (error) {
       console.error("Błąd podczas zapisu:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const saveIncomeValue = async (newValue: number) => {
     if (!budget) return;
 
-    setLoading(true);
-
     try {
-      const updatedBudget = await budgetsApi.update(budget.id, {
-        income: newValue,
+      await updateBudgetMutation.mutateAsync({
+        id: budget.id,
+        budget: { income: newValue },
       });
-      dispatch(setSelectedBudget([updatedBudget]));
     } catch (error) {
       console.error("Błąd podczas zapisu przychodu:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const savePreviousMonthSavingsValue = async (newValue: number) => {
     if (!budget) return;
 
-    setLoading(true);
-
     try {
-      const updatedBudget = await budgetsApi.update(budget.id, {
-        previous_month_savings: newValue,
+      await updateBudgetMutation.mutateAsync({
+        id: budget.id,
+        budget: { previous_month_savings: newValue },
       });
-      dispatch(setSelectedBudget([updatedBudget]));
     } catch (error) {
       console.error("Błąd podczas zapisu oszczędności:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const setIncomeReceived = async (received: boolean) => {
     if (!budget) return;
 
-    setLoading(true);
-
     try {
-      const updatedBudget = received
-        ? await budgetsApi.confirmIncome(budget.id)
-        : await budgetsApi.unconfirmIncome(budget.id);
-      dispatch(setSelectedBudget([updatedBudget]));
+      await setIncomeReceivedMutation.mutateAsync({ id: budget.id, received });
     } catch (error) {
       console.error("Błąd podczas zmiany statusu wypłaty:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -178,7 +163,8 @@ export const useBudgetSummary = () => {
     incomeInputValue,
     editingPreviousMonthSavings,
     previousMonthSavingsInputValue,
-    loading,
+    loading:
+      updateBudgetMutation.isPending || setIncomeReceivedMutation.isPending,
     setEditingCategory,
     setInputValue,
     setEditingIncome,

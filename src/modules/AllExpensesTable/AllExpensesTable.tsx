@@ -5,11 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 import ExpenseDialog from "../ExpenseDialog";
 import Pagination from "../../ui/Pagination/Pagination";
-import { expensesApi } from "../../lib/expensesApi";
-
-interface IProps {
-  onDelete: () => Promise<void>;
-}
+import { useDeleteExpenseMutation, useExpensesQuery } from "../../features/expenses/queries";
 
 const ROW_COLORS = ["bg-white", "bg-gray-100"];
 const ROWS_PER_PAGE_OPTIONS = [8, 15, 20, 50] as const;
@@ -39,9 +35,11 @@ const getInitialRowsPerPage = (): RowsPerPage => {
   }
 };
 
-const ElementsTable = ({ onDelete }: IProps) => {
-  const expenses = useAppSelector((state) => state.expenses);
+const ElementsTable = () => {
   const category = useAppSelector((state) => state.config.selectedCategory);
+  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+  const { data: expenses = [] } = useExpensesQuery(selectedMonth);
+  const deleteExpenseMutation = useDeleteExpenseMutation(selectedMonth);
 
   const [filters, setFilters] = useState({
     name: "",
@@ -80,11 +78,10 @@ const ElementsTable = ({ onDelete }: IProps) => {
   const handleDelete = async (id?: string) => {
     if (!id) return;
 
-    await expensesApi.remove(id);
-    onDelete();
+    await deleteExpenseMutation.mutateAsync(id);
   };
 
-  const filteredExpenses = expenses.items.filter((el) => {
+  const filteredExpenses = expenses.filter((el) => {
     const nameSearch = filters.name.toLowerCase();
     const matchesName = nameSearch
       ? el.name.toLowerCase().includes(nameSearch)

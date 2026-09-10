@@ -12,6 +12,9 @@ export type YearlySummary = {
 };
 
 export const summaryApi = {
-  getYearly: (year: number) =>
-    apiRequest<YearlySummary>(`/summary/yearly?year=${encodeURIComponent(year)}`),
+  getYearly: (year: number, signal?: AbortSignal) =>
+    apiRequest<YearlySummary>(
+      `/summary/yearly?year=${encodeURIComponent(year)}`,
+      { signal },
+    ),
 };
