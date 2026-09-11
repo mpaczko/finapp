@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   defaultValues,
@@ -8,14 +8,12 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { ComboboxCategories } from "../../../components/ComboboxCategories";
-import { useDispatch } from "react-redux";
 import { IExpense } from "../../../types/expenseType";
 import { useAppSelector } from "../../../store/reduxHook";
-import { setExpenses } from "../../../store/expensesSlice/expensesSlice";
 import FormDatePicker from "../../../components/Form/FormDatePicker";
 import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
-import { expensesApi } from "../../../lib/expensesApi";
+import { useSaveExpenseMutation } from "../../../features/expenses/queries";
 
 type Props = {
   isEdit?: boolean;
@@ -32,9 +30,8 @@ const ExpenseForm = ({
   onRemove,
   showRemoveButton,
 }: Props) => {
-  const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const saveExpenseMutation = useSaveExpenseMutation(selectedMonth);
 
   const methods = useForm<IAddExpenseForm>({
     defaultValues,
@@ -43,11 +40,6 @@ const ExpenseForm = ({
 
   const { reset, handleSubmit } = methods;
 
-  async function fetchExpenses(month: string) {
-    const data = await expensesApi.listByMonth(month);
-    dispatch(setExpenses(data));
-  }
-
   useEffect(() => {
     if (expense) {
       reset(expense);
@@ -55,29 +47,14 @@ const ExpenseForm = ({
   }, [expense, reset]);
 
   async function onSubmit(data: IAddExpenseForm) {
-    if (isSubmitting) return;
+    if (saveExpenseMutation.isPending) return;
 
-    setIsSubmitting(true);
-
-    try {
-      if (expense?.id) {
-        const updateData: IAddExpenseForm = {
-          name: data.name,
-          category: data.category,
-          date: data.date,
-          cost: data.cost,
-        };
-        await expensesApi.update(expense.id, updateData);
-      } else {
-        await expensesApi.create(data);
-      }
-
-      await fetchExpenses(selectedMonth);
-      reset(defaultValues);
-      onClose?.();
-    } finally {
-      setIsSubmitting(false);
-    }
+    await saveExpenseMutation.mutateAsync({
+      id: expense?.id,
+      expense: data,
+    });
+    reset(defaultValues);
+    onClose?.();
   }
 
   return (
@@ -117,14 +94,14 @@ const ExpenseForm = ({
                 type="button"
                 variant="destructive"
                 onClick={onRemove}
-                disabled={isSubmitting}
+                disabled={saveExpenseMutation.isPending}
               >
                 Usuń
               </Button>
             )}
 
-            <Button type="submit" variant="ghost" disabled={isSubmitting}>
-              {isSubmitting ? "Zapisywanie..." : isEdit ? "Zapisz" : "Dodaj"}
+            <Button type="submit" variant="ghost" disabled={saveExpenseMutation.isPending}>
+              {saveExpenseMutation.isPending ? "Zapisywanie..." : isEdit ? "Zapisz" : "Dodaj"}
             </Button>
           </div>
         </form>

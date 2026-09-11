@@ -3,6 +3,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestj
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { AuthUser } from "../../common/types/auth-user";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
+import { CreateExpensesBatchDto } from "./dto/create-expenses-batch.dto";
 import { ExpensesQueryDto } from "./dto/expenses-query.dto";
 import { UpdateExpenseDto } from "./dto/update-expense.dto";
 import { ExpensesService } from "./expenses.service";
@@ -19,6 +20,11 @@ export class ExpensesController {
   @Post()
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateExpenseDto) {
     return this.expensesService.create(user.id, dto);
+  }
+
+  @Post("batch")
+  createMany(@CurrentUser() user: AuthUser, @Body() dto: CreateExpensesBatchDto) {
+    return this.expensesService.createMany(user.id, dto.expenses);
   }
 
   @Patch(":id")

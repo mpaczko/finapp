@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-
-import { supabase } from "../../createClient";
-import { setExpenses } from "../../store/expensesSlice/expensesSlice";
-import { setCategories } from "../../store/categoriesSlice/categoriesSlice";
-import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
 import CategoriesSummaryTable from "../../modules/CategoriesSummaryTable";
 import ElementsTable from "../../modules/AllExpensesTable";
 import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
-import { expensesApi } from "../../lib/expensesApi";
-import { budgetsApi } from "../../lib/budgetsApi";
+import { useExpensesQuery } from "../../features/expenses/queries";
+import { useBudgetQuery } from "../../features/budgets/queries";
+import { useCategoriesQuery } from "../../features/categories/queries";
 
 type Props = {
   userId: string | null;
@@ -17,51 +11,14 @@ type Props = {
 };
 
 const Main = ({ userId, selectedMonth }: Props) => {
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
-
-  async function fetchExpenses(month: string) {
-    if (!userId) return;
-
-    const data = await expensesApi.listByMonth(month);
-    dispatch(setExpenses(data));
-  }
-
-  async function fetchCategories() {
-    if (!userId) return;
-
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("user_id", userId);
-
-    if (data) dispatch(setCategories(data));
-  }
-
-  async function fetchBudget(month: string) {
-    if (!userId) return;
-
-    const data = await budgetsApi.listByMonth(month);
-    dispatch(setSelectedBudget(data));
-  }
-
-  useEffect(() => {
-    const loadData = async () => {
-      if (!userId) return;
-
-      setLoading(true);
-
-      await Promise.all([
-        fetchExpenses(selectedMonth),
-        fetchBudget(selectedMonth),
-        fetchCategories(),
-      ]);
-
-      setLoading(false);
-    };
-
-    loadData();
-  }, [selectedMonth, userId]);
+  const queryEnabled = Boolean(userId);
+  const expensesQuery = useExpensesQuery(selectedMonth, queryEnabled);
+  const budgetQuery = useBudgetQuery(selectedMonth, queryEnabled);
+  const categoriesQuery = useCategoriesQuery(queryEnabled);
+  const loading =
+    expensesQuery.isLoading || budgetQuery.isLoading || categoriesQuery.isLoading;
+  const hasError =
+    expensesQuery.isError || budgetQuery.isError || categoriesQuery.isError;
 
   if (loading) {
     return (
@@ -76,18 +33,27 @@ const Main = ({ userId, selectedMonth }: Props) => {
     );
   }
 
+  if (hasError) {
+    return (
+      <main className="pt-20 flex items-center justify-center min-h-[60vh]">
+        <p className="text-sm text-red-600">
+          Nie udało się pobrać danych. Odśwież stronę i spróbuj ponownie.
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="grid grid-cols-1 gap-4 px-4 pb-20 pt-25 sm:px-6 xl:grid-cols-2 xl:items-start">
       <div className="min-w-0">
         <CategoriesSummaryTable />
       </div>
       <div className="grid min-w-0 gap-8">
-        <YearlyInvestmentSummary userId={userId} />
-        <ElementsTable
-          onDelete={async () => {
-            await fetchExpenses(selectedMonth);
-          }}
+        <YearlyInvestmentSummary
+          userId={userId}
+          selectedMonth={selectedMonth}
         />
+        <ElementsTable />
       </div>
     </main>
   );

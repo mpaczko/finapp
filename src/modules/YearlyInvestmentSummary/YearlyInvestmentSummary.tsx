@@ -1,20 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pencil } from "lucide-react";
-import { supabase } from "../../createClient";
-import { budgetsApi } from "../../lib/budgetsApi";
-import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
-import { setSelectedBudget } from "../../store/selectedBudgetSlice/selectedBudgetSlice";
-
-const INVESTMENT_CATEGORY_NAME = "inwestycje";
-
-const TRAVEL_CATEGORY_KEY = "travels";
-const TRAVEL_CATEGORY_FALLBACK = "podróże/wakacje";
-
-const CLOTHES_CATEGORY_KEY = "clothes";
-const CLOTHES_CATEGORY_FALLBACK = "ubrania/sprzęt sportowy";
+import { useBudgetQuery, useUpdateBudgetMutation } from "../../features/budgets/queries";
+import { useYearlySummaryQuery } from "../../features/summary/queries";
 
 type YearlyInvestmentSummaryProps = {
   userId: string | null;
+  selectedMonth: string;
 };
 
 type ComparisonCardProps = {
@@ -74,35 +65,21 @@ const ComparisonCard = ({
   );
 };
 
-const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
+const YearlyInvestmentSummary = ({
+  userId,
+  selectedMonth,
+}: YearlyInvestmentSummaryProps) => {
   const currentYear = new Date().getFullYear();
-  const dispatch = useAppDispatch();
-  const selectedBudget = useAppSelector((state) => state.budget.items?.[0]);
-
   const [year, setYear] = useState<number>(currentYear);
-
-  const [investmentSum, setInvestmentSum] = useState<number | null>(null);
-  const [ipBoxSum, setIpBoxSum] = useState<number | null>(null);
-
-  const [travelPlanned, setTravelPlanned] = useState<number | null>(null);
-  const [travelActual, setTravelActual] = useState<number | null>(null);
-  const [travelCategoryName, setTravelCategoryName] = useState<string>(
-    TRAVEL_CATEGORY_FALLBACK,
-  );
-
-  const [clothesPlanned, setClothesPlanned] = useState<number | null>(null);
-  const [clothesActual, setClothesActual] = useState<number | null>(null);
-  const [clothesCategoryName, setClothesCategoryName] = useState<string>(
-    CLOTHES_CATEGORY_FALLBACK,
-  );
-
-  const [loadingInvestment, setLoadingInvestment] = useState(false);
-  const [loadingTravel, setLoadingTravel] = useState(false);
-  const [loadingClothes, setLoadingClothes] = useState(false);
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
-  const [savingIpBox, setSavingIpBox] = useState(false);
-  const [ipBoxRefreshKey, setIpBoxRefreshKey] = useState(0);
+  const { data: budgets = [] } = useBudgetQuery(selectedMonth, Boolean(userId));
+  const selectedBudget = budgets[0];
+  const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
+  const { data: summary, isLoading: loading } = useYearlySummaryQuery(
+    year,
+    Boolean(userId),
+  );
 
   const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
   const selectedMonthBelongsToYear = selectedBudget?.month.startsWith(
@@ -115,189 +92,16 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
     const value = Number(ipBoxInputValue);
     if (!Number.isFinite(value) || value < 0) return;
 
-    setSavingIpBox(true);
-
     try {
-      const updatedBudget = await budgetsApi.update(selectedBudget.id, {
-        ip_box: value,
+      await updateBudgetMutation.mutateAsync({
+        id: selectedBudget.id,
+        budget: { ip_box: value },
       });
-      dispatch(setSelectedBudget([updatedBudget]));
-      setIpBoxRefreshKey((current) => current + 1);
       setEditingIpBox(false);
     } catch (error) {
       console.error("Błąd podczas zapisu kwoty IP Box:", error);
-    } finally {
-      setSavingIpBox(false);
     }
   };
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("key, name")
-        .eq("user_id", userId)
-        .in("key", [TRAVEL_CATEGORY_KEY, CLOTHES_CATEGORY_KEY]);
-
-      if (error) {
-        console.error("Error fetching categories:", error);
-        return;
-      }
-
-      const travelCategory = data?.find(
-        (category) => category.key === TRAVEL_CATEGORY_KEY,
-      );
-
-      const clothesCategory = data?.find(
-        (category) => category.key === CLOTHES_CATEGORY_KEY,
-      );
-
-      if (travelCategory?.name) {
-        setTravelCategoryName(travelCategory.name);
-      }
-
-      if (clothesCategory?.name) {
-        setClothesCategoryName(clothesCategory.name);
-      }
-    };
-
-    fetchCategories();
-  }, [userId]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const fromDate = `${year}-01-01`;
-    const toDate = `${year}-12-31`;
-
-    const fetchInvestmentSum = async () => {
-      setLoadingInvestment(true);
-
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("cost")
-        .eq("user_id", userId)
-        .eq("category", INVESTMENT_CATEGORY_NAME)
-        .gte("date", fromDate)
-        .lte("date", toDate);
-
-      if (error) {
-        console.error("Error fetching investment sum:", error);
-        setInvestmentSum(0);
-      } else {
-        setInvestmentSum(
-          data?.reduce(
-            (sum: number, item: { cost: number }) =>
-              sum + Number(item.cost || 0),
-            0,
-          ) ?? 0,
-        );
-      }
-
-      setLoadingInvestment(false);
-    };
-
-    const fetchPlannedValues = async () => {
-      const { data, error } = await supabase
-        .from("budgets")
-        .select("travels, clothes, ip_box")
-        .eq("user_id", userId)
-        .gte("month", `${year}-01`)
-        .lte("month", `${year}-12`);
-
-      if (error) {
-        console.error("Error fetching planned values:", error);
-        setTravelPlanned(0);
-        setClothesPlanned(0);
-        setIpBoxSum(0);
-      } else {
-        setTravelPlanned(
-          data?.reduce(
-            (sum: number, item: { travels?: number }) =>
-              sum + Number(item.travels || 0),
-            0,
-          ) ?? 0,
-        );
-
-        setClothesPlanned(
-          data?.reduce(
-            (sum: number, item: { clothes?: number }) =>
-              sum + Number(item.clothes || 0),
-            0,
-          ) ?? 0,
-        );
-
-        setIpBoxSum(
-          data?.reduce(
-            (sum: number, item: { ip_box?: number }) =>
-              sum + Number(item.ip_box || 0),
-            0,
-          ) ?? 0,
-        );
-      }
-    };
-
-    const fetchTravelActual = async () => {
-      setLoadingTravel(true);
-
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("cost")
-        .eq("user_id", userId)
-        .eq("category", travelCategoryName)
-        .gte("date", fromDate)
-        .lte("date", toDate);
-
-      if (error) {
-        console.error("Error fetching travel actual:", error);
-        setTravelActual(0);
-      } else {
-        setTravelActual(
-          data?.reduce(
-            (sum: number, item: { cost: number }) =>
-              sum + Number(item.cost || 0),
-            0,
-          ) ?? 0,
-        );
-      }
-
-      setLoadingTravel(false);
-    };
-
-    const fetchClothesActual = async () => {
-      setLoadingClothes(true);
-
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("cost")
-        .eq("user_id", userId)
-        .eq("category", clothesCategoryName)
-        .gte("date", fromDate)
-        .lte("date", toDate);
-
-      if (error) {
-        console.error("Error fetching clothes actual:", error);
-        setClothesActual(0);
-      } else {
-        setClothesActual(
-          data?.reduce(
-            (sum: number, item: { cost: number }) =>
-              sum + Number(item.cost || 0),
-            0,
-          ) ?? 0,
-        );
-      }
-
-      setLoadingClothes(false);
-    };
-
-    fetchInvestmentSum();
-    fetchPlannedValues();
-    fetchTravelActual();
-    fetchClothesActual();
-  }, [year, userId, travelCategoryName, clothesCategoryName, ipBoxRefreshKey]);
 
   return (
     <div className="w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -336,9 +140,9 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
           </p>
 
           <p className="mt-auto text-2xl font-bold text-slate-900">
-            {loadingInvestment
+            {loading
               ? "Ładowanie…"
-              : `${investmentSum?.toFixed(2) ?? "0.00"} zł`}
+              : `${summary?.investmentSum.toFixed(2) ?? "0.00"} zł`}
           </p>
         </div>
 
@@ -348,7 +152,9 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
           </p>
 
           <p className="mt-auto text-2xl font-bold text-slate-900">
-            {ipBoxSum == null ? "Ładowanie…" : `${ipBoxSum.toFixed(2)} zł`}
+            {loading || summary == null
+              ? "Ładowanie…"
+              : `${summary.ipBoxSum.toFixed(2)} zł`}
           </p>
 
           {selectedBudget && selectedMonthBelongsToYear && (
@@ -388,7 +194,7 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
                   />
                   <button
                     type="button"
-                    disabled={savingIpBox}
+                    disabled={updateBudgetMutation.isPending}
                     onClick={saveIpBoxValue}
                     className="rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -407,9 +213,9 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
         <div className="min-w-0">
           <ComparisonCard
             title="Podróże — planowane vs zrealizowane"
-            planned={travelPlanned}
-            actual={travelActual}
-            loading={loadingTravel}
+            planned={summary?.travelPlanned ?? null}
+            actual={summary?.travelActual ?? null}
+            loading={loading}
             baseColor="rgb(254, 205, 211)"
           />
         </div>
@@ -417,9 +223,9 @@ const YearlyInvestmentSummary = ({ userId }: YearlyInvestmentSummaryProps) => {
         <div className="min-w-0">
           <ComparisonCard
             title="Ubrania / sprzęt sportowy — planowane vs zrealizowane"
-            planned={clothesPlanned}
-            actual={clothesActual}
-            loading={loadingClothes}
+            planned={summary?.clothesPlanned ?? null}
+            actual={summary?.clothesActual ?? null}
+            loading={loading}
             baseColor="rgb(165, 243, 252)"
           />
         </div>
