@@ -27,6 +27,20 @@ export const useSaveExpenseMutation = (selectedMonth: string) => {
   });
 };
 
+export const useCreateManyExpensesMutation = (selectedMonth: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: expensesApi.createMany,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: expensesQueryKey(selectedMonth),
+      });
+      void queryClient.invalidateQueries({ queryKey: ["summary"] });
+    },
+  });
+};
+
 export const useDeleteExpenseMutation = (selectedMonth: string) => {
   const queryClient = useQueryClient();
 

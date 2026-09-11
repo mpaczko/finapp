@@ -5,3 +5,15 @@ export type Transaction = {
   category: string;
   cost: number;
 };
+
+export type CsvIssue = {
+  line: number;
+  reason: string;
+  fileName?: string;
+};
+
+export type CsvParseResult = {
+  validRows: Transaction[];
+  invalidRows: CsvIssue[];
+  warnings: CsvIssue[];
+};

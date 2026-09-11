@@ -10,6 +10,8 @@ export type Expense = {
   cost: number;
 };
 
+export type CreateExpenseDto = IAddExpenseForm;
+
 export const expensesApi = {
   listByMonth: (month: string, signal?: AbortSignal) =>
     apiRequest<Expense[]>(`/expenses?month=${encodeURIComponent(month)}`, {
@@ -20,6 +22,12 @@ export const expensesApi = {
     apiRequest<Expense>("/expenses", {
       method: "POST",
       body: expense,
+    }),
+
+  createMany: (expenses: CreateExpenseDto[]) =>
+    apiRequest<Expense[]>("/expenses/batch", {
+      method: "POST",
+      body: { expenses },
     }),
 
   update: (id: string, expense: IAddExpenseForm) =>

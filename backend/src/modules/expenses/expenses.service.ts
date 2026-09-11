@@ -48,6 +48,24 @@ export class ExpensesService {
     return this.mapExpense(expense);
   }
 
+  async createMany(userId: string, dtos: CreateExpenseDto[]) {
+    const expenses = await this.prisma.$transaction(
+      dtos.map((dto) =>
+        this.prisma.expense.create({
+          data: {
+            name: dto.name,
+            category: dto.category,
+            date: toDatabaseDate(dto.date),
+            cost: dto.cost,
+            user_id: userId,
+          },
+        }),
+      ),
+    );
+
+    return expenses.map((expense) => this.mapExpense(expense));
+  }
+
   async update(userId: string, id: string, dto: UpdateExpenseDto) {
     const existing = await this.prisma.expense.findFirst({
       where: {

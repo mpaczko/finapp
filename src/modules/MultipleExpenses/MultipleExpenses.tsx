@@ -1,94 +1,104 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Button } from "../../ui/Button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../ui/Dialog";
+import { useRef, useState } from "react";
 
-import ExpenseForm from "../ExpenseDialog/ExpenseForm";
-import { Transaction } from "./MultipleExpenses.types";
+import { useCreateManyExpensesMutation } from "../../features/expenses/queries";
+import { useAppSelector } from "../../store/reduxHook";
+import { Button } from "../../ui/Button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/Dialog";
+import { CsvIssue, Transaction } from "./MultipleExpenses.types";
 import { parseCSV } from "./parseCSV";
 
 const ExpensesDialog = () => {
   const [open, setOpen] = useState(false);
   const [expenses, setExpenses] = useState<Transaction[]>([]);
+  const [invalidRows, setInvalidRows] = useState<CsvIssue[]>([]);
+  const [warnings, setWarnings] = useState<CsvIssue[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+  const createManyMutation = useCreateManyExpensesMutation(selectedMonth);
+
+  const resetImport = () => {
+    setExpenses([]);
+    setInvalidRows([]);
+    setWarnings([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-
-    if (!isOpen) {
-      setExpenses([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
+    if (!isOpen) resetImport();
   };
 
-  useEffect(() => {
-    if (expenses.length === 0 && open) {
-      setOpen(false);
-    }
-  }, [expenses, open]);
+  const handleFiles = async (files: File[]) => {
+    const results = await Promise.all(
+      files.map(async (file) => ({ fileName: file.name, result: parseCSV(await file.text()) })),
+    );
 
-  const handleRemoveExpense = (idToRemove?: string) =>
-    setExpenses((prev) => prev.filter((exp) => exp.id !== idToRemove));
+    setExpenses(results.flatMap(({ result }) => result.validRows));
+    setInvalidRows(results.flatMap(({ fileName, result }) =>
+      result.invalidRows.map((issue) => ({ ...issue, fileName })),
+    ));
+    setWarnings(results.flatMap(({ fileName, result }) =>
+      result.warnings.map((issue) => ({ ...issue, fileName })),
+    ));
+    setOpen(true);
+  };
+
+  const importExpenses = async () => {
+    if (!expenses.length || createManyMutation.isPending) return;
+    await createManyMutation.mutateAsync(expenses.map(({ id: _id, ...expense }) => expense));
+    handleOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div className="flex">
-        <Button onClick={() => fileInputRef.current?.click()}>
-          Wgraj plik CSV
-        </Button>
-
+        <Button onClick={() => fileInputRef.current?.click()}>Wgraj plik CSV</Button>
         <input
           ref={fileInputRef}
           type="file"
           multiple
-          accept=".csv"
+          accept=".csv,text/csv"
           className="hidden"
-          onChange={async (e) => {
-            const files = Array.from(e.target.files || []);
-            let all: Transaction[] = [];
-
-            for (const file of files) {
-              const text = await file.text();
-              all = [...all, ...parseCSV(text)];
-            }
-
-            setExpenses(all);
-
-            if (all.length > 0) {
-              setOpen(true);
-            }
-          }}
+          onChange={(event) => void handleFiles(Array.from(event.target.files ?? []))}
         />
       </div>
 
       <DialogContent className="bg-white max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Twoje wydatki</DialogTitle>
+          <DialogTitle>Podgląd importu</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
-          {expenses.map((expense) => {
-            const { id, ...expenseWithoutId } = expense;
+        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
+          <p className="text-sm">Poprawne wydatki: {expenses.length}. Błędne wiersze: {invalidRows.length}.</p>
 
-            return (
-              <div key={id} className="border p-3 rounded">
-                <ExpenseForm
-                  expense={expenseWithoutId}
-                  onClose={() => handleRemoveExpense(id)}
-                  onRemove={() => handleRemoveExpense(id)}
-                  showRemoveButton={expenses.length > 1}
-                />
-              </div>
-            );
-          })}
+          {expenses.length > 0 && (
+            <div className="overflow-x-auto border rounded">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b text-left"><th className="p-2">Data</th><th className="p-2">Opis</th><th className="p-2">Kategoria</th><th className="p-2">Kwota</th></tr></thead>
+                <tbody>{expenses.map((expense) => (
+                  <tr key={expense.id} className="border-b last:border-0"><td className="p-2">{expense.date}</td><td className="p-2">{expense.name}</td><td className="p-2">{expense.category}</td><td className="p-2">{expense.cost.toFixed(2)}</td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+
+          {(invalidRows.length > 0 || warnings.length > 0) && (
+            <div className="space-y-2">
+              {invalidRows.map((issue, index) => <p key={`error-${index}`} className="text-sm text-red-600">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
+              {warnings.map((issue, index) => <p key={`warning-${index}`} className="text-sm text-amber-600">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
+            </div>
+          )}
+
+          {createManyMutation.error && <p className="text-sm text-red-600">Nie udało się zaimportować wydatków: {createManyMutation.error.message}</p>}
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => handleOpenChange(false)} disabled={createManyMutation.isPending}>Anuluj</Button>
+          <Button onClick={() => void importExpenses()} disabled={!expenses.length || createManyMutation.isPending}>
+            {createManyMutation.isPending ? "Importowanie..." : `Importuj ${expenses.length} wydatków`}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
