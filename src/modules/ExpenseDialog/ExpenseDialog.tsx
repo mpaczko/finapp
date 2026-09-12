@@ -13,14 +13,20 @@ import {
 import { Button } from "../../ui/Button";
 import ExpenseForm from "./ExpenseForm";
 
-type Props = {
+export type ExpenseDialogProps = {
   isEdit?: boolean;
   expense?: IExpense;
   triggerLabel?: string;
+  defaultOpen?: boolean;
 };
 
-const ExpenseDialog = ({ isEdit, expense, triggerLabel }: Props) => {
-  const [open, setOpen] = useState(false);
+const ExpenseDialog = ({
+  isEdit,
+  expense,
+  triggerLabel,
+  defaultOpen = false,
+}: ExpenseDialogProps) => {
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
