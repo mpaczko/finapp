@@ -1,15 +1,16 @@
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../store/reduxHook";
 import { supabase } from "../../createClient";
 import { setSelectedMonth } from "../../store/configSlice/configSlice";
-import MultipleExpenses from "../../modules/MultipleExpenses";
-import ExpenseDialog from "../../modules/ExpenseDialog";
+import DeferredExpenseDialog from "../../modules/ExpenseDialog/DeferredExpenseDialog";
 import { Button } from "../../ui/Button";
 
 type Props = {
   userId: string | null;
 };
+
+const MultipleExpenses = lazy(() => import("../../modules/MultipleExpenses"));
 
 const Nav = ({ userId }: Props) => {
   const dispatch = useDispatch();
@@ -41,8 +42,10 @@ const Nav = ({ userId }: Props) => {
       </div>
 
       <div className="flex items-center justify-end gap-5">
-        <MultipleExpenses />
-        <ExpenseDialog />
+        <Suspense fallback={<Button disabled>Ładowanie CSV...</Button>}>
+          <MultipleExpenses />
+        </Suspense>
+        <DeferredExpenseDialog />
 
         <div className="relative" ref={menuRef}>
           <Button

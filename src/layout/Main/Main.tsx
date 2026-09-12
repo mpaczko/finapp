@@ -1,6 +1,6 @@
+import { lazy, Suspense } from "react";
 import CategoriesSummaryTable from "../../modules/CategoriesSummaryTable";
 import ElementsTable from "../../modules/AllExpensesTable";
-import YearlyInvestmentSummary from "../../modules/YearlyInvestmentSummary";
 import { useExpensesQuery } from "../../features/expenses/queries";
 import { useBudgetQuery } from "../../features/budgets/queries";
 import { useCategoriesQuery } from "../../features/categories/queries";
@@ -9,6 +9,10 @@ type Props = {
   userId: string | null;
   selectedMonth: string;
 };
+
+const YearlyInvestmentSummary = lazy(
+  () => import("../../modules/YearlyInvestmentSummary"),
+);
 
 const Main = ({ userId, selectedMonth }: Props) => {
   const queryEnabled = Boolean(userId);
@@ -49,10 +53,19 @@ const Main = ({ userId, selectedMonth }: Props) => {
         <CategoriesSummaryTable />
       </div>
       <div className="grid min-w-0 gap-8">
-        <YearlyInvestmentSummary
-          userId={userId}
-          selectedMonth={selectedMonth}
-        />
+        <Suspense
+          fallback={
+            <div
+              className="h-48 animate-pulse rounded-3xl bg-slate-100"
+              aria-label="Ładowanie rocznego podsumowania"
+            />
+          }
+        >
+          <YearlyInvestmentSummary
+            userId={userId}
+            selectedMonth={selectedMonth}
+          />
+        </Suspense>
         <ElementsTable />
       </div>
     </main>

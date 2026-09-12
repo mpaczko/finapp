@@ -1,5 +1,5 @@
-import { useFormContext } from "react-hook-form";
-import { InputHTMLAttributes, useState, useEffect } from "react";
+import { InputHTMLAttributes } from "react";
+import { FieldPath, FieldValues, useFormContext } from "react-hook-form";
 
 import { cn } from "../../../lib/utils";
 import {
@@ -11,58 +11,27 @@ import {
 } from "../../../ui/Form";
 import Input from "../../../ui/Input";
 
-type IProps<T> = {
-  name: keyof T;
+type FormInputProps<T extends FieldValues> = {
+  name: FieldPath<T>;
   label?: string;
   className?: string;
   inputClassName?: string;
-} & InputHTMLAttributes<HTMLInputElement>;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "name">;
 
-const FormInput = <T,>({
+const FormInput = <T extends FieldValues>({
   name,
   label,
   className,
   inputClassName,
-  type,
   ...rest
-}: IProps<T>) => {
-  const { control, setValue, watch } = useFormContext();
-  const value = watch(name as string);
-
-  const [displayValue, setDisplayValue] = useState(value ?? "");
-  const [isFocused, setIsFocused] = useState(false);
-
-  // Update display value without touching form state
-  useEffect(() => {
-    if (!isFocused && type === "number" && name === "cost") {
-      const num = parseFloat(value as any);
-      setDisplayValue(`${!isNaN(num) ? num.toFixed(2) : "0.00"} zł`);
-    } else if (!isFocused) {
-      setDisplayValue(value ?? "");
-    }
-  }, [value, isFocused, name, type]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    if (type === "number" && name === "cost") {
-      // extract numeric part only
-      const numeric = raw.replace(/[^\d,\.]/g, "").replace(",", ".");
-      setValue(name as any, numeric ? parseFloat(numeric) : 0); // **always numeric**
-      setDisplayValue(raw); // display keeps user's typing
-    } else {
-      setValue(name as any, raw);
-      setDisplayValue(raw);
-    }
-  };
-
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
+}: FormInputProps<T>) => {
+  const { control } = useFormContext<T>();
 
   return (
     <FormField
       control={control}
       name={name}
-      render={() => (
+      render={({ field }) => (
         <FormItem className={cn("col-span-1 text-start", className)}>
           <FormLabel className="flex gap-1 font-lexend text-sm font-normal">
             {label}
@@ -70,13 +39,9 @@ const FormInput = <T,>({
           <FormControl>
             <Input
               {...rest}
-              value={displayValue}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              type={type === "number" && name === "cost" ? "text" : type}
+              {...field}
+              value={String(field.value ?? "")}
               className={inputClassName}
-              inputMode={type === "number" ? "decimal" : undefined}
             />
           </FormControl>
           <FormMessage />

@@ -13,6 +13,7 @@ import { useAppSelector } from "../../../store/reduxHook";
 import FormDatePicker from "../../../components/Form/FormDatePicker";
 import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
+import FormCurrencyInput from "../../../components/Form/FormCurrencyInput";
 import { useSaveExpenseMutation } from "../../../features/expenses/queries";
 
 type Props = {
@@ -77,11 +78,10 @@ const ExpenseForm = ({
                 name="category"
                 className="w-1/2"
               />
-              <FormInput<IAddExpenseForm>
+              <FormCurrencyInput<IAddExpenseForm>
                 name="cost"
                 label="Wydatek"
                 className="w-1/4"
-                type="number"
                 step="0.01"
               />
               <FormDatePicker<IAddExpenseForm> name="date" label="Data" />

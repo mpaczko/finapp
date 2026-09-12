@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
-import ExpenseDialog from "../ExpenseDialog";
+import DeferredExpenseDialog from "../ExpenseDialog/DeferredExpenseDialog";
 import Pagination from "../../ui/Pagination/Pagination";
 import { useDeleteExpenseMutation, useExpensesQuery } from "../../features/expenses/queries";
 
@@ -81,35 +81,29 @@ const ElementsTable = () => {
     await deleteExpenseMutation.mutateAsync(id);
   };
 
-  const filteredExpenses = expenses.filter((el) => {
+  const filteredExpenses = useMemo(() => {
     const nameSearch = filters.name.toLowerCase();
-    const matchesName = nameSearch
-      ? el.name.toLowerCase().includes(nameSearch)
-      : true;
+    const categorySearch = filters.category.toLowerCase();
+    const min = Number.parseFloat(filters.minCost.replace(",", ".")) || 0;
+    const max =
+      Number.parseFloat(filters.maxCost.replace(",", ".")) || Infinity;
+    const startDate = filters.startDate ? new Date(filters.startDate) : null;
+    const endDate = filters.endDate ? new Date(filters.endDate) : null;
 
-    const searchValue = filters.category.toLowerCase();
-    const matchesSearch = searchValue
-      ? el.category.toLowerCase().includes(searchValue)
-      : true;
+    return expenses.filter((expense) => {
+      const expenseDate = new Date(expense.date);
 
-    const elDate = new Date(el.date);
-
-    const matchesStart = filters.startDate
-      ? elDate >= new Date(filters.startDate)
-      : true;
-
-    const matchesEnd = filters.endDate
-      ? elDate <= new Date(filters.endDate)
-      : true;
-
-    const min = parseFloat(filters.minCost.replace(",", ".")) || 0;
-    const max = parseFloat(filters.maxCost.replace(",", ".")) || Infinity;
-    const matchesCost = el.cost >= min && el.cost <= max;
-
-    return (
-      matchesName && matchesSearch && matchesStart && matchesEnd && matchesCost
-    );
-  });
+      return (
+        (!nameSearch || expense.name.toLowerCase().includes(nameSearch)) &&
+        (!categorySearch ||
+          expense.category.toLowerCase().includes(categorySearch)) &&
+        (!startDate || expenseDate >= startDate) &&
+        (!endDate || expenseDate <= endDate) &&
+        expense.cost >= min &&
+        expense.cost <= max
+      );
+    });
+  }, [expenses, filters]);
 
   const totalPages = Math.max(
     1,
@@ -179,7 +173,7 @@ const ElementsTable = () => {
                   </td>
                   <td className="px-2 py-3 text-center">
                     <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                      <ExpenseDialog
+                      <DeferredExpenseDialog
                         expense={el}
                         isEdit
                         triggerLabel="Edytuj"
