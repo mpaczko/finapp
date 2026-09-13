@@ -6,13 +6,9 @@ import { setSelectedMonth } from "../../store/configSlice/configSlice";
 import DeferredExpenseDialog from "../../modules/ExpenseDialog/DeferredExpenseDialog";
 import { Button } from "../../ui/Button";
 
-type Props = {
-  userId: string | null;
-};
-
 const MultipleExpenses = lazy(() => import("../../modules/MultipleExpenses"));
 
-const Nav = ({ userId }: Props) => {
+const Nav = () => {
   const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
 
