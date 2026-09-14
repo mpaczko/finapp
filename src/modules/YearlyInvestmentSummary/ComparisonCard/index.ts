@@ -1,1 +1,1 @@
-export { default } from ".//ComparisonCard";
+export { default } from "./ComparisonCard";
