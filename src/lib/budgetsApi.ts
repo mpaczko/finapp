@@ -47,7 +47,7 @@ export interface CreateBudgetPayload {
   ip_box?: number;
 }
 
-export interface UpdateBudgetPayload extends Partial<CreateBudgetPayload> {}
+export type UpdateBudgetPayload = Partial<CreateBudgetPayload>;
 
 export const budgetsApi = {
   listByMonth: (month: string, signal?: AbortSignal) =>
