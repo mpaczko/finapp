@@ -28,7 +28,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen">
-      <Nav userId={userId} />
+      <Nav />
       <Main userId={userId} selectedMonth={selectedMonth} />
     </div>
   );
