@@ -4,6 +4,7 @@ import "react-day-picker/dist/style.css";
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 
@@ -29,35 +30,42 @@ function FormDatePicker<T extends FieldValues>({ name, label }: Props<T>) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-slate-700">{label}</label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="outline"
-            className="justify-start h-[40px] text-left font-normal w-full"
+            className="h-10 w-full justify-start rounded-xl border-slate-200 bg-slate-50 px-3 text-left font-normal text-slate-900 shadow-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-200"
           >
             {selectedDate
               ? selectedDate.toLocaleDateString("pl-PL")
               : "Wybierz datę"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 bg-white shadow-md rounded-md">
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={(day) => {
-              if (day) {
-                // Always save as plain yyyy-MM-dd string (no UTC issues)
-                const localDateString = format(day, "yyyy-MM-dd");
-                onChange(localDateString);
-              } else {
-                onChange(""); // clear date if user unselects
-              }
-            }}
-            locale={pl}
-          />
-        </PopoverContent>
+        <PopoverPortal>
+          <PopoverContent
+            className="z-[60] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl"
+            align="start"
+            side="top"
+            sideOffset={8}
+          >
+            <DayPicker
+              mode="single"
+              selected={selectedDate}
+              onSelect={(day) => {
+                if (day) {
+                  // Always save as plain yyyy-MM-dd string (no UTC issues)
+                  const localDateString = format(day, "yyyy-MM-dd");
+                  onChange(localDateString);
+                } else {
+                  onChange(""); // clear date if user unselects
+                }
+              }}
+              locale={pl}
+            />
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );

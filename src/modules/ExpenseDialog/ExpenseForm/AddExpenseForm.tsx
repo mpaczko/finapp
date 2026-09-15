@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   defaultValues,
@@ -22,15 +22,18 @@ type Props = {
   onClose?: () => void;
   onRemove?: () => void;
   showRemoveButton?: boolean;
+  disabled?: boolean;
 };
 
-const ExpenseForm = ({
-  isEdit,
-  expense,
-  onClose,
-  onRemove,
-  showRemoveButton,
-}: Props) => {
+export type ExpenseFormHandle = {
+  getValues: () => IAddExpenseForm;
+  validate: () => Promise<boolean>;
+};
+
+const ExpenseForm = forwardRef<ExpenseFormHandle, Props>(function ExpenseForm(
+  { isEdit, expense, onClose, onRemove, showRemoveButton, disabled },
+  ref,
+) {
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
   const saveExpenseMutation = useSaveExpenseMutation(selectedMonth);
 
@@ -39,7 +42,16 @@ const ExpenseForm = ({
     resolver: yupResolver(formSchema()),
   });
 
-  const { reset, handleSubmit } = methods;
+  const { getValues, handleSubmit, reset, trigger } = methods;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getValues,
+      validate: () => trigger(),
+    }),
+    [getValues, trigger],
+  );
 
   useEffect(() => {
     if (expense) {
@@ -48,7 +60,7 @@ const ExpenseForm = ({
   }, [expense, reset]);
 
   async function onSubmit(data: IAddExpenseForm) {
-    if (saveExpenseMutation.isPending) return;
+    if (saveExpenseMutation.isPending || disabled) return;
 
     await saveExpenseMutation.mutateAsync({
       id: expense?.id,
@@ -59,48 +71,57 @@ const ExpenseForm = ({
   }
 
   return (
-    <div>
+    <div className="px-6 py-6">
       <FormProvider {...methods}>
         <form
-          className="flex flex-col gap-10"
+          className="flex flex-col gap-6"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <div className="w-full flex flex-col gap-4">
+          <div className="flex w-full flex-col gap-5">
             <FormInput<IAddExpenseForm>
               name="name"
               label="Nazwa"
               className="w-full"
+              inputClassName="h-10 rounded-xl border-slate-200 bg-slate-50 px-3 text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:ring-slate-200"
             />
 
-            <div className="w-full flex gap-4">
+            <div className="grid w-full gap-4 sm:grid-cols-2">
               <ComboboxCategories
                 label="Kategoria"
                 name="category"
-                className="w-1/2"
+                className="w-full"
               />
               <FormCurrencyInput<IAddExpenseForm>
                 name="cost"
                 label="Wydatek"
-                className="w-1/4"
+                className="w-full"
                 step="0.01"
+                inputClassName="h-10 rounded-xl border-slate-200 bg-slate-50 px-3 text-slate-900 shadow-none focus-visible:ring-slate-200"
               />
-              <FormDatePicker<IAddExpenseForm> name="date" label="Data" />
+              <div className="sm:col-span-2">
+                <FormDatePicker<IAddExpenseForm> name="date" label="Data" />
+              </div>
             </div>
           </div>
 
-          <div className="w-full flex justify-end gap-2">
+          <div className="flex w-full items-center justify-end gap-2 border-t border-slate-100 pt-5">
             {showRemoveButton && (
               <Button
                 type="button"
                 variant="destructive"
                 onClick={onRemove}
-                disabled={saveExpenseMutation.isPending}
+                disabled={saveExpenseMutation.isPending || disabled}
+                className="mr-auto rounded-xl border border-red-200 bg-red-50 text-red-600 shadow-none hover:bg-red-100"
               >
                 Usuń
               </Button>
             )}
 
-            <Button type="submit" variant="ghost" disabled={saveExpenseMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={saveExpenseMutation.isPending || disabled}
+              className="rounded-xl bg-slate-900 px-5 text-white shadow-sm hover:bg-slate-800"
+            >
               {saveExpenseMutation.isPending ? "Zapisywanie..." : isEdit ? "Zapisz" : "Dodaj"}
             </Button>
           </div>
@@ -108,6 +129,6 @@ const ExpenseForm = ({
       </FormProvider>
     </div>
   );
-};
+});
 
 export default ExpenseForm;

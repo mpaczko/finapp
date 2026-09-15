@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { useCategoriesQuery } from "../../features/categories/queries";
@@ -49,7 +50,7 @@ export function ComboboxCategories({
           className={cn("text-start flex-1 min-w-[200px] w-full", className)}
         >
           {label && (
-            <FormLabel className="flex gap-1 font-lexend text-sm font-normal">
+          <FormLabel className="flex gap-1 text-sm font-medium text-slate-700">
               {label}
             </FormLabel>
           )}
@@ -59,51 +60,54 @@ export function ComboboxCategories({
                 <Button
                   variant="outline"
                   role="combobox"
-                  aria-expanded={!!field.value}
+                  aria-expanded={open}
                   className={cn(
-                    "flex-1 min-w-0 w-full h-10 justify-between text-left truncate",
+                    "h-10 w-full min-w-0 justify-between rounded-xl border-slate-200 bg-slate-50 px-3 text-left text-slate-900 shadow-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-200",
                   )}
                 >
                   <span className="truncate">
                     {field.value
-                      ? categories.find((c) => c.name === field.value)?.name
+                      ? categories.find((c) => c.name === field.value)?.name ?? field.value
                       : "Wybierz kategorię..."}
                   </span>
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
                 </Button>
               </PopoverTrigger>
 
-              <PopoverContent
-                className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto"
-                align="start"
-              >
-                <Command className="h-full">
-                  <CommandInput placeholder="Wyszukaj kategorię..." />
-                  <CommandList className="overflow-y-auto max-h-72">
-                    <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
-                    <CommandGroup>
-                      {categories.map((category) => (
-                        <CommandItem
-                          key={category.id}
-                          value={category.name}
-                          onSelect={(currentValue) => {
-                            const newValue =
-                              currentValue === field.value ? "" : currentValue;
-                            field.onChange(newValue);
-                            setOpen(false); // close popover on selection
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <span className="truncate">{category.name}</span>
-                          {field.value === category.name && (
-                            <Check className="ml-auto h-4 w-4" />
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
+              <PopoverPortal>
+                <PopoverContent
+                  className="z-[60] max-h-80 w-[--radix-popover-trigger-width] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1 shadow-xl"
+                  align="start"
+                  sideOffset={8}
+                >
+                  <Command className="h-full">
+                    <CommandInput placeholder="Wyszukaj kategorię..." />
+                    <CommandList className="max-h-72 overflow-y-auto">
+                      <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
+                      <CommandGroup>
+                        {categories.map((category) => (
+                          <CommandItem
+                            key={category.id}
+                            value={category.name}
+                            onSelect={(currentValue) => {
+                              const newValue =
+                                currentValue === field.value ? "" : currentValue;
+                              field.onChange(newValue);
+                              setOpen(false);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <span className="truncate">{category.name}</span>
+                            {field.value === category.name && (
+                              <Check className="ml-auto h-4 w-4" />
+                            )}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </PopoverPortal>
             </Popover>
           </FormControl>
           <FormMessage />
