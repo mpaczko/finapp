@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { useCreateManyExpensesMutation } from "../../features/expenses/queries";
-import { useAppSelector } from "../../store/reduxHook";
 import { Button } from "../../ui/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/Dialog";
+import ExpenseForm from "../ExpenseDialog/ExpenseForm";
 import { CsvIssue, Transaction } from "./MultipleExpenses.types";
 import { parseCSV } from "./parseCSV";
 
@@ -15,9 +14,6 @@ const ExpensesDialog = () => {
   const [invalidRows, setInvalidRows] = useState<CsvIssue[]>([]);
   const [warnings, setWarnings] = useState<CsvIssue[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
-  const createManyMutation = useCreateManyExpensesMutation(selectedMonth);
-
   const resetImport = () => {
     setExpenses([]);
     setInvalidRows([]);
@@ -29,6 +25,10 @@ const ExpensesDialog = () => {
     setOpen(isOpen);
     if (!isOpen) resetImport();
   };
+
+  useEffect(() => {
+    if (open && expenses.length === 0) handleOpenChange(false);
+  }, [expenses.length, open]);
 
   const handleFiles = async (files: File[]) => {
     const results = await Promise.all(
@@ -45,10 +45,10 @@ const ExpensesDialog = () => {
     setOpen(true);
   };
 
-  const importExpenses = async () => {
-    if (!expenses.length || createManyMutation.isPending) return;
-    await createManyMutation.mutateAsync(expenses.map(({ id: _id, ...expense }) => expense));
-    handleOpenChange(false);
+  const removeExpense = (id: string) => {
+    setExpenses((currentExpenses) =>
+      currentExpenses.filter((expense) => expense.id !== id),
+    );
   };
 
   return (
@@ -73,16 +73,16 @@ const ExpensesDialog = () => {
         <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
           <p className="text-sm">Poprawne wydatki: {expenses.length}. Błędne wiersze: {invalidRows.length}.</p>
 
-          {expenses.length > 0 && (
-            <div className="overflow-x-auto border rounded">
-              <table className="w-full text-sm">
-                <thead><tr className="border-b text-left"><th className="p-2">Data</th><th className="p-2">Opis</th><th className="p-2">Kategoria</th><th className="p-2">Kwota</th></tr></thead>
-                <tbody>{expenses.map((expense) => (
-                  <tr key={expense.id} className="border-b last:border-0"><td className="p-2">{expense.date}</td><td className="p-2">{expense.name}</td><td className="p-2">{expense.category}</td><td className="p-2">{expense.cost.toFixed(2)}</td></tr>
-                ))}</tbody>
-              </table>
+          {expenses.map(({ id, ...expense }) => (
+            <div key={id} className="rounded border p-3">
+              <ExpenseForm
+                expense={expense}
+                onClose={() => removeExpense(id)}
+                onRemove={() => removeExpense(id)}
+                showRemoveButton={expenses.length > 1}
+              />
             </div>
-          )}
+          ))}
 
           {(invalidRows.length > 0 || warnings.length > 0) && (
             <div className="space-y-2">
@@ -91,14 +91,6 @@ const ExpensesDialog = () => {
             </div>
           )}
 
-          {createManyMutation.error && <p className="text-sm text-red-600">Nie udało się zaimportować wydatków: {createManyMutation.error.message}</p>}
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => handleOpenChange(false)} disabled={createManyMutation.isPending}>Anuluj</Button>
-          <Button onClick={() => void importExpenses()} disabled={!expenses.length || createManyMutation.isPending}>
-            {createManyMutation.isPending ? "Importowanie..." : `Importuj ${expenses.length} wydatków`}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
