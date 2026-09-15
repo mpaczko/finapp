@@ -42,7 +42,13 @@ const ExpensesDialog = () => {
   };
 
   useEffect(() => {
-    if (open && expenses.length === 0) handleOpenChange(false);
+    if (open && expenses.length === 0) {
+      setOpen(false);
+      setInvalidRows([]);
+      setWarnings([]);
+      formRefs.current = {};
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }, [expenses.length, open]);
 
   const handleFiles = async (files: File[]) => {

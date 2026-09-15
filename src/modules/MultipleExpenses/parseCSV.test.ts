@@ -31,4 +31,16 @@ describe("parseCSV", () => {
       },
     ]);
   });
+
+  it("prefers a currency-marked card payment from the description over an account balance", () => {
+    const result = parseCSV(
+      "Data,Opis,Kwota\n01.09.2026,VB DEBIT 423725******3832 PŁATNOŚĆ KARTĄ 19.72 PLN JMP S.A. BIEDRONKA,3833.07",
+    );
+
+    expect(result.validRows).toHaveLength(1);
+    expect(result.validRows[0]).toMatchObject({
+      cost: 19.72,
+      category: "jedzenie",
+    });
+  });
 });
