@@ -55,7 +55,15 @@ const ExpenseForm = forwardRef<ExpenseFormHandle, Props>(function ExpenseForm(
 
   useEffect(() => {
     if (expense) {
-      reset(expense);
+      // API responses include read-only fields (for example `id` and
+      // `created_at`). Reset only the fields that belong to this form so they
+      // cannot be submitted back with an update request.
+      reset({
+        name: expense.name,
+        category: expense.category,
+        date: expense.date,
+        cost: expense.cost,
+      });
     }
   }, [expense, reset]);
 

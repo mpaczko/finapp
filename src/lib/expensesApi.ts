@@ -12,6 +12,13 @@ export type Expense = {
 
 export type CreateExpenseDto = IAddExpenseForm;
 
+const toExpenseDto = ({ name, category, date, cost }: IAddExpenseForm): CreateExpenseDto => ({
+  name,
+  category,
+  date,
+  cost,
+});
+
 export const expensesApi = {
   listByMonth: (month: string, signal?: AbortSignal) =>
     apiRequest<Expense[]>(`/expenses?month=${encodeURIComponent(month)}`, {
@@ -21,7 +28,7 @@ export const expensesApi = {
   create: (expense: IAddExpenseForm) =>
     apiRequest<Expense>("/expenses", {
       method: "POST",
-      body: expense,
+      body: toExpenseDto(expense),
     }),
 
   createMany: (expenses: CreateExpenseDto[]) =>
@@ -33,7 +40,7 @@ export const expensesApi = {
   update: (id: string, expense: IAddExpenseForm) =>
     apiRequest<Expense>(`/expenses/${id}`, {
       method: "PATCH",
-      body: expense,
+      body: toExpenseDto(expense),
     }),
 
   remove: (id: string) =>
