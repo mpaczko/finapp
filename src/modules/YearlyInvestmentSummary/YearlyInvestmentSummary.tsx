@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Eye, EyeOff, Pencil } from "lucide-react";
 import {
   useBudgetQuery,
   useUpdateBudgetMutation,
 } from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
+import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 import { LOADING_TEXT } from "../../lib/loadingText";
+import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 import ComparisonCard from "./ComparisonCard";
 
 type YearlyInvestmentSummaryProps = {
@@ -21,6 +23,7 @@ const YearlyInvestmentSummary = ({
   const [year, setYear] = useState<number>(currentYear);
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
+  const [showValues, setShowValues] = useSummaryVisibility();
   const { data: budgets = [] } = useBudgetQuery(selectedMonth, Boolean(userId));
   const selectedBudget = budgets[0];
   const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
@@ -64,20 +67,38 @@ const YearlyInvestmentSummary = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-          <span className="text-sm text-slate-600">Rok</span>
-          <input
-            type="number"
-            min="2000"
-            max="2100"
-            step="1"
-            value={year}
-            onChange={(e) => {
-              const nextYear = Number(e.target.value);
-              setYear(isNaN(nextYear) ? currentYear : nextYear);
-            }}
-            className="w-20 border-none bg-transparent text-right text-sm font-semibold text-slate-900 outline-none"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <span className="text-sm text-slate-600">Rok</span>
+            <input
+              type="number"
+              min="2000"
+              max="2100"
+              step="1"
+              value={year}
+              onChange={(e) => {
+                const nextYear = Number(e.target.value);
+                setYear(isNaN(nextYear) ? currentYear : nextYear);
+              }}
+              className="w-20 border-none bg-transparent text-right text-sm font-semibold text-slate-900 outline-none"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowValues((current) => !current)}
+            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            aria-label={
+              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+            }
+          >
+            {showValues ? (
+              <EyeOff size={14} aria-hidden="true" />
+            ) : (
+              <Eye size={14} aria-hidden="true" />
+            )}
+            {showValues ? "Ukryj" : "Pokaż"}
+          </button>
         </div>
       </div>
 
@@ -90,7 +111,7 @@ const YearlyInvestmentSummary = ({
           <p className="mt-auto text-2xl font-bold text-slate-900">
             {loading
               ? LOADING_TEXT
-              : `${summary?.investmentSum.toFixed(2) ?? "0.00"} zł`}
+              : formatSummaryCurrency(summary?.investmentSum ?? 0, showValues)}
           </p>
         </div>
 
@@ -102,7 +123,7 @@ const YearlyInvestmentSummary = ({
           <p className="mt-auto text-2xl font-bold text-slate-900">
             {loading || summary == null
               ? LOADING_TEXT
-              : `${summary.ipBoxSum.toFixed(2)} zł`}
+              : formatSummaryCurrency(summary.ipBoxSum, showValues)}
           </p>
 
           {selectedBudget && selectedMonthBelongsToYear && (
@@ -151,7 +172,7 @@ const YearlyInvestmentSummary = ({
                 </div>
               ) : (
                 <p className="mt-1 text-sm font-semibold text-slate-800">
-                  {selectedMonthIpBox.toFixed(2)} zł
+                  {formatSummaryCurrency(selectedMonthIpBox, showValues)}
                 </p>
               )}
             </div>

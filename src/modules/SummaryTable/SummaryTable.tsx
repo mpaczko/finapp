@@ -1,6 +1,8 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
-import { LOADING_TEXT } from "../../lib/loadingText";
-import { Pencil } from "lucide-react";
+import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
+import { Eye, EyeOff, Pencil } from "lucide-react";
+import { formatSummaryCurrency } from "../../lib/summaryVisibility";
+import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
 
 const SummaryTable = () => {
   const {
@@ -13,14 +15,33 @@ const SummaryTable = () => {
     savePreviousMonthSavingsValue,
   } = useBudgetSummary();
 
+  const [showValues, setShowValues] = useSummaryVisibility();
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
-      <h2 className="text-xl font-semibold text-slate-900">
-        Podsumowanie ogólne wybranego miesiąca
-      </h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-xl font-semibold text-slate-900">
+          Podsumowanie ogólne wybranego miesiąca
+        </h2>
+        <button
+          type="button"
+          onClick={() => setShowValues((current) => !current)}
+          className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+          aria-label={
+            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+          }
+        >
+          {showValues ? (
+            <EyeOff size={14} aria-hidden="true" />
+          ) : (
+            <Eye size={14} aria-hidden="true" />
+          )}
+          {showValues ? "Ukryj" : "Pokaż"}
+        </button>
+      </div>
 
       {loading ? (
-        <div className="text-sm text-gray-500 mb-2">{LOADING_TEXT}</div>
+        <TableSkeleton rows={2} columns={3} className="min-h-[180px]" />
       ) : (
         <table className="w-full table-fixed overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
           <thead>
@@ -69,7 +90,12 @@ const SummaryTable = () => {
                   />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span>{totals.previous_month_savings.toFixed(2)} zł</span>
+                    <span>
+                      {formatSummaryCurrency(
+                        totals.previous_month_savings,
+                        showValues,
+                      )}
+                    </span>
                     <button
                       type="button"
                       aria-label="Edytuj oszczędności z poprzedniego miesiąca"
@@ -89,11 +115,11 @@ const SummaryTable = () => {
               </td>
 
               <td className="px-4 py-3 border-b border-slate-100 text-sm font-bold text-cyan-600 tabular-nums whitespace-nowrap">
-                {totals.savingsCurrent} zł
+                {formatSummaryCurrency(totals.savingsCurrent, showValues)}
               </td>
 
               <td className="px-4 py-3 border-b border-slate-100 text-sm font-bold text-indigo-700 tabular-nums whitespace-nowrap">
-                {totals.savingsEndMonth} zł
+                {formatSummaryCurrency(totals.savingsEndMonth, showValues)}
               </td>
             </tr>
           </tbody>

@@ -1,4 +1,7 @@
+import { Eye, EyeOff } from "lucide-react";
 import type { CategorySummary } from "../../hooks/useBudgetSummary";
+import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
+import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 
 type CategorySummarySectionProps = {
   title: string;
@@ -17,9 +20,9 @@ const calculateTotals = (rows: CategorySummary[]) => {
   const actual = rows.reduce((sum, row) => sum + Number(row.actual), 0);
 
   return {
-    planned: `${planned.toFixed(2)} zł`,
-    actual: `${actual.toFixed(2)} zł`,
-    diff: `${(planned - actual).toFixed(2)} zł`,
+    planned,
+    actual,
+    diff: planned - actual,
   };
 };
 
@@ -34,6 +37,8 @@ const CategorySummarySection = ({
   setInputValue,
   savePlannedValue,
 }: CategorySummarySectionProps) => {
+  const [showValues, setShowValues] = useSummaryVisibility();
+
   const totals = calculateTotals(rows);
 
   const saveEditedValue = (category: string) => {
@@ -45,8 +50,24 @@ const CategorySummarySection = ({
     <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
       <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
         <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-        <div className="text-xs font-medium text-slate-500">
-          Suma kategorii: {totals.actual}
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <span>Suma kategorii:</span>
+          <button
+            type="button"
+            onClick={() => setShowValues((current) => !current)}
+            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            aria-label={
+              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+            }
+          >
+            {showValues ? (
+              <EyeOff size={14} aria-hidden="true" />
+            ) : (
+              <Eye size={14} aria-hidden="true" />
+            )}
+            {showValues ? "Ukryj" : "Pokaż"}
+          </button>
+          <span>{formatSummaryCurrency(totals.actual, showValues)}</span>
         </div>
       </div>
 
@@ -136,7 +157,7 @@ const CategorySummarySection = ({
                       />
                     ) : (
                       <span className="whitespace-nowrap">
-                        {row.planned} zł
+                        {formatSummaryCurrency(row.planned, showValues)}
                       </span>
                     )}
                   </td>
@@ -144,11 +165,13 @@ const CategorySummarySection = ({
                   <td
                     className={`px-1.5 py-2 text-right text-[11px] font-semibold tabular-nums sm:px-2 sm:text-xs ${actual > planned ? "text-red-700" : actual === planned ? "text-amber-600" : "text-emerald-600"}`}
                   >
-                    <span className="whitespace-nowrap">{row.actual} zł</span>
+                    <span className="whitespace-nowrap">
+                      {formatSummaryCurrency(row.actual, showValues)}
+                    </span>
                   </td>
                   <td className="px-1.5 py-2 text-right text-[11px] tabular-nums sm:px-2 sm:text-xs">
                     <span className="whitespace-nowrap">
-                      {difference.toFixed(2)} zł
+                      {formatSummaryCurrency(difference, showValues)}
                     </span>
                   </td>
                 </tr>
@@ -159,13 +182,19 @@ const CategorySummarySection = ({
           <tr className="bg-slate-100 text-xs font-semibold text-slate-900">
             <td className="px-2.5 py-2 sm:px-3">Suma</td>
             <td className="px-1.5 py-2 text-right tabular-nums sm:px-2">
-              <span className="whitespace-nowrap">{totals.planned}</span>
+              <span className="whitespace-nowrap">
+                {formatSummaryCurrency(totals.planned, showValues)}
+              </span>
             </td>
             <td className="px-1.5 py-2 text-right tabular-nums sm:px-2">
-              <span className="whitespace-nowrap">{totals.actual}</span>
+              <span className="whitespace-nowrap">
+                {formatSummaryCurrency(totals.actual, showValues)}
+              </span>
             </td>
             <td className="px-1.5 py-2 text-right tabular-nums sm:px-2">
-              <span className="whitespace-nowrap">{totals.diff}</span>
+              <span className="whitespace-nowrap">
+                {formatSummaryCurrency(totals.diff, showValues)}
+              </span>
             </td>
           </tr>
         </tbody>

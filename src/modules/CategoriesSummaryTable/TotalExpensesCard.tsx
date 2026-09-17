@@ -1,4 +1,6 @@
-import { Check, Pencil, Undo2 } from "lucide-react";
+import { Check, Pencil, Undo2, Eye, EyeOff } from "lucide-react";
+import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
+import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 
 type TotalExpensesCardProps = {
   totals: { income: string; planned: string; actual: string; diff: string };
@@ -23,6 +25,8 @@ const TotalExpensesCard = ({
   saveIncomeValue,
   setIncomeReceived,
 }: TotalExpensesCardProps) => {
+  const [showValues, setShowValues] = useSummaryVisibility();
+
   const saveEditedIncome = () => {
     saveIncomeValue(parseFloat(incomeInputValue) || 0);
     setEditingIncome(false);
@@ -31,7 +35,26 @@ const TotalExpensesCard = ({
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-950 p-3 text-sm text-white shadow-md">
       <div className="grid gap-3">
-        <span className="text-sm font-semibold">Suma wszystkich wydatków</span>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold">
+            Suma wszystkich wydatków
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowValues((current) => !current)}
+            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            aria-label={
+              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+            }
+          >
+            {showValues ? (
+              <EyeOff size={14} aria-hidden="true" />
+            ) : (
+              <Eye size={14} aria-hidden="true" />
+            )}
+            {showValues ? "Ukryj" : "Pokaż"}
+          </button>
+        </div>
 
         <div className="grid gap-2 sm:grid-cols-4">
           <div className="rounded-xl bg-white/10 p-2.5">
@@ -55,7 +78,9 @@ const TotalExpensesCard = ({
                 />
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <span>{totals.income} zł</span>
+                  <span>
+                    {formatSummaryCurrency(totals.income, showValues)}
+                  </span>
                   <button
                     type="button"
                     aria-label="Edytuj przychód"
@@ -97,17 +122,17 @@ const TotalExpensesCard = ({
 
           <SummaryMetric
             label="Planowane"
-            value={`${totals.planned} zł`}
+            value={formatSummaryCurrency(totals.planned, showValues)}
             className="text-amber-200"
           />
           <SummaryMetric
             label="Rzeczywiste"
-            value={`${totals.actual} zł`}
+            value={formatSummaryCurrency(totals.actual, showValues)}
             className="text-rose-200"
           />
           <SummaryMetric
             label="Różnica"
-            value={`${totals.diff} zł`}
+            value={formatSummaryCurrency(totals.diff, showValues)}
             className={
               Number(totals.diff) >= 0 ? "text-emerald-200" : "text-rose-200"
             }
