@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { LOADING_TEXT } from "../../../lib/loadingText";
 
 type ComparisonCardProps = {
   title: string;
@@ -42,7 +43,7 @@ const ComparisonCard = ({
         <div className="grid grid-cols-[90px_1fr] items-center text-sm text-slate-700">
           <span>Rzeczyw.</span>
           <span className="text-right font-medium text-slate-900">
-            {loading ? "Ładowanie…" : `${actual?.toFixed(2) ?? "0.00"} zł`}
+            {loading ? LOADING_TEXT : `${actual?.toFixed(2) ?? "0.00"} zł`}
           </span>
         </div>
         <div className="grid grid-cols-[90px_1fr] items-center border-t border-slate-200 pt-2 text-sm font-semibold text-slate-900">

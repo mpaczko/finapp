@@ -1,4 +1,5 @@
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
+import { LOADING_TEXT } from "../../lib/loadingText";
 import { Pencil } from "lucide-react";
 
 const SummaryTable = () => {
@@ -19,7 +20,7 @@ const SummaryTable = () => {
       </h2>
 
       {loading ? (
-        <div className="text-sm text-gray-500 mb-2">⏳ Ładowanie danych...</div>
+        <div className="text-sm text-gray-500 mb-2">{LOADING_TEXT}</div>
       ) : (
         <table className="w-full table-fixed overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
           <thead>

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
-import { useBudgetQuery, useUpdateBudgetMutation } from "../../features/budgets/queries";
+import {
+  useBudgetQuery,
+  useUpdateBudgetMutation,
+} from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
+import { LOADING_TEXT } from "../../lib/loadingText";
 import ComparisonCard from "./ComparisonCard";
 
 type YearlyInvestmentSummaryProps = {
@@ -85,7 +89,7 @@ const YearlyInvestmentSummary = ({
 
           <p className="mt-auto text-2xl font-bold text-slate-900">
             {loading
-              ? "Ładowanie…"
+              ? LOADING_TEXT
               : `${summary?.investmentSum.toFixed(2) ?? "0.00"} zł`}
           </p>
         </div>
@@ -97,7 +101,7 @@ const YearlyInvestmentSummary = ({
 
           <p className="mt-auto text-2xl font-bold text-slate-900">
             {loading || summary == null
-              ? "Ładowanie…"
+              ? LOADING_TEXT
               : `${summary.ipBoxSum.toFixed(2)} zł`}
           </p>
 
