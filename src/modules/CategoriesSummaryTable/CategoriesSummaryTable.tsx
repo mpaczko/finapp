@@ -6,6 +6,7 @@ import SummaryTable from "../SummaryTable";
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import CategorySummarySection from "./CategorySummarySection";
 import TotalExpensesCard from "./TotalExpensesCard";
+import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
 
 const excludedCategoryNames = ["inwestycje", "koszty związane z firmą"];
 
@@ -99,7 +100,7 @@ const CategoriesSummaryTable = () => {
 
         <div className="min-w-0">
           {loading ? (
-            <div className="mb-2 text-xs text-gray-500">⏳ Zapisuję zmiany...</div>
+            <TableSkeleton rows={6} columns={3} className="min-h-[420px]" />
           ) : (
             <CategoryBudgetBars
               rows={summary}
