@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useSummaryVisibility } from "../../../hooks/useSummaryVisibility";
-import { LOADING_TEXT } from "../../../lib/loadingText";
 import { formatSummaryCurrency } from "../../../lib/summaryVisibility";
 
 type ComparisonCardProps = {
@@ -58,11 +57,13 @@ const ComparisonCard = ({
         </div>
         <div className="grid grid-cols-[90px_1fr] items-center text-sm text-slate-700">
           <span>Rzeczyw.</span>
-          <span className="text-right font-medium text-slate-900">
-            {loading
-              ? LOADING_TEXT
-              : formatSummaryCurrency(actual ?? 0, showValues)}
-          </span>
+          {loading ? (
+            <div className="h-5 w-24 animate-pulse justify-self-end rounded bg-slate-200" />
+          ) : (
+            <span className="text-right font-medium text-slate-900">
+              {formatSummaryCurrency(actual ?? 0, showValues)}
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-[90px_1fr] items-center border-t border-slate-200 pt-2 text-sm font-semibold text-slate-900">
           <span>Saldo</span>

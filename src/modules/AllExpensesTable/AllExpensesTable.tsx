@@ -5,7 +5,11 @@ import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
 import DeferredExpenseDialog from "../ExpenseDialog/DeferredExpenseDialog";
 import Pagination from "../../ui/Pagination/Pagination";
-import { useDeleteExpenseMutation, useExpensesQuery } from "../../features/expenses/queries";
+import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
+import {
+  useDeleteExpenseMutation,
+  useExpensesQuery,
+} from "../../features/expenses/queries";
 
 const ROW_COLORS = ["bg-white", "bg-gray-100"];
 const ROWS_PER_PAGE_OPTIONS = [8, 15, 20, 50] as const;
@@ -27,9 +31,7 @@ const getInitialRowsPerPage = (): RowsPerPage => {
       window.localStorage.getItem(ROWS_PER_PAGE_STORAGE_KEY),
     );
 
-    return isRowsPerPageOption(savedValue)
-      ? savedValue
-      : DEFAULT_ROWS_PER_PAGE;
+    return isRowsPerPageOption(savedValue) ? savedValue : DEFAULT_ROWS_PER_PAGE;
   } catch {
     return DEFAULT_ROWS_PER_PAGE;
   }
@@ -50,8 +52,9 @@ const ElementsTable = () => {
     maxCost: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] =
-    useState<RowsPerPage>(getInitialRowsPerPage);
+  const [rowsPerPage, setRowsPerPage] = useState<RowsPerPage>(
+    getInitialRowsPerPage,
+  );
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -130,108 +133,116 @@ const ElementsTable = () => {
     return map;
   }, [filteredExpenses]);
 
+  const isTableLoading = !expenses.length;
+
   return (
     <div className="flex min-h-[720px] min-w-0 flex-col gap-4 overflow-x-auto">
       <h2 className="text-xl font-semibold text-gray-800">Moje wydatki</h2>
 
       <ExpenseFilters filters={filters} onFilterChange={setFilters} />
 
-      <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-sm">
-        <table className="w-full min-w-[680px] table-fixed">
-          <thead>
-            <tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-              <th className="w-[26%] px-4 py-3">Nazwa</th>
-              <th className="w-[23%] px-4 py-3">Kategoria</th>
-              <th className="w-[14%] px-2 py-3 whitespace-nowrap">Data</th>
-              <th className="w-[13%] px-2 py-3 whitespace-nowrap">Koszt</th>
-              <th className="w-[24%] px-2 py-3 text-center whitespace-nowrap">
-                Akcje
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {paginatedExpenses.map((el) => {
-              const dateKey = getDateKey(el.date);
-              const rowBg = rowColorByDate.get(dateKey) ?? "bg-white";
-
-              return (
-                <tr
-                  key={el.id}
-                  className={`${rowBg} transition-colors hover:bg-slate-50`}
-                >
-                  <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
-                    <span className="block truncate">{el.name}</span>
-                  </td>
-                  <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
-                    <span className="block truncate">{el.category}</span>
-                  </td>
-                  <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
-                    {format(new Date(el.date), "dd.MM.yyyy", { locale: pl })}
-                  </td>
-                  <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
-                    {el.cost.toFixed(2)} zł
-                  </td>
-                  <td className="px-2 py-3 text-center">
-                    <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                      <DeferredExpenseDialog
-                        expense={el}
-                        isEdit
-                        triggerLabel="Edytuj"
-                      />
-                      <button
-                        onClick={() => handleDelete(el.id)}
-                        className="px-2 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
-          Pokazano {paginatedExpenses.length} z {filteredExpenses.length}{" "}
-          wydatków
-        </p>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Wiersze:</span>
-            <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white">
-              {ROWS_PER_PAGE_OPTIONS.map((option) => {
-                const isActive = rowsPerPage === option;
+      {isTableLoading ? (
+        <TableSkeleton rows={8} columns={5} className="min-h-[520px]" />
+      ) : (
+        <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-sm">
+          <table className="w-full min-w-[680px] table-fixed">
+            <thead>
+              <tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
+                <th className="w-[26%] px-4 py-3">Nazwa</th>
+                <th className="w-[23%] px-4 py-3">Kategoria</th>
+                <th className="w-[14%] px-2 py-3 whitespace-nowrap">Data</th>
+                <th className="w-[13%] px-2 py-3 whitespace-nowrap">Koszt</th>
+                <th className="w-[24%] px-2 py-3 text-center whitespace-nowrap">
+                  Akcje
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {paginatedExpenses.map((el) => {
+                const dateKey = getDateKey(el.date);
+                const rowBg = rowColorByDate.get(dateKey) ?? "bg-white";
 
                 return (
-                  <button
-                    key={option}
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => setRowsPerPage(option)}
-                    className={`px-3 py-1.5 text-sm font-medium transition ${
-                      isActive
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }`}
+                  <tr
+                    key={el.id}
+                    className={`${rowBg} transition-colors hover:bg-slate-50`}
                   >
-                    {option}
-                  </button>
+                    <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
+                      <span className="block truncate">{el.name}</span>
+                    </td>
+                    <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
+                      <span className="block truncate">{el.category}</span>
+                    </td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
+                      {format(new Date(el.date), "dd.MM.yyyy", { locale: pl })}
+                    </td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
+                      {el.cost.toFixed(2)} zł
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <DeferredExpenseDialog
+                          expense={el}
+                          isEdit
+                          triggerLabel="Edytuj"
+                        />
+                        <button
+                          onClick={() => handleDelete(el.id)}
+                          className="px-2 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          Usuń
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
-            </div>
-          </div>
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
+
+      {!isTableLoading && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-600">
+            Pokazano {paginatedExpenses.length} z {filteredExpenses.length}{" "}
+            wydatków
+          </p>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">Wiersze:</span>
+              <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white">
+                {ROWS_PER_PAGE_OPTIONS.map((option) => {
+                  const isActive = rowsPerPage === option;
+
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => setRowsPerPage(option)}
+                      className={`px-3 py-1.5 text-sm font-medium transition ${
+                        isActive
+                          ? "bg-slate-900 text-white"
+                          : "text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

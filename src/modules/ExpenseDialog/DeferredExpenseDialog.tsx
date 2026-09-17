@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState } from "react";
 
-import { LOADING_TEXT } from "../../lib/loadingText";
 import { Button } from "../../ui/Button";
 import type { ExpenseDialogProps } from "./ExpenseDialog";
 
@@ -17,7 +16,13 @@ const DeferredExpenseDialog = ({ triggerLabel, ...props }: Props) => {
   }
 
   return (
-    <Suspense fallback={<Button disabled>{LOADING_TEXT}</Button>}>
+    <Suspense
+      fallback={
+        <Button disabled className="animate-pulse">
+          <span className="inline-block h-4 w-16 rounded bg-slate-200" />
+        </Button>
+      }
+    >
       <ExpenseDialog {...props} triggerLabel={triggerLabel} defaultOpen />
     </Suspense>
   );

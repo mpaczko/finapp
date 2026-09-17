@@ -4,7 +4,7 @@ import ElementsTable from "../../modules/AllExpensesTable";
 import { useExpensesQuery } from "../../features/expenses/queries";
 import { useBudgetQuery } from "../../features/budgets/queries";
 import { useCategoriesQuery } from "../../features/categories/queries";
-import { LOADING_TEXT } from "../../lib/loadingText";
+import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
 
 type Props = {
   userId: string | null;
@@ -29,10 +29,13 @@ const Main = ({ userId, selectedMonth }: Props) => {
 
   if (loading) {
     return (
-      <main className="pt-20 flex items-center justify-center min-h-[60vh]">
-        <div className="bg-white rounded-xl px-8 py-6 flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
-          <p className="text-sm text-gray-600 font-medium">{LOADING_TEXT}</p>
+      <main className="grid grid-cols-1 gap-4 px-4 pb-20 pt-25 sm:px-6 xl:grid-cols-2 xl:items-start">
+        <div className="min-w-0">
+          <TableSkeleton rows={7} columns={4} className="min-h-[420px]" />
+        </div>
+        <div className="grid min-w-0 gap-8">
+          <div className="h-56 animate-pulse rounded-3xl bg-slate-100" />
+          <TableSkeleton rows={8} columns={5} className="min-h-[520px]" />
         </div>
       </main>
     );

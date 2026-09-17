@@ -4,7 +4,6 @@ import { useAppSelector } from "../../store/reduxHook";
 import { supabase } from "../../createClient";
 import { setSelectedMonth } from "../../store/configSlice/configSlice";
 import DeferredExpenseDialog from "../../modules/ExpenseDialog/DeferredExpenseDialog";
-import { LOADING_TEXT } from "../../lib/loadingText";
 import { Button } from "../../ui/Button";
 
 const MultipleExpenses = lazy(() => import("../../modules/MultipleExpenses"));
@@ -39,7 +38,13 @@ const Nav = () => {
       </div>
 
       <div className="flex items-center justify-end gap-5">
-        <Suspense fallback={<Button disabled>{LOADING_TEXT}</Button>}>
+        <Suspense
+          fallback={
+            <Button disabled className="animate-pulse">
+              <span className="inline-block h-4 w-20 rounded bg-slate-200" />
+            </Button>
+          }
+        >
           <MultipleExpenses />
         </Suspense>
         <DeferredExpenseDialog />

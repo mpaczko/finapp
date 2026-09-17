@@ -6,7 +6,6 @@ import {
 } from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
 import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
-import { LOADING_TEXT } from "../../lib/loadingText";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 import ComparisonCard from "./ComparisonCard";
 
@@ -108,11 +107,15 @@ const YearlyInvestmentSummary = ({
             Inwestycje — łączne wydatki w danym roku
           </p>
 
-          <p className="mt-auto text-2xl font-bold text-slate-900">
-            {loading
-              ? LOADING_TEXT
-              : formatSummaryCurrency(summary?.investmentSum ?? 0, showValues)}
-          </p>
+          <div className="mt-auto">
+            {loading ? (
+              <div className="h-8 w-32 animate-pulse rounded bg-slate-200" />
+            ) : (
+              <p className="text-2xl font-bold text-slate-900">
+                {formatSummaryCurrency(summary?.investmentSum ?? 0, showValues)}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-slate-200 bg-slate-50 p-4">
@@ -120,11 +123,15 @@ const YearlyInvestmentSummary = ({
             IP Box — szacowany zwrot za dany rok dotychczas
           </p>
 
-          <p className="mt-auto text-2xl font-bold text-slate-900">
-            {loading || summary == null
-              ? LOADING_TEXT
-              : formatSummaryCurrency(summary.ipBoxSum, showValues)}
-          </p>
+          <div className="mt-auto">
+            {loading || summary == null ? (
+              <div className="h-8 w-32 animate-pulse rounded bg-slate-200" />
+            ) : (
+              <p className="text-2xl font-bold text-slate-900">
+                {formatSummaryCurrency(summary.ipBoxSum, showValues)}
+              </p>
+            )}
+          </div>
 
           {selectedBudget && selectedMonthBelongsToYear && (
             <div className="mt-2 border-t border-slate-200 pt-2">
