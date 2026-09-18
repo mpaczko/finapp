@@ -43,10 +43,18 @@ const Main = ({ userId, selectedMonth }: Props) => {
 
   if (hasError) {
     return (
-      <main className="pt-20 flex items-center justify-center min-h-[60vh]">
-        <p className="text-sm text-red-600">
-          Nie udało się pobrać danych. Odśwież stronę i spróbuj ponownie.
-        </p>
+      <main className="flex min-h-[60vh] items-center justify-center px-4 pt-20">
+        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-100 text-lg font-semibold text-red-600">
+            !
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Nie udało się pobrać danych
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Odśwież stronę i spróbuj ponownie.
+          </p>
+        </div>
       </main>
     );
   }
