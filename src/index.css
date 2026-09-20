@@ -1,2 +1,9 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate"; /* optional, if you installed it */
+
+@layer base {
+  /* All enabled native buttons represent an available action. */
+  button:not(:disabled):not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
