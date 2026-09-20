@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { useCategoriesQuery } from "../../features/categories/queries";
@@ -58,38 +59,41 @@ export function ComboboxCategoriesStandalone({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent
-          className="w-[--radix-popover-trigger-width] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-lg max-h-80"
-          align="start"
-        >
-          <Command className="h-full">
-            <CommandInput placeholder="Wyszukaj kategorię..." />
-            <CommandList className="overflow-y-auto max-h-72">
-              <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
+        <PopoverPortal>
+          <PopoverContent
+            className="w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white p-0 shadow-lg max-h-80"
+            align="start"
+            onWheel={(event) => event.stopPropagation()}
+          >
+            <Command className="h-full">
+              <CommandInput placeholder="Wyszukaj kategorię..." />
+              <CommandList className="max-h-72 overflow-y-auto overscroll-contain">
+                <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
 
-              <CommandGroup>
-                {categories.map((category) => (
-                  <CommandItem
-                    key={category.id}
-                    value={category.name}
-                    onSelect={(currentValue) => {
-                      const newValue =
-                        currentValue === value ? "" : currentValue;
-                      onChange(newValue);
-                      setOpen(false);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <span className="truncate">{category.name}</span>
-                    {value === category.name && (
-                      <Check className="ml-auto h-4 w-4" />
-                    )}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
+                <CommandGroup>
+                  {categories.map((category) => (
+                    <CommandItem
+                      key={category.id}
+                      value={category.name}
+                      onSelect={(currentValue) => {
+                        const newValue =
+                          currentValue === value ? "" : currentValue;
+                        onChange(newValue);
+                        setOpen(false);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <span className="truncate">{category.name}</span>
+                      {value === category.name && (
+                        <Check className="ml-auto h-4 w-4" />
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );

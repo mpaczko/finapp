@@ -50,7 +50,7 @@ export function ComboboxCategories({
           className={cn("text-start flex-1 min-w-[200px] w-full", className)}
         >
           {label && (
-          <FormLabel className="flex gap-1 text-sm font-medium text-slate-700">
+            <FormLabel className="flex gap-1 text-sm font-medium text-slate-700">
               {label}
             </FormLabel>
           )}
@@ -67,7 +67,8 @@ export function ComboboxCategories({
                 >
                   <span className="truncate">
                     {field.value
-                      ? categories.find((c) => c.name === field.value)?.name ?? field.value
+                      ? (categories.find((c) => c.name === field.value)?.name ??
+                        field.value)
                       : "Wybierz kategorię..."}
                   </span>
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
@@ -76,13 +77,14 @@ export function ComboboxCategories({
 
               <PopoverPortal>
                 <PopoverContent
-                  className="z-[60] max-h-80 w-[--radix-popover-trigger-width] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1 shadow-xl"
+                  className="z-[60] max-h-80 w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white p-1 shadow-xl"
                   align="start"
                   sideOffset={8}
+                  onWheel={(event) => event.stopPropagation()}
                 >
                   <Command className="h-full">
                     <CommandInput placeholder="Wyszukaj kategorię..." />
-                    <CommandList className="max-h-72 overflow-y-auto">
+                    <CommandList className="max-h-72 overflow-y-auto overscroll-contain">
                       <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
                       <CommandGroup>
                         {categories.map((category) => (
@@ -91,7 +93,9 @@ export function ComboboxCategories({
                             value={category.name}
                             onSelect={(currentValue) => {
                               const newValue =
-                                currentValue === field.value ? "" : currentValue;
+                                currentValue === field.value
+                                  ? ""
+                                  : currentValue;
                               field.onChange(newValue);
                               setOpen(false);
                             }}
