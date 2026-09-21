@@ -1,9 +1,8 @@
 import { useAppSelector } from "../../store/reduxHook";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
 import { useEffect, useState, useMemo } from "react";
 import ExpenseFilters from "./ExpenseFilters";
-import DeferredExpenseDialog from "../ExpenseDialog/DeferredExpenseDialog";
+import ExpensesTable from "./ExpensesTable";
+import EmptyState from "./EmptyState";
 import Pagination from "../../ui/Pagination/Pagination";
 import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
 import {
@@ -18,7 +17,7 @@ const DEFAULT_ROWS_PER_PAGE: RowsPerPage = 8;
 const ROWS_PER_PAGE_STORAGE_KEY = "allExpensesRowsPerPage";
 
 const getDateKey = (date: string | Date) =>
-  format(new Date(date), "yyyy-MM-dd");
+  new Date(date).toISOString().slice(0, 10);
 
 const isRowsPerPageOption = (value: number): value is RowsPerPage =>
   ROWS_PER_PAGE_OPTIONS.some((option) => option === value);
@@ -40,7 +39,7 @@ const getInitialRowsPerPage = (): RowsPerPage => {
 const ElementsTable = () => {
   const category = useAppSelector((state) => state.config.selectedCategory);
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
-  const { data: expenses = [] } = useExpensesQuery(selectedMonth);
+  const { data: expenses = [], isLoading } = useExpensesQuery(selectedMonth);
   const deleteExpenseMutation = useDeleteExpenseMutation(selectedMonth);
 
   const [filters, setFilters] = useState({
@@ -133,7 +132,16 @@ const ElementsTable = () => {
     return map;
   }, [filteredExpenses]);
 
-  const isTableLoading = !expenses.length;
+  const isTableLoading = Boolean(isLoading);
+
+  const areFiltersActive = Boolean(
+    filters.name ||
+    filters.category ||
+    filters.startDate ||
+    filters.endDate ||
+    filters.minCost ||
+    filters.maxCost,
+  );
 
   return (
     <div className="flex min-h-[720px] min-w-0 flex-col gap-4 overflow-x-auto">
@@ -143,63 +151,20 @@ const ElementsTable = () => {
 
       {isTableLoading ? (
         <TableSkeleton rows={8} columns={5} className="min-h-[520px]" />
+      ) : filteredExpenses.length === 0 ? (
+        <EmptyState
+          message={
+            areFiltersActive
+              ? "Dla zastosowanych filtrów nie znaleziono wydatków."
+              : "Brak wydatków w tym miesaicu"
+          }
+        />
       ) : (
-        <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-sm">
-          <table className="w-full min-w-[680px] table-fixed">
-            <thead>
-              <tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-                <th className="w-[26%] px-4 py-3">Nazwa</th>
-                <th className="w-[23%] px-4 py-3">Kategoria</th>
-                <th className="w-[14%] px-2 py-3 whitespace-nowrap">Data</th>
-                <th className="w-[13%] px-2 py-3 whitespace-nowrap">Koszt</th>
-                <th className="w-[24%] px-2 py-3 text-center whitespace-nowrap">
-                  Akcje
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paginatedExpenses.map((el) => {
-                const dateKey = getDateKey(el.date);
-                const rowBg = rowColorByDate.get(dateKey) ?? "bg-white";
-
-                return (
-                  <tr
-                    key={el.id}
-                    className={`${rowBg} transition-colors hover:bg-slate-50`}
-                  >
-                    <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
-                      <span className="block truncate">{el.name}</span>
-                    </td>
-                    <td className="px-4 py-3 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-900">
-                      <span className="block truncate">{el.category}</span>
-                    </td>
-                    <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
-                      {format(new Date(el.date), "dd.MM.yyyy", { locale: pl })}
-                    </td>
-                    <td className="px-2 py-3 whitespace-nowrap text-sm text-slate-900">
-                      {el.cost.toFixed(2)} zł
-                    </td>
-                    <td className="px-2 py-3 text-center">
-                      <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                        <DeferredExpenseDialog
-                          expense={el}
-                          isEdit
-                          triggerLabel="Edytuj"
-                        />
-                        <button
-                          onClick={() => handleDelete(el.id)}
-                          className="px-2 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                        >
-                          Usuń
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <ExpensesTable
+          expenses={paginatedExpenses}
+          rowColorByDate={rowColorByDate}
+          handleDelete={handleDelete}
+        />
       )}
 
       {!isTableLoading && (
