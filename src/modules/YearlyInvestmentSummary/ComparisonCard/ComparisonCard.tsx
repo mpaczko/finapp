@@ -17,7 +17,7 @@ const ComparisonCard = ({
   loading,
   baseColor,
 }: ComparisonCardProps) => {
-  const [showValues, setShowValues] = useSummaryVisibility();
+  const [showValues] = useSummaryVisibility();
 
   const difference = useMemo(
     () => (Number(planned || 0) - Number(actual || 0)).toFixed(2),
@@ -36,16 +36,6 @@ const ComparisonCard = ({
             {title}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowValues((current) => !current)}
-          className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-600 transition hover:bg-slate-100"
-          aria-label={
-            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
-          }
-        >
-          {showValues ? "Ukryj" : "Pokaż"}
-        </button>
       </div>
 
       <div className="mt-auto space-y-2 pt-5">
