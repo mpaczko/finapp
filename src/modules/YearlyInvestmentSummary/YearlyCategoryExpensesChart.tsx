@@ -33,6 +33,7 @@ const CHART_HEIGHT = 260;
 const PADDING = { top: 32, right: 18, bottom: 42, left: 58 };
 const MONTHLY_VALUES_VISIBILITY_STORAGE_KEY =
   "finapp.yearlyChartMonthlyValuesVisible";
+const AVERAGE_VISIBILITY_STORAGE_KEY = "finapp.yearlyChartAverageVisible";
 
 const getMonthIndex = (date: string) => Number(date.slice(5, 7)) - 1;
 
@@ -56,6 +57,18 @@ const YearlyCategoryExpensesChart = ({
       return false;
     }
   });
+  const [showAverage, setShowAverage] = useState(() => {
+    if (typeof window === "undefined") return true;
+
+    try {
+      const savedValue = window.localStorage.getItem(
+        AVERAGE_VISIBILITY_STORAGE_KEY,
+      );
+      return savedValue === null || savedValue === "true";
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     try {
@@ -67,6 +80,17 @@ const YearlyCategoryExpensesChart = ({
       // The toggle still works for the current session when storage is unavailable.
     }
   }, [showMonthlyValues]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        AVERAGE_VISIBILITY_STORAGE_KEY,
+        String(showAverage),
+      );
+    } catch {
+      // The toggle still works for the current session when storage is unavailable.
+    }
+  }, [showAverage]);
   const values = useMemo(() => {
     const monthlyValues = Array.from({ length: 12 }, () => 0);
 
@@ -96,6 +120,7 @@ const YearlyCategoryExpensesChart = ({
 
   const visibleValues = values.slice(0, visibleMonthCount);
   const total = visibleValues.reduce((sum, value) => sum + value, 0);
+  const average = visibleValues.length ? total / visibleValues.length : 0;
   const chart = useMemo(() => {
     const innerWidth = CHART_WIDTH - PADDING.left - PADDING.right;
     const innerHeight = CHART_HEIGHT - PADDING.top - PADDING.bottom;
@@ -118,6 +143,7 @@ const YearlyCategoryExpensesChart = ({
       innerHeight,
       points,
       scaleMax,
+      averageY: y(average),
       path: points
         .map(
           (point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`,
@@ -128,7 +154,7 @@ const YearlyCategoryExpensesChart = ({
         y: PADDING.top + innerHeight * (1 - ratio),
       })),
     };
-  }, [visibleValues]);
+  }, [average, visibleValues]);
 
   return (
     <section className="mt-4 min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -142,7 +168,7 @@ const YearlyCategoryExpensesChart = ({
           </p>
         </div>
         {!loading && category && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-slate-900">
               {formatSummaryCurrency(total, showValues)}
             </p>
@@ -163,6 +189,14 @@ const YearlyCategoryExpensesChart = ({
                 <Eye size={14} aria-hidden="true" />
               )}
               {showMonthlyValues ? "Ukryj kwoty" : "Pokaż kwoty"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAverage((visible) => !visible)}
+              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+              aria-pressed={showAverage}
+            >
+              {showAverage ? "Ukryj średnią" : "Pokaż średnią"}
             </button>
           </div>
         )}
@@ -211,6 +245,28 @@ const YearlyCategoryExpensesChart = ({
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+
+            {showAverage && (
+              <g>
+                <line
+                  x1={PADDING.left}
+                  x2={CHART_WIDTH - PADDING.right}
+                  y1={chart.averageY}
+                  y2={chart.averageY}
+                  stroke="#2563eb"
+                  strokeWidth="2"
+                  strokeDasharray="7 5"
+                />
+                <text
+                  x={CHART_WIDTH - PADDING.right}
+                  y={Math.max(PADDING.top + 12, chart.averageY - 7)}
+                  textAnchor="end"
+                  className="fill-blue-600 text-[11px] font-semibold"
+                >
+                  {`Średnia: ${formatSummaryCurrency(average, showValues)}`}
+                </text>
+              </g>
+            )}
 
             {chart.points.map((point, index) => (
               <g key={monthLabels[index]}>
