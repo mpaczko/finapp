@@ -1,13 +1,19 @@
-import { useState } from "react";
-import { Eye, EyeOff, Pencil } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Pencil } from "lucide-react";
 import {
   useBudgetQuery,
   useUpdateBudgetMutation,
 } from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
+import { useCategoriesQuery } from "../../features/categories/queries";
+import { useYearlyExpensesQuery } from "../../features/expenses/queries";
 import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
+import { categoryChartColors } from "../../lib/categoryColors";
+import { setSelectedCategory } from "../../store/configSlice/configSlice";
+import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
 import ComparisonCard from "./ComparisonCard";
+import YearlyCategoryExpensesChart from "./YearlyCategoryExpensesChart";
 
 type YearlyInvestmentSummaryProps = {
   userId: string | null;
@@ -22,7 +28,12 @@ const YearlyInvestmentSummary = ({
   const [year, setYear] = useState<number>(currentYear);
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
-  const [showValues, setShowValues] = useSummaryVisibility();
+  const [showValues] = useSummaryVisibility();
+  const [selectedCategory, setSelectedCategoryForChart] = useState("");
+  const dispatch = useAppDispatch();
+  const globallySelectedCategory = useAppSelector(
+    (state) => state.config.selectedCategory,
+  );
   const { data: budgets = [] } = useBudgetQuery(selectedMonth, Boolean(userId));
   const selectedBudget = budgets[0];
   const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
@@ -30,6 +41,37 @@ const YearlyInvestmentSummary = ({
     year,
     Boolean(userId),
   );
+  const { data: yearlyExpenses = [], isLoading: yearlyExpensesLoading } =
+    useYearlyExpensesQuery(year, Boolean(userId));
+  const { data: categories = [] } = useCategoriesQuery(Boolean(userId));
+
+  const availableCategories = useMemo(() => {
+    const names = categories.map((category) => category.name);
+    yearlyExpenses.forEach((expense) => {
+      if (!names.includes(expense.category)) names.push(expense.category);
+    });
+    return names;
+  }, [categories, yearlyExpenses]);
+  const categoryColors = useMemo(
+    () =>
+      Object.fromEntries(
+        availableCategories.map((category, index) => [
+          category,
+          categoryChartColors[index % categoryChartColors.length],
+        ]),
+      ),
+    [availableCategories],
+  );
+
+  useEffect(() => {
+    if (!availableCategories.includes(selectedCategory)) {
+      const foodCategory = availableCategories.find(
+        (category) => category.trim().toLocaleLowerCase("pl-PL") === "jedzenie",
+      );
+
+      setSelectedCategoryForChart(foodCategory ?? availableCategories[0] ?? "");
+    }
+  }, [availableCategories, selectedCategory]);
 
   const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
   const selectedMonthBelongsToYear = selectedBudget?.month.startsWith(
@@ -82,22 +124,6 @@ const YearlyInvestmentSummary = ({
               className="w-20 border-none bg-transparent text-right text-sm font-semibold text-slate-900 outline-none"
             />
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowValues((current) => !current)}
-            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-            aria-label={
-              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
-            }
-          >
-            {showValues ? (
-              <EyeOff size={14} aria-hidden="true" />
-            ) : (
-              <Eye size={14} aria-hidden="true" />
-            )}
-            {showValues ? "Ukryj" : "Pokaż"}
-          </button>
         </div>
       </div>
 
@@ -206,6 +232,48 @@ const YearlyInvestmentSummary = ({
           />
         </div>
       </div>
+
+      <div
+        className="mt-4 flex flex-wrap gap-2"
+        aria-label="Wybór kategorii wykresu"
+      >
+        {availableCategories.map((category) => {
+          const active = category === selectedCategory;
+          const color = categoryColors[category];
+
+          return (
+            <button
+              key={category}
+              type="button"
+              aria-pressed={active}
+              onClick={() => {
+                setSelectedCategoryForChart(category);
+                if (globallySelectedCategory !== category) {
+                  dispatch(setSelectedCategory(category));
+                }
+              }}
+              className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-medium text-slate-800 transition hover:brightness-95 ${
+                active ? "shadow-sm" : "bg-white"
+              }`}
+              style={{
+                backgroundColor: active ? color : undefined,
+                borderColor: color,
+              }}
+            >
+              {category}
+            </button>
+          );
+        })}
+      </div>
+
+      <YearlyCategoryExpensesChart
+        category={selectedCategory}
+        color={categoryColors[selectedCategory] ?? categoryChartColors[0]}
+        year={year}
+        expenses={yearlyExpenses}
+        loading={yearlyExpensesLoading}
+        showValues={showValues}
+      />
     </div>
   );
 };

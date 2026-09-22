@@ -12,6 +12,17 @@ export const useExpensesQuery = (month: string, enabled = true) =>
     enabled,
   });
 
+export const yearlyExpensesQueryKey = (year: number) =>
+  ["expenses", "year", year] as const;
+
+export const useYearlyExpensesQuery = (year: number, enabled = true) =>
+  useQuery({
+    queryKey: yearlyExpensesQueryKey(year),
+    queryFn: ({ signal }) =>
+      expensesApi.listByDateRange(`${year}-01-01`, `${year}-12-31`, signal),
+    enabled,
+  });
+
 export const useSaveExpenseMutation = (selectedMonth: string) => {
   const queryClient = useQueryClient();
 
