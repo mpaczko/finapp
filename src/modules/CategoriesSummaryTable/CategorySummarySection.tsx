@@ -1,4 +1,3 @@
-import { Eye, EyeOff } from "lucide-react";
 import type { CategorySummary } from "../../hooks/useBudgetSummary";
 import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
@@ -37,7 +36,7 @@ const CategorySummarySection = ({
   setInputValue,
   savePlannedValue,
 }: CategorySummarySectionProps) => {
-  const [showValues, setShowValues] = useSummaryVisibility();
+  const [showValues] = useSummaryVisibility();
 
   const totals = calculateTotals(rows);
 
@@ -52,21 +51,6 @@ const CategorySummarySection = ({
         <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
           <span>Suma kategorii:</span>
-          <button
-            type="button"
-            onClick={() => setShowValues((current) => !current)}
-            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-            aria-label={
-              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
-            }
-          >
-            {showValues ? (
-              <EyeOff size={14} aria-hidden="true" />
-            ) : (
-              <Eye size={14} aria-hidden="true" />
-            )}
-            {showValues ? "Ukryj" : "Pokaż"}
-          </button>
           <span>{formatSummaryCurrency(totals.actual, showValues)}</span>
         </div>
       </div>

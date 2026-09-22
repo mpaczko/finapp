@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import {
   useBudgetQuery,
   useUpdateBudgetMutation,
@@ -28,7 +28,7 @@ const YearlyInvestmentSummary = ({
   const [year, setYear] = useState<number>(currentYear);
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
-  const [showValues, setShowValues] = useSummaryVisibility();
+  const [showValues] = useSummaryVisibility();
   const [selectedCategory, setSelectedCategoryForChart] = useState("");
   const dispatch = useAppDispatch();
   const globallySelectedCategory = useAppSelector(
@@ -124,22 +124,6 @@ const YearlyInvestmentSummary = ({
               className="w-20 border-none bg-transparent text-right text-sm font-semibold text-slate-900 outline-none"
             />
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowValues((current) => !current)}
-            className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-            aria-label={
-              showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
-            }
-          >
-            {showValues ? (
-              <EyeOff size={14} aria-hidden="true" />
-            ) : (
-              <Eye size={14} aria-hidden="true" />
-            )}
-            {showValues ? "Ukryj" : "Pokaż"}
-          </button>
         </div>
       </div>
 

@@ -1,16 +1,19 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { Eye, EyeOff } from "lucide-react";
 import { useAppSelector } from "../../store/reduxHook";
 import { supabase } from "../../createClient";
 import { setSelectedMonth } from "../../store/configSlice/configSlice";
 import DeferredExpenseDialog from "../../modules/ExpenseDialog/DeferredExpenseDialog";
 import { Button } from "../../ui/Button";
+import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 
 const MultipleExpenses = lazy(() => import("../../modules/MultipleExpenses"));
 
 const Nav = () => {
   const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
+  const [showValues, setShowValues] = useSummaryVisibility();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -38,6 +41,20 @@ const Nav = () => {
       </div>
 
       <div className="flex items-center justify-end gap-5">
+        <Button
+          className="inline-flex items-center gap-1.5 whitespace-nowrap"
+          onClick={() => setShowValues((current) => !current)}
+          aria-label={
+            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+          }
+        >
+          {showValues ? (
+            <EyeOff size={16} aria-hidden="true" />
+          ) : (
+            <Eye size={16} aria-hidden="true" />
+          )}
+          {showValues ? "Ukryj dane" : "Pokaż dane"}
+        </Button>
         <Suspense
           fallback={
             <Button disabled className="animate-pulse">

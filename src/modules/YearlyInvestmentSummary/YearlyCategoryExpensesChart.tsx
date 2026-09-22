@@ -270,7 +270,7 @@ const YearlyCategoryExpensesChart = ({
 
             {chart.points.map((point, index) => (
               <g key={monthLabels[index]}>
-                {showMonthlyValues && showValues && (
+                {showMonthlyValues && (
                   <text
                     x={point.x}
                     y={Math.max(PADDING.top - 8, point.y - 12)}
