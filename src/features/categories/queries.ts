@@ -9,4 +9,6 @@ export const useCategoriesQuery = (enabled = true) =>
     queryKey: categoriesQueryKey,
     queryFn: ({ signal }) => categoriesApi.list(signal),
     enabled,
+    staleTime: 24 * 60 * 60_000,
+    gcTime: 24 * 60 * 60_000,
   });

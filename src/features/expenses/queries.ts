@@ -11,17 +11,18 @@ export const useExpensesQuery = (month: string, enabled = true) =>
     queryKey: expensesQueryKey(month),
     queryFn: ({ signal }) => expensesApi.listByMonth(month, signal),
     enabled,
+    staleTime: 45_000,
   });
 
-export const yearlyExpensesQueryKey = (year: number) =>
-  ["expenses", "year", year] as const;
+export const yearlyExpenseTotalsQueryKey = (year: number) =>
+  ["expenses", "monthly-totals", year] as const;
 
-export const useYearlyExpensesQuery = (year: number, enabled = true) =>
+export const useYearlyExpenseTotalsQuery = (year: number, enabled = true) =>
   useQuery({
-    queryKey: yearlyExpensesQueryKey(year),
-    queryFn: ({ signal }) =>
-      expensesApi.listByDateRange(`${year}-01-01`, `${year}-12-31`, signal),
+    queryKey: yearlyExpenseTotalsQueryKey(year),
+    queryFn: ({ signal }) => expensesApi.getMonthlyTotals(year, signal),
     enabled,
+    staleTime: 2 * 60_000,
   });
 
 const invalidateExpenseData = (queryClient: QueryClient) => {

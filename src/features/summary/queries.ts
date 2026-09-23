@@ -10,4 +10,5 @@ export const useYearlySummaryQuery = (year: number, enabled = true) =>
     queryKey: yearlySummaryQueryKey(year),
     queryFn: ({ signal }) => summaryApi.getYearly(year, signal),
     enabled,
+    staleTime: 2 * 60_000,
   });

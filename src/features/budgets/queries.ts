@@ -9,6 +9,7 @@ export const useBudgetQuery = (month: string, enabled = true) =>
     queryKey: budgetQueryKey(month),
     queryFn: ({ signal }) => budgetsApi.listByMonth(month, signal),
     enabled,
+    staleTime: 2 * 60_000,
   });
 
 export const useUpdateBudgetMutation = (month: string) => {

@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-import type { Expense } from "../../lib/expensesApi";
+import type { MonthlyExpenseTotal } from "../../lib/expensesApi";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 
 type YearlyCategoryExpensesChartProps = {
   category: string;
   color: string;
   year: number;
-  expenses: Expense[];
+  monthlyTotals: MonthlyExpenseTotal[];
   loading: boolean;
   showValues: boolean;
 };
@@ -35,13 +35,11 @@ const MONTHLY_VALUES_VISIBILITY_STORAGE_KEY =
   "finapp.yearlyChartMonthlyValuesVisible";
 const AVERAGE_VISIBILITY_STORAGE_KEY = "finapp.yearlyChartAverageVisible";
 
-const getMonthIndex = (date: string) => Number(date.slice(5, 7)) - 1;
-
 const YearlyCategoryExpensesChart = ({
   category,
   color,
   year,
-  expenses,
+  monthlyTotals,
   loading,
   showValues,
 }: YearlyCategoryExpensesChartProps) => {
@@ -94,17 +92,17 @@ const YearlyCategoryExpensesChart = ({
   const values = useMemo(() => {
     const monthlyValues = Array.from({ length: 12 }, () => 0);
 
-    expenses.forEach((expense) => {
-      if (expense.category !== category) return;
+    monthlyTotals.forEach((entry) => {
+      if (entry.category !== category) return;
 
-      const monthIndex = getMonthIndex(expense.date);
+      const monthIndex = entry.month - 1;
       if (monthIndex >= 0 && monthIndex < 12) {
-        monthlyValues[monthIndex] += Number(expense.cost);
+        monthlyValues[monthIndex] += entry.total;
       }
     });
 
     return monthlyValues;
-  }, [category, expenses]);
+  }, [category, monthlyTotals]);
 
   const visibleMonthCount = useMemo(() => {
     const currentDate = new Date();

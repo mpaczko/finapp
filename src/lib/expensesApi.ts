@@ -10,6 +10,12 @@ export type Expense = {
   cost: number;
 };
 
+export type MonthlyExpenseTotal = {
+  category: string;
+  month: number;
+  total: number;
+};
+
 export type CreateExpenseDto = IAddExpenseForm;
 
 const toExpenseDto = ({
@@ -30,9 +36,9 @@ export const expensesApi = {
       signal,
     }),
 
-  listByDateRange: (from: string, to: string, signal?: AbortSignal) =>
-    apiRequest<Expense[]>(
-      `/expenses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+  getMonthlyTotals: (year: number, signal?: AbortSignal) =>
+    apiRequest<MonthlyExpenseTotal[]>(
+      `/expenses/monthly-totals?year=${encodeURIComponent(year)}`,
       { signal },
     ),
 
