@@ -34,6 +34,29 @@ export class ExpensesService {
     return expenses.map(this.mapExpense);
   }
 
+  async getMonthlyTotals(userId: string, year: number) {
+    const from = `${year}-01-01`;
+    const to = `${year + 1}-01-01`;
+
+    const totals = await this.prisma.$queryRaw<
+      Array<{ category: string; month: number; total: Prisma.Decimal }>
+    >`
+      SELECT category, EXTRACT(MONTH FROM date)::int AS month, SUM(cost) AS total
+      FROM expenses
+      WHERE user_id = ${userId}::uuid
+        AND date >= ${from}::date
+        AND date < ${to}::date
+      GROUP BY category, EXTRACT(MONTH FROM date)
+      ORDER BY category, month
+    `;
+
+    return totals.map(({ category, month, total }) => ({
+      category,
+      month,
+      total: toNumber(total),
+    }));
+  }
+
   async create(userId: string, dto: CreateExpenseDto) {
     const expense = await this.prisma.expense.create({
       data: {

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 
 import { expensesApi } from "../../lib/expensesApi";
 import { IAddExpenseForm } from "../../modules/ExpenseDialog/ExpenseForm/addExpenseForm.config";
@@ -10,58 +11,49 @@ export const useExpensesQuery = (month: string, enabled = true) =>
     queryKey: expensesQueryKey(month),
     queryFn: ({ signal }) => expensesApi.listByMonth(month, signal),
     enabled,
+    staleTime: 45_000,
   });
 
-export const yearlyExpensesQueryKey = (year: number) =>
-  ["expenses", "year", year] as const;
+export const yearlyExpenseTotalsQueryKey = (year: number) =>
+  ["expenses", "monthly-totals", year] as const;
 
-export const useYearlyExpensesQuery = (year: number, enabled = true) =>
+export const useYearlyExpenseTotalsQuery = (year: number, enabled = true) =>
   useQuery({
-    queryKey: yearlyExpensesQueryKey(year),
-    queryFn: ({ signal }) =>
-      expensesApi.listByDateRange(`${year}-01-01`, `${year}-12-31`, signal),
+    queryKey: yearlyExpenseTotalsQueryKey(year),
+    queryFn: ({ signal }) => expensesApi.getMonthlyTotals(year, signal),
     enabled,
+    staleTime: 2 * 60_000,
   });
 
-export const useSaveExpenseMutation = (selectedMonth: string) => {
+const invalidateExpenseData = (queryClient: QueryClient) => {
+  void queryClient.invalidateQueries({ queryKey: ["expenses"] });
+  void queryClient.invalidateQueries({ queryKey: ["summary"] });
+};
+
+export const useSaveExpenseMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, expense }: { id?: string; expense: IAddExpenseForm }) =>
       id ? expensesApi.update(id, expense) : expensesApi.create(expense),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: expensesQueryKey(selectedMonth),
-      });
-      void queryClient.invalidateQueries({ queryKey: ["summary"] });
-    },
+    onSuccess: () => invalidateExpenseData(queryClient),
   });
 };
 
-export const useCreateManyExpensesMutation = (selectedMonth: string) => {
+export const useCreateManyExpensesMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: expensesApi.createMany,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: expensesQueryKey(selectedMonth),
-      });
-      void queryClient.invalidateQueries({ queryKey: ["summary"] });
-    },
+    onSuccess: () => invalidateExpenseData(queryClient),
   });
 };
 
-export const useDeleteExpenseMutation = (selectedMonth: string) => {
+export const useDeleteExpenseMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => expensesApi.remove(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: expensesQueryKey(selectedMonth),
-      });
-      void queryClient.invalidateQueries({ queryKey: ["summary"] });
-    },
+    onSuccess: () => invalidateExpenseData(queryClient),
   });
 };

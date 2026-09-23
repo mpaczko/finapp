@@ -9,7 +9,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { ComboboxCategories } from "../../../components/ComboboxCategories";
 import { IExpense } from "../../../types/expenseType";
-import { useAppSelector } from "../../../store/reduxHook";
 import FormDatePicker from "../../../components/Form/FormDatePicker";
 import { Button } from "../../../ui/Button";
 import FormInput from "../../../components/Form/FormInput";
@@ -34,8 +33,7 @@ const ExpenseForm = forwardRef<ExpenseFormHandle, Props>(function ExpenseForm(
   { isEdit, expense, onClose, onRemove, showRemoveButton, disabled },
   ref,
 ) {
-  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
-  const saveExpenseMutation = useSaveExpenseMutation(selectedMonth);
+  const saveExpenseMutation = useSaveExpenseMutation();
 
   const methods = useForm<IAddExpenseForm>({
     defaultValues,

@@ -6,7 +6,7 @@ import {
 } from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
 import { useCategoriesQuery } from "../../features/categories/queries";
-import { useYearlyExpensesQuery } from "../../features/expenses/queries";
+import { useYearlyExpenseTotalsQuery } from "../../features/expenses/queries";
 import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 import { categoryChartColors } from "../../lib/categoryColors";
@@ -41,17 +41,17 @@ const YearlyInvestmentSummary = ({
     year,
     Boolean(userId),
   );
-  const { data: yearlyExpenses = [], isLoading: yearlyExpensesLoading } =
-    useYearlyExpensesQuery(year, Boolean(userId));
+  const { data: monthlyTotals = [], isLoading: monthlyTotalsLoading } =
+    useYearlyExpenseTotalsQuery(year, Boolean(userId));
   const { data: categories = [] } = useCategoriesQuery(Boolean(userId));
 
   const availableCategories = useMemo(() => {
     const names = categories.map((category) => category.name);
-    yearlyExpenses.forEach((expense) => {
-      if (!names.includes(expense.category)) names.push(expense.category);
+    monthlyTotals.forEach((entry) => {
+      if (!names.includes(entry.category)) names.push(entry.category);
     });
     return names;
-  }, [categories, yearlyExpenses]);
+  }, [categories, monthlyTotals]);
   const categoryColors = useMemo(
     () =>
       Object.fromEntries(
@@ -270,8 +270,8 @@ const YearlyInvestmentSummary = ({
         category={selectedCategory}
         color={categoryColors[selectedCategory] ?? categoryChartColors[0]}
         year={year}
-        expenses={yearlyExpenses}
-        loading={yearlyExpensesLoading}
+        monthlyTotals={monthlyTotals}
+        loading={monthlyTotalsLoading}
         showValues={showValues}
       />
     </div>
