@@ -40,7 +40,7 @@ const ElementsTable = () => {
   const category = useAppSelector((state) => state.config.selectedCategory);
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
   const { data: expenses = [], isLoading } = useExpensesQuery(selectedMonth);
-  const deleteExpenseMutation = useDeleteExpenseMutation(selectedMonth);
+  const deleteExpenseMutation = useDeleteExpenseMutation();
 
   const [filters, setFilters] = useState({
     name: "",

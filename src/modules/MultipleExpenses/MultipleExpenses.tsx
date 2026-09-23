@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useCreateManyExpensesMutation } from "../../features/expenses/queries";
-import { useAppSelector } from "../../store/reduxHook";
 import { Button } from "../../ui/Button";
 import {
   Dialog,
@@ -25,8 +24,7 @@ const ExpensesDialog = () => {
   const [warnings, setWarnings] = useState<CsvIssue[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const formRefs = useRef<Record<string, ExpenseFormHandle | null>>({});
-  const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
-  const createManyMutation = useCreateManyExpensesMutation(selectedMonth);
+  const createManyMutation = useCreateManyExpensesMutation();
 
   const resetImport = () => {
     setExpenses([]);
