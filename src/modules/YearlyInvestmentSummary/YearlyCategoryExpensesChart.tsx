@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import type { MonthlyExpenseTotal } from "../../lib/expensesApi";
-import { formatSummaryCurrency } from "../../lib/summaryVisibility";
+import {
+  formatSummaryCurrency,
+  maskCurrencyValue,
+} from "../../lib/summaryVisibility";
 
 type YearlyCategoryExpensesChartProps = {
   category: string;
@@ -224,14 +227,18 @@ const YearlyCategoryExpensesChart = ({
                   stroke="#cbd5e1"
                   strokeDasharray="4 4"
                 />
-                <text
-                  x={PADDING.left - 10}
-                  y={gridLine.y + 4}
-                  textAnchor="end"
-                  className="fill-slate-500 text-[11px]"
-                >
-                  {showValues ? `${Math.round(gridLine.value)} zł` : "•••"}
-                </text>
+                {showMonthlyValues && (
+                  <text
+                    x={PADDING.left - 10}
+                    y={gridLine.y + 4}
+                    textAnchor="end"
+                    className="fill-slate-500 text-[11px]"
+                  >
+                    {showValues
+                      ? `${Math.round(gridLine.value)} zł`
+                      : maskCurrencyValue(gridLine.value)}
+                  </text>
+                )}
               </g>
             ))}
 
@@ -244,7 +251,7 @@ const YearlyCategoryExpensesChart = ({
               strokeLinejoin="round"
             />
 
-            {showAverage && (
+            {showAverage && showMonthlyValues && (
               <g>
                 <line
                   x1={PADDING.left}
@@ -261,7 +268,9 @@ const YearlyCategoryExpensesChart = ({
                   textAnchor="end"
                   className="fill-blue-600 text-[11px] font-semibold"
                 >
-                  {`Średnia: ${formatSummaryCurrency(average, showValues)}`}
+                  {showValues
+                    ? `Średnia: ${formatSummaryCurrency(average, true)}`
+                    : `Średnia: ${maskCurrencyValue(average)}`}
                 </text>
               </g>
             )}
@@ -275,7 +284,9 @@ const YearlyCategoryExpensesChart = ({
                     textAnchor="middle"
                     className="fill-slate-700 text-[11px] font-medium"
                   >
-                    {formatSummaryCurrency(point.value, true)}
+                    {showValues
+                      ? formatSummaryCurrency(point.value, true)
+                      : maskCurrencyValue(point.value)}
                   </text>
                 )}
                 <circle
@@ -286,7 +297,7 @@ const YearlyCategoryExpensesChart = ({
                   stroke={color}
                   strokeWidth="3"
                 >
-                  <title>{`${monthLabels[index]}: ${formatSummaryCurrency(point.value, showValues)}`}</title>
+                  <title>{`${monthLabels[index]}: ${showValues ? formatSummaryCurrency(point.value, true) : maskCurrencyValue(point.value)}`}</title>
                 </circle>
                 <text
                   x={point.x}
