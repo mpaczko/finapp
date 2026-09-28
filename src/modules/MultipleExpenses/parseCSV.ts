@@ -60,6 +60,45 @@ function findColumn(headers: string[], candidates: string[], fallback: number) {
   return index >= 0 ? index : fallback;
 }
 
+function hasKnownHeader(headers: string[]) {
+  const candidates = [
+    ...DATE_HEADERS,
+    ...NAME_HEADERS,
+    ...AMOUNT_HEADERS,
+  ];
+
+  return headers.some((header) =>
+    candidates.some((candidate) => header === candidate || header.includes(candidate)),
+  );
+}
+
+function findExpenseColumn(records: CsvRecord[]) {
+  const negativeAmountCounts = new Map<number, number>();
+
+  records.forEach((record) => {
+    record.fields.forEach((value, index) => {
+      const normalized = value
+        .replace(/\b(PLN|EUR|USD|GBP|zł)\b/gi, "")
+        .trim();
+
+      if (/^-[0-9\s\u00A0,.]+$/.test(normalized)) {
+        negativeAmountCounts.set(index, (negativeAmountCounts.get(index) ?? 0) + 1);
+      }
+    });
+  });
+
+  let expenseColumn = -1;
+  let highestCount = 0;
+  negativeAmountCounts.forEach((count, index) => {
+    if (count > highestCount) {
+      expenseColumn = index;
+      highestCount = count;
+    }
+  });
+
+  return expenseColumn;
+}
+
 function detectDelimiter(header: string) {
   const delimiters = [",", ";", "\t"] as const;
   return delimiters.reduce((best, delimiter) => {
@@ -183,18 +222,29 @@ export function parseCSV(csv: string): CsvParseResult {
   if (error) return { validRows: [], invalidRows, warnings };
 
   const headers = records[0].fields.map(normalizeHeader);
-  const dateColumn = findColumn(headers, DATE_HEADERS, 1);
-  const nameColumn = findColumn(headers, NAME_HEADERS, 2);
-  const amountColumn = findColumn(headers, AMOUNT_HEADERS, Math.max(headers.length - 3, 0));
+  const hasHeader = hasKnownHeader(headers);
+  // Headerless bank exports start with an account-balance metadata row, which
+  // is not a transaction and must not be imported.
+  const dataRecords = records.slice(1);
+  const dateColumn = hasHeader ? findColumn(headers, DATE_HEADERS, 1) : 1;
+  const nameColumn = hasHeader ? findColumn(headers, NAME_HEADERS, 2) : 2;
+  const amountColumn = hasHeader
+    ? findColumn(headers, AMOUNT_HEADERS, Math.max(headers.length - 3, 0))
+    : Math.max(headers.length - 3, 0);
+  const expenseColumn = findExpenseColumn(dataRecords);
   const validRows: Transaction[] = [];
 
-  for (const record of records.slice(1)) {
+  for (const record of dataRecords) {
     const name = (record.fields[nameColumn] ?? "").trim();
     const date = parseDate(record.fields[dateColumn] ?? "");
-    // Some bank exports place the account balance in the generic amount
-    // column. A currency-marked amount in the transaction description is the
-    // actual card payment and takes precedence (e.g. "PŁATNOŚĆ KARTĄ 19.72 PLN").
+    // Some bank exports contain a dedicated, always-negative expense column
+    // followed by the account balance. Prefer that expense value when present.
+    // Otherwise, a currency-marked card payment in the description takes
+    // precedence over the generic amount column.
     const amount =
+      (expenseColumn >= 0
+        ? parseAmount(record.fields[expenseColumn] ?? "")
+        : undefined) ??
       parseAmountFromDescription(name) ??
       parseAmount(record.fields[amountColumn] ?? "");
 

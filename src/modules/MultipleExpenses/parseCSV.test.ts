@@ -43,4 +43,17 @@ describe("parseCSV", () => {
       category: "jedzenie",
     });
   });
+
+  it("uses the negative expense column instead of the following account balance", () => {
+    const result = parseCSV(
+      "2026-09-28,27-09-2026,'12 1090 2835 0000 0001 5886 5644,MICHAŁ PĄCZKO UL. POPRZECZNA 9 46-050 TARNÓW OPOLSKI,PLN,\"5434,66\",\"5661,34\",3,\n27-09-2026,27-09-2026,Zakup BLIK PayPro S.A. Pastelowa 860-198 Poznan ref:95040219795,PayPro S.A. Pastelowa 860-198 Poznan,72 1090 1489 0000 0000 4800 3393,\"-123,97\",\"5661,34\",1,\n28-09-2026,28-09-2026,Zakup BLIK allegro.pl WIERZBIĘCICE 1b ref:95048583566,allegro.pl WIERZBIĘCICE 1b,72 1090 1489 0000 0000 4800 3393,\"-188,67\",\"5235,99\",2,",
+    );
+
+    expect(result.invalidRows).toEqual([]);
+    expect(result.validRows).toHaveLength(2);
+    expect(result.validRows.map((transaction) => transaction.cost)).toEqual([
+      123.97,
+      188.67,
+    ]);
+  });
 });
