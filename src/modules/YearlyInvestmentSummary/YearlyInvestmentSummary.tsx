@@ -20,6 +20,23 @@ type YearlyInvestmentSummaryProps = {
   selectedMonth: string;
 };
 
+const SELECTED_CATEGORY_COOKIE = "finapp.yearlyChartSelectedCategory";
+const DEFAULT_SELECTED_CATEGORY = "jedzenie";
+
+const getSelectedCategoryFromCookie = () => {
+  const cookie = document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${SELECTED_CATEGORY_COOKIE}=`));
+
+  return cookie
+    ? decodeURIComponent(cookie.split("=").slice(1).join("="))
+    : DEFAULT_SELECTED_CATEGORY;
+};
+
+const saveSelectedCategoryToCookie = (category: string) => {
+  document.cookie = `${SELECTED_CATEGORY_COOKIE}=${encodeURIComponent(category)}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+};
+
 const YearlyInvestmentSummary = ({
   userId,
   selectedMonth,
@@ -29,7 +46,9 @@ const YearlyInvestmentSummary = ({
   const [editingIpBox, setEditingIpBox] = useState(false);
   const [ipBoxInputValue, setIpBoxInputValue] = useState("");
   const [showValues] = useSummaryVisibility();
-  const [selectedCategory, setSelectedCategoryForChart] = useState("");
+  const [selectedCategory, setSelectedCategoryForChart] = useState(
+    getSelectedCategoryFromCookie,
+  );
   const dispatch = useAppDispatch();
   const globallySelectedCategory = useAppSelector(
     (state) => state.config.selectedCategory,
@@ -69,7 +88,13 @@ const YearlyInvestmentSummary = ({
         (category) => category.trim().toLocaleLowerCase("pl-PL") === "jedzenie",
       );
 
-      setSelectedCategoryForChart(foodCategory ?? availableCategories[0] ?? "");
+      const nextCategory =
+        foodCategory ?? availableCategories[0] ?? DEFAULT_SELECTED_CATEGORY;
+      setSelectedCategoryForChart(nextCategory);
+
+      if (availableCategories.length > 0) {
+        saveSelectedCategoryToCookie(nextCategory);
+      }
     }
   }, [availableCategories, selectedCategory]);
 
@@ -248,6 +273,7 @@ const YearlyInvestmentSummary = ({
               aria-pressed={active}
               onClick={() => {
                 setSelectedCategoryForChart(category);
+                saveSelectedCategoryToCookie(category);
                 if (globallySelectedCategory !== category) {
                   dispatch(setSelectedCategory(category));
                 }
