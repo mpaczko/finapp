@@ -12,6 +12,7 @@ import { ExpensesModule } from "./modules/expenses/expenses.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { BudgetsModule } from "./modules/budgets/budgets.module";
 import { SummaryModule } from "./modules/summary/summary.module";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SummaryModule } from "./modules/summary/summary.module";
     CategoriesModule,
     BudgetsModule,
     SummaryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
