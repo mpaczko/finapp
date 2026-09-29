@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import helmet from "helmet";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express from "express";
 import {
   ExpressAdapter,
@@ -29,12 +30,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   server.use(helmet());
+  server.use(cookieParser());
   server.use(
     cors({
       origin: parseCorsOrigin(configService.get<string>("CORS_ORIGIN")),
       credentials: true,
       methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
+      allowedHeaders: ["Content-Type"],
     }),
   );
   app.useGlobalPipes(
