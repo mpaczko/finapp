@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { supabase } from "../../createClient";
+import { authClient, type AuthUser } from "../../lib/authClient";
 import FormInput from "../../components/Form/FormInput";
 import { Button } from "../../ui/Button";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -14,10 +14,12 @@ import {
 
 type Props = {
   onSwitchToLogin: () => void;
+  onAuthenticated: (user: AuthUser) => void;
 };
 
-export default function RegisterForm({ onSwitchToLogin }: Props) {
+export default function RegisterForm({ onAuthenticated, onSwitchToLogin }: Props) {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const methods = useForm<IRegisterForm>({
     defaultValues,
@@ -30,21 +32,27 @@ export default function RegisterForm({ onSwitchToLogin }: Props) {
     if (loading) return;
 
     setLoading(true);
+    setErrorMessage(null);
 
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Sprawdź maila i potwierdź konto");
+    try {
+      const { user } = await authClient.register({
+        email: data.email,
+        password: data.password,
+      });
       reset();
-      onSwitchToLogin();
-    }
+      onAuthenticated(user);
+    } catch (error) {
+      const rawMessage = error instanceof Error ? error.message : "Rejestracja nie powiodła się.";
+      const isNetworkError = /failed to fetch|network error|nie można połączyć/i.test(rawMessage);
 
-    setLoading(false);
+      setErrorMessage(
+        isNetworkError
+          ? "Nie udało się zarejestrować. Problem z serwerem lub połączeniem sieciowym."
+          : `Błąd rejestracji: ${rawMessage}`,
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,6 +88,12 @@ export default function RegisterForm({ onSwitchToLogin }: Props) {
         <Button type="submit" disabled={loading} className="mt-4">
           {loading ? "Rejestracja..." : "Zarejestruj"}
         </Button>
+
+        {errorMessage ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        ) : null}
 
         <Button
           type="button"
