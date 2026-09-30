@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "../../createClient";
+import { authClient, type AuthUser } from "../../lib/authClient";
 import LoginForm from "../../modules/LoginForm";
 import RegisterForm from "../../modules/RegisterForm";
+import { AuthContext } from "../AuthProvider/AuthContext";
 
 const AuthenticatedSession = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -19,38 +19,31 @@ export default function ProtectedRoute({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isRegister, setIsRegister] = useState(false);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const currentUser = await authClient.getCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+    } finally {
       setLoading(false);
-    };
-
-    getUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      },
-    );
-
-    return () => listener.subscription.unsubscribe();
+    }
   }, []);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        {isRegister ? (
-          <RegisterForm onSwitchToLogin={() => setIsRegister(false)} />
-        ) : (
-          <LoginForm onSwitchToRegister={() => setIsRegister(true)} />
-        )}
-      </div>
-    );
-  }
+  useEffect(() => {
+    void loadCurrentUser();
+  }, [loadCurrentUser]);
+
+  const logout = useCallback(async () => {
+    try {
+      await authClient.logout();
+    } finally {
+      setUser(null);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -67,7 +60,27 @@ export default function ProtectedRoute({
     );
   }
 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {isRegister ? (
+          <RegisterForm
+            onAuthenticated={setUser}
+            onSwitchToLogin={() => setIsRegister(false)}
+          />
+        ) : (
+          <LoginForm
+            onAuthenticated={setUser}
+            onSwitchToRegister={() => setIsRegister(true)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <AuthenticatedSession key={user.id}>{children}</AuthenticatedSession>
+    <AuthContext.Provider value={{ user, logout }}>
+      <AuthenticatedSession key={user.id}>{children}</AuthenticatedSession>
+    </AuthContext.Provider>
   );
 }

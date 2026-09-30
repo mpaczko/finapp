@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { supabase } from "../../createClient";
+import { authClient, type AuthUser } from "../../lib/authClient";
 import FormInput from "../../components/Form/FormInput";
 import { Button } from "../../ui/Button";
 
@@ -13,9 +13,10 @@ type FormValues = {
 
 type Props = {
   onSwitchToRegister: () => void;
+  onAuthenticated: (user: AuthUser) => void;
 };
 
-export default function LoginForm({ onSwitchToRegister }: Props) {
+export default function LoginForm({ onAuthenticated, onSwitchToRegister }: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -34,13 +35,11 @@ export default function LoginForm({ onSwitchToRegister }: Props) {
     setLoading(true);
     setErrorMessage(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      const rawMessage = error.message || "Logowanie nie powiodło się.";
+    try {
+      const { user } = await authClient.login(data);
+      onAuthenticated(user);
+    } catch (error) {
+      const rawMessage = error instanceof Error ? error.message : "Logowanie nie powiodło się.";
       const isNetworkError =
         /failed to fetch|network error|nie można połączyć/i.test(rawMessage);
       const friendlyMessage = isNetworkError
@@ -48,9 +47,9 @@ export default function LoginForm({ onSwitchToRegister }: Props) {
         : `Błąd logowania: ${rawMessage}`;
 
       setErrorMessage(friendlyMessage);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

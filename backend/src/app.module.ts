@@ -5,13 +5,14 @@ import { JwtModule } from "@nestjs/jwt";
 
 import { AppController } from "./app.controller";
 import { validateEnv } from "./config/env.validation";
-import { SupabaseAuthGuard } from "./common/guards/supabase-auth.guard";
+import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PrismaModule } from "./prisma/prisma.module";
 import { HealthModule } from "./modules/health/health.module";
 import { ExpensesModule } from "./modules/expenses/expenses.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { BudgetsModule } from "./modules/budgets/budgets.module";
 import { SummaryModule } from "./modules/summary/summary.module";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -26,12 +27,13 @@ import { SummaryModule } from "./modules/summary/summary.module";
     CategoriesModule,
     BudgetsModule,
     SummaryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: SupabaseAuthGuard,
+      useClass: JwtAuthGuard,
     },
   ],
 })

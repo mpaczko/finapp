@@ -9,7 +9,7 @@ Finapp to aplikacja do zarządzania osobistym budżetem. Pozwala rejestrować wy
 - zbiorcze dodanie wszystkich poprawnych pozycji z importu;
 - kategorie wydatków i filtrowanie listy;
 - budżety miesięczne oraz roczne podsumowania;
-- uwierzytelnianie przez Supabase.
+- lokalne uwierzytelnianie przez backend NestJS i sesję JWT w cookie `HttpOnly`.
 
 ## Technologie
 
@@ -20,7 +20,6 @@ Finapp to aplikacja do zarządzania osobistym budżetem. Pozwala rejestrować wy
 
 - Node.js 20 lub nowszy;
 - dostęp do bazy PostgreSQL (np. Supabase);
-- projekt Supabase do obsługi logowania.
 
 ## Uruchomienie lokalne
 
@@ -37,13 +36,8 @@ Aplikacja będzie dostępna pod adresem `http://localhost:5173`.
 Uzupełnij plik `.env`:
 
 ```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-public-api-key
 VITE_API_BASE_URL=http://localhost:4000/api
-VITE_LOCAL_USER_ID=your-local-user-id-for-development
 ```
-
-`VITE_LOCAL_USER_ID` jest potrzebne tylko wtedy, gdy backend działa lokalnie z wyłączonym uwierzytelnianiem.
 
 ### 2. Backend
 
@@ -57,7 +51,7 @@ npm run start:dev
 
 API uruchamia się domyślnie pod adresem `http://localhost:4000/api`.
 
-W `backend/.env` ustaw co najmniej `DATABASE_URL`, `SUPABASE_URL` i `SUPABASE_JWKS_URL`. Szczegóły konfiguracji oraz lista endpointów są w [backend/README.md](backend/README.md).
+W `backend/.env` ustaw co najmniej `DATABASE_URL` oraz bezpieczny, losowy `JWT_SECRET`. Szczegóły konfiguracji oraz lista endpointów są w [backend/README.md](backend/README.md).
 
 ## Komendy
 

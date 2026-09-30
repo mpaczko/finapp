@@ -2,7 +2,7 @@ import { lazy, Suspense, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Eye, EyeOff } from "lucide-react";
 import { useAppSelector } from "../../store/reduxHook";
-import { supabase } from "../../createClient";
+import { useAuth } from "../../components/AuthProvider/AuthContext";
 import { setSelectedMonth } from "../../store/configSlice/configSlice";
 import DeferredExpenseDialog from "../../modules/ExpenseDialog/DeferredExpenseDialog";
 import { Button } from "../../ui/Button";
@@ -14,13 +14,10 @@ const Nav = () => {
   const dispatch = useDispatch();
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
   const [showValues, setShowValues] = useSummaryVisibility();
+  const { logout } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-slate-100 bg-white px-6 py-3 shadow-sm">
@@ -82,7 +79,7 @@ const Nav = () => {
                 className="w-full justify-start text-red-500 hover:bg-red-50"
                 onClick={async () => {
                   setIsMenuOpen(false);
-                  await handleLogout();
+                  await logout();
                 }}
               >
                 Wyloguj
