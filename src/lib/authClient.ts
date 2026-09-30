@@ -32,5 +32,8 @@ export const authClient = {
       method: "POST",
     }),
 
-  getCurrentUser: () => apiRequest<AuthUser>("/auth/me"),
+  getCurrentUser: () =>
+    apiRequest<AuthUser>("/auth/me", {
+      quietOnStatuses: [401],
+    }),
 };
