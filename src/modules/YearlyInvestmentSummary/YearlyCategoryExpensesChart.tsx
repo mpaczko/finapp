@@ -251,7 +251,7 @@ const YearlyCategoryExpensesChart = ({
               strokeLinejoin="round"
             />
 
-            {showAverage && showMonthlyValues && (
+            {showAverage && (
               <g>
                 <line
                   x1={PADDING.left}
@@ -262,16 +262,18 @@ const YearlyCategoryExpensesChart = ({
                   strokeWidth="2"
                   strokeDasharray="7 5"
                 />
-                <text
-                  x={CHART_WIDTH - PADDING.right}
-                  y={Math.max(PADDING.top + 12, chart.averageY - 7)}
-                  textAnchor="end"
-                  className="fill-blue-600 text-[11px] font-semibold"
-                >
-                  {showValues
-                    ? `Średnia: ${formatSummaryCurrency(average, true)}`
-                    : `Średnia: ${maskCurrencyValue(average)}`}
-                </text>
+                {showMonthlyValues && (
+                  <text
+                    x={CHART_WIDTH - PADDING.right}
+                    y={Math.max(PADDING.top + 12, chart.averageY - 7)}
+                    textAnchor="end"
+                    className="fill-blue-600 text-[11px] font-semibold"
+                  >
+                    {showValues
+                      ? `Średnia: ${formatSummaryCurrency(average, true)}`
+                      : `Średnia: ${maskCurrencyValue(average)}`}
+                  </text>
+                )}
               </g>
             )}
 
