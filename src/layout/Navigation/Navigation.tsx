@@ -21,7 +21,22 @@ const Nav = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-slate-100 bg-white px-6 py-3 shadow-sm">
-      <div />
+      <div className="flex items-center justify-start">
+        <Button
+          className="inline-flex items-center gap-1.5 whitespace-nowrap"
+          onClick={() => setShowValues((current) => !current)}
+          aria-label={
+            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+          }
+        >
+          {showValues ? (
+            <EyeOff size={16} aria-hidden="true" />
+          ) : (
+            <Eye size={16} aria-hidden="true" />
+          )}
+          {showValues ? "Ukryj dane" : "Pokaż dane"}
+        </Button>
+      </div>
 
       <div className="flex items-center justify-center gap-4">
         <h1 className="text-2xl font-semibold text-slate-900">Budżet</h1>
@@ -38,20 +53,6 @@ const Nav = () => {
       </div>
 
       <div className="flex items-center justify-end gap-5">
-        <Button
-          className="inline-flex items-center gap-1.5 whitespace-nowrap"
-          onClick={() => setShowValues((current) => !current)}
-          aria-label={
-            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
-          }
-        >
-          {showValues ? (
-            <EyeOff size={16} aria-hidden="true" />
-          ) : (
-            <Eye size={16} aria-hidden="true" />
-          )}
-          {showValues ? "Ukryj dane" : "Pokaż dane"}
-        </Button>
         <Suspense
           fallback={
             <Button disabled className="animate-pulse">
