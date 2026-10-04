@@ -18,6 +18,12 @@ type ForgotPasswordRequest = {
   email: string;
 };
 
+type ResetPasswordRequest = {
+  token: string;
+  password: string;
+  confirmPassword: string;
+};
+
 export const authClient = {
   register: (credentials: Credentials) =>
     apiRequest<AuthResponse>("/auth/register", {
@@ -33,6 +39,12 @@ export const authClient = {
 
   requestPasswordReset: (request: ForgotPasswordRequest) =>
     apiRequest<void>("/auth/forgot-password", {
+      method: "POST",
+      body: request,
+    }),
+
+  resetPassword: (request: ResetPasswordRequest) =>
+    apiRequest<void>("/auth/reset-password", {
       method: "POST",
       body: request,
     }),

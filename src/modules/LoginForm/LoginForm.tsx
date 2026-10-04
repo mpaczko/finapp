@@ -15,12 +15,14 @@ type Props = {
   onSwitchToRegister: () => void;
   onSwitchToForgotPassword: () => void;
   onAuthenticated: (user: AuthUser) => void;
+  successMessage?: string;
 };
 
 export default function LoginForm({
   onAuthenticated,
   onSwitchToRegister,
   onSwitchToForgotPassword,
+  successMessage,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -85,6 +87,15 @@ export default function LoginForm({
         {errorMessage ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {errorMessage}
+          </div>
+        ) : null}
+
+        {successMessage ? (
+          <div
+            role="status"
+            className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+          >
+            {successMessage}
           </div>
         ) : null}
 
