@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -7,6 +8,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as argon2 from "argon2";
+import { createHash } from "crypto";
 import { Prisma } from "@prisma/client";
 import type { StringValue } from "ms";
 
@@ -14,6 +16,7 @@ import { SESSION_COOKIE } from "../../common/auth/session";
 import { PrismaService } from "../../prisma/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 export type AuthenticatedUser = {
   id: string;
@@ -81,6 +84,62 @@ export class AuthService {
     }
 
     return this.toAuthenticatedUser(user);
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<void> {
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException("Passwords do not match");
+    }
+
+    const tokenHash = createHash("sha256").update(dto.token).digest("hex");
+    const passwordHash = await argon2.hash(dto.password);
+    const now = new Date();
+
+    const tokenWasUsed = await this.prisma.$transaction(async (tx) => {
+      const consumedToken = await tx.passwordResetToken.updateMany({
+        where: {
+          tokenHash,
+          usedAt: null,
+          expiresAt: { gt: now },
+        },
+        data: { usedAt: now },
+      });
+
+      if (consumedToken.count === 0) {
+        return false;
+      }
+
+      const token = await tx.passwordResetToken.findUnique({
+        where: { tokenHash },
+        select: { userId: true },
+      });
+
+      if (!token) {
+        return false;
+      }
+
+      await tx.user.update({
+        where: { id: token.userId },
+        data: {
+          passwordHash,
+          mustResetPassword: false,
+        },
+      });
+
+      await tx.passwordResetToken.updateMany({
+        where: {
+          userId: token.userId,
+          usedAt: null,
+        },
+        data: { usedAt: now },
+      });
+
+      return true;
+    });
+
+    if (!tokenWasUsed) {
+      throw new BadRequestException("Invalid or expired password reset token");
+    }
   }
 
   async createSession(user: AuthenticatedUser): Promise<string> {

@@ -8,6 +8,7 @@ import { SESSION_COOKIE } from "../../common/auth/session";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -41,6 +42,13 @@ export class AuthController {
   @Post("logout")
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie(SESSION_COOKIE, this.authService.getSessionCookieOptions());
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post("reset-password")
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto);
   }
 
   @Get("me")

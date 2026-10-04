@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const argon2 = require("argon2");
+const { createHash } = require("node:crypto");
 const { JwtService } = require("@nestjs/jwt");
 
 const { AuthService } = require("../dist/modules/auth/auth.service");
@@ -60,6 +61,82 @@ test("AuthService accepts correct credentials and rejects invalid credentials", 
   );
   await assert.rejects(
     service.validateCredentials({ email: "test@example.com", password: "bad-password" }),
+  );
+});
+
+test("AuthService resets the password once and invalidates the user's other reset tokens", async () => {
+  const updates = [];
+  let updatedUser;
+  const prisma = {
+    $transaction: async (callback) => callback(prisma),
+    passwordResetToken: {
+      updateMany: async (args) => {
+        updates.push(args);
+        return { count: updates.length === 1 ? 1 : 2 };
+      },
+      findUnique: async () => ({ userId: "user-1" }),
+    },
+    user: {
+      update: async ({ data }) => {
+        updatedUser = data;
+      },
+    },
+  };
+  const service = new AuthService(prisma, new JwtService(), testConfig);
+
+  await service.resetPassword({
+    token: "reset-token",
+    password: "new-password",
+    confirmPassword: "new-password",
+  });
+
+  assert.equal(
+    updates[0].where.tokenHash,
+    createHash("sha256").update("reset-token").digest("hex"),
+  );
+  assert.equal(updates[0].where.usedAt, null);
+  assert.ok(updates[0].where.expiresAt.gt instanceof Date);
+  assert.equal(await argon2.verify(updatedUser.passwordHash, "new-password"), true);
+  assert.equal(updatedUser.mustResetPassword, false);
+  assert.deepEqual(updates[1].where, { userId: "user-1", usedAt: null });
+});
+
+test("AuthService rejects invalid or already-used password reset tokens", async () => {
+  let userUpdated = false;
+  const prisma = {
+    $transaction: async (callback) => callback(prisma),
+    passwordResetToken: {
+      updateMany: async () => ({ count: 0 }),
+    },
+    user: {
+      update: async () => {
+        userUpdated = true;
+      },
+    },
+  };
+  const service = new AuthService(prisma, new JwtService(), testConfig);
+
+  await assert.rejects(
+    service.resetPassword({
+      token: "already-used-token",
+      password: "new-password",
+      confirmPassword: "new-password",
+    }),
+    /Invalid or expired password reset token/,
+  );
+  assert.equal(userUpdated, false);
+});
+
+test("AuthService rejects mismatched password reset confirmation", async () => {
+  const service = new AuthService({}, new JwtService(), testConfig);
+
+  await assert.rejects(
+    service.resetPassword({
+      token: "reset-token",
+      password: "new-password",
+      confirmPassword: "different-password",
+    }),
+    /Passwords do not match/,
   );
 });
 
