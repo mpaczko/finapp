@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authClient, type AuthUser } from "../../lib/authClient";
 import LoginForm from "../../modules/LoginForm";
 import RegisterForm from "../../modules/RegisterForm";
+import ForgotPasswordForm from "../../modules/ForgotPasswordForm";
 import { AuthContext } from "../AuthProvider/AuthContext";
 
 const AuthenticatedSession = ({ children }: { children: React.ReactNode }) => {
@@ -21,6 +22,7 @@ export default function ProtectedRoute({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   const loadCurrentUser = useCallback(async () => {
     try {
@@ -63,7 +65,9 @@ export default function ProtectedRoute({
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        {isRegister ? (
+        {isForgotPassword ? (
+          <ForgotPasswordForm onSwitchToLogin={() => setIsForgotPassword(false)} />
+        ) : isRegister ? (
           <RegisterForm
             onAuthenticated={setUser}
             onSwitchToLogin={() => setIsRegister(false)}
@@ -72,6 +76,7 @@ export default function ProtectedRoute({
           <LoginForm
             onAuthenticated={setUser}
             onSwitchToRegister={() => setIsRegister(true)}
+            onSwitchToForgotPassword={() => setIsForgotPassword(true)}
           />
         )}
       </div>

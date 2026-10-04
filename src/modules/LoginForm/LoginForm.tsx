@@ -13,10 +13,15 @@ type FormValues = {
 
 type Props = {
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword: () => void;
   onAuthenticated: (user: AuthUser) => void;
 };
 
-export default function LoginForm({ onAuthenticated, onSwitchToRegister }: Props) {
+export default function LoginForm({
+  onAuthenticated,
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -82,6 +87,15 @@ export default function LoginForm({ onAuthenticated, onSwitchToRegister }: Props
             {errorMessage}
           </div>
         ) : null}
+
+        <Button
+          type="button"
+          variant="link"
+          className="self-start px-0 text-sm"
+          onClick={onSwitchToForgotPassword}
+        >
+          Nie pamiętasz hasła?
+        </Button>
 
         <Button
           type="button"
