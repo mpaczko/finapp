@@ -1,11 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from "@nestjs/common";
-import { Response } from "express";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from "@nestjs/common";
+import { Request, Response } from "express";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
 import { AuthUser } from "../../common/types/auth-user";
 import { SESSION_COOKIE } from "../../common/auth/session";
 import { AuthService } from "./auth.service";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
@@ -49,6 +50,14 @@ export class AuthController {
   @Post("reset-password")
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post("forgot-password")
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() request: Request) {
+    const ip = request.ip ?? request.socket.remoteAddress ?? "unknown";
+    await this.authService.requestPasswordReset(dto, ip);
   }
 
   @Get("me")

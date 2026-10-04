@@ -8,15 +8,18 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as argon2 from "argon2";
-import { createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { Prisma } from "@prisma/client";
 import type { StringValue } from "ms";
 
 import { SESSION_COOKIE } from "../../common/auth/session";
+import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { PasswordResetRateLimiter } from "./password-reset-rate-limiter.service";
 
 export type AuthenticatedUser = {
   id: string;
@@ -29,6 +32,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly passwordResetRateLimiter: PasswordResetRateLimiter,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthenticatedUser> {
@@ -84,6 +89,55 @@ export class AuthService {
     }
 
     return this.toAuthenticatedUser(user);
+  }
+
+  async requestPasswordReset(dto: ForgotPasswordDto, ip: string): Promise<void> {
+    const email = this.normalizeEmail(dto.email);
+
+    if (
+      !this.passwordResetRateLimiter.tryConsume(
+        email,
+        ip,
+        this.getPasswordResetRateLimitMs(),
+      )
+    ) {
+      return;
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return;
+    }
+
+    const token = randomBytes(32).toString("base64url");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + this.getPasswordResetTtlMs());
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: now },
+      });
+      await tx.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        },
+      });
+    });
+
+    const resetUrl = new URL("/reset-password", this.getFrontendUrl());
+    resetUrl.searchParams.set("token", token);
+
+    try {
+      await this.mailService.sendPasswordResetEmail(email, resetUrl.toString());
+    } catch {
+      // The MailService records a token-free delivery failure. Keep this response
+      // indistinguishable from requests for an unknown email address.
+    }
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<void> {
@@ -167,6 +221,28 @@ export class AuthService {
 
   private normalizeEmail(email: string) {
     return email.trim().toLowerCase();
+  }
+
+  private getFrontendUrl() {
+    return this.configService.getOrThrow<string>("FRONTEND_URL");
+  }
+
+  private getPasswordResetTtlMs() {
+    return this.getPositiveMinutes("PASSWORD_RESET_TTL_MINUTES") * 60_000;
+  }
+
+  private getPasswordResetRateLimitMs() {
+    return this.getPositiveMinutes("PASSWORD_RESET_RATE_LIMIT_MINUTES") * 60_000;
+  }
+
+  private getPositiveMinutes(key: "PASSWORD_RESET_TTL_MINUTES" | "PASSWORD_RESET_RATE_LIMIT_MINUTES") {
+    const minutes = Number(this.configService.getOrThrow<string>(key));
+
+    if (!Number.isInteger(minutes) || minutes < 1) {
+      throw new Error(`${key} must be a positive whole number`);
+    }
+
+    return minutes;
   }
 
   private getSessionDuration(): StringValue {
