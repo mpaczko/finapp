@@ -13,6 +13,7 @@ import { CategoriesModule } from "./modules/categories/categories.module";
 import { BudgetsModule } from "./modules/budgets/budgets.module";
 import { SummaryModule } from "./modules/summary/summary.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { MailModule } from "./modules/mail/mail.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from "./modules/auth/auth.module";
     CategoriesModule,
     BudgetsModule,
     SummaryModule,
+    MailModule,
     AuthModule,
   ],
   controllers: [AppController],

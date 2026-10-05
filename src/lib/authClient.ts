@@ -14,6 +14,16 @@ type Credentials = {
   password: string;
 };
 
+type ForgotPasswordRequest = {
+  email: string;
+};
+
+type ResetPasswordRequest = {
+  token: string;
+  password: string;
+  confirmPassword: string;
+};
+
 export const authClient = {
   register: (credentials: Credentials) =>
     apiRequest<AuthResponse>("/auth/register", {
@@ -25,6 +35,18 @@ export const authClient = {
     apiRequest<AuthResponse>("/auth/login", {
       method: "POST",
       body: credentials,
+    }),
+
+  requestPasswordReset: (request: ForgotPasswordRequest) =>
+    apiRequest<void>("/auth/forgot-password", {
+      method: "POST",
+      body: request,
+    }),
+
+  resetPassword: (request: ResetPasswordRequest) =>
+    apiRequest<void>("/auth/reset-password", {
+      method: "POST",
+      body: request,
     }),
 
   logout: () =>

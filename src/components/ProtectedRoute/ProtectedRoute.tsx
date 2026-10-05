@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authClient, type AuthUser } from "../../lib/authClient";
 import LoginForm from "../../modules/LoginForm";
 import RegisterForm from "../../modules/RegisterForm";
+import ForgotPasswordForm from "../../modules/ForgotPasswordForm";
+import ResetPasswordForm from "../../modules/ResetPasswordForm";
 import { AuthContext } from "../AuthProvider/AuthContext";
 
 const AuthenticatedSession = ({ children }: { children: React.ReactNode }) => {
@@ -21,6 +23,11 @@ export default function ProtectedRoute({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(
+    () => window.location.pathname === "/reset-password",
+  );
+  const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
 
   const loadCurrentUser = useCallback(async () => {
     try {
@@ -34,8 +41,13 @@ export default function ProtectedRoute({
   }, []);
 
   useEffect(() => {
+    if (isResetPassword) {
+      setLoading(false);
+      return;
+    }
+
     void loadCurrentUser();
-  }, [loadCurrentUser]);
+  }, [isResetPassword, loadCurrentUser]);
 
   const logout = useCallback(async () => {
     try {
@@ -63,7 +75,21 @@ export default function ProtectedRoute({
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        {isRegister ? (
+        {isResetPassword ? (
+          <ResetPasswordForm
+            onCompleted={() => {
+              setIsResetPassword(false);
+              setPasswordResetSuccess(true);
+            }}
+            onRequestPasswordReset={() => {
+              window.history.replaceState({}, document.title, "/");
+              setIsResetPassword(false);
+              setIsForgotPassword(true);
+            }}
+          />
+        ) : isForgotPassword ? (
+          <ForgotPasswordForm onSwitchToLogin={() => setIsForgotPassword(false)} />
+        ) : isRegister ? (
           <RegisterForm
             onAuthenticated={setUser}
             onSwitchToLogin={() => setIsRegister(false)}
@@ -72,6 +98,12 @@ export default function ProtectedRoute({
           <LoginForm
             onAuthenticated={setUser}
             onSwitchToRegister={() => setIsRegister(true)}
+            onSwitchToForgotPassword={() => setIsForgotPassword(true)}
+            successMessage={
+              passwordResetSuccess
+                ? "Hasło zostało zmienione. Zaloguj się nowym hasłem."
+                : undefined
+            }
           />
         )}
       </div>
