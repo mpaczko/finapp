@@ -90,7 +90,7 @@ export default function RegisterForm({ onAuthenticated, onSwitchToLogin }: Props
         </Button>
 
         {errorMessage ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger">
             {errorMessage}
           </div>
         ) : null}

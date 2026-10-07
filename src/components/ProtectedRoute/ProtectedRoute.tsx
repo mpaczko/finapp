@@ -59,13 +59,13 @@ export default function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-pulse">
-          <div className="mb-4 h-8 w-1/2 rounded bg-slate-200" />
+      <div className="min-h-screen flex items-center justify-center bg-surface-muted p-6">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-sm animate-pulse">
+          <div className="mb-4 h-8 w-1/2 rounded bg-border" />
           <div className="space-y-3">
-            <div className="h-10 rounded bg-slate-200" />
-            <div className="h-10 rounded bg-slate-200" />
-            <div className="h-10 w-24 rounded bg-slate-200" />
+            <div className="h-10 rounded bg-border" />
+            <div className="h-10 rounded bg-border" />
+            <div className="h-10 w-24 rounded bg-border" />
           </div>
         </div>
       </div>

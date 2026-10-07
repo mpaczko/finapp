@@ -55,8 +55,8 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: Props) {
         onSubmit={handleSubmit(onSubmit)}
       >
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Reset hasła</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-foreground">Reset hasła</h1>
+          <p className="mt-1 text-sm text-muted">
             Podaj adres e-mail, a wyślemy instrukcję ustawienia nowego hasła.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: Props) {
         {isSubmitted ? (
           <div
             role="status"
-            className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+            className="rounded-xl border border-success-border bg-success-surface px-4 py-3 text-sm text-success"
           >
             {SUCCESS_MESSAGE}
           </div>
@@ -86,7 +86,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: Props) {
         {errorMessage ? (
           <div
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
           >
             {errorMessage}
           </div>
