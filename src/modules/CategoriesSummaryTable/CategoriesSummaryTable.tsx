@@ -68,7 +68,7 @@ const CategoriesSummaryTable = () => {
 
   return (
     <div className="grid min-w-0 gap-8 p-4">
-      <h2 className="text-lg font-semibold text-gray-800 sm:text-xl">
+      <h2 className="text-lg font-semibold text-foreground sm:text-xl">
         Podsumowanie wydatków według kategorii
       </h2>
 

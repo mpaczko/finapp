@@ -121,21 +121,21 @@ const YearlyInvestmentSummary = ({
   };
 
   return (
-    <div className="w-full min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div className="w-full min-w-0 rounded-3xl border border-border-soft bg-surface p-5 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <p className="text-lg font-semibold text-slate-900">
+          <p className="text-lg font-semibold text-foreground">
             Roczne podsumowanie finansów
           </p>
-          <p className="max-w-lg text-sm text-slate-500">
+          <p className="max-w-lg text-sm text-muted">
             Podsumowanie roczne: inwestycje, podróże, ubrania/sprzęt sportowy
             oraz szacowany zwrot IP Box.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <span className="text-sm text-slate-600">Rok</span>
+          <div className="flex items-center gap-2 rounded-2xl border border-border bg-surface-muted px-3 py-2">
+            <span className="text-sm text-muted">Rok</span>
             <input
               type="number"
               min="2000"
@@ -146,47 +146,47 @@ const YearlyInvestmentSummary = ({
                 const nextYear = Number(e.target.value);
                 setYear(isNaN(nextYear) ? currentYear : nextYear);
               }}
-              className="w-20 border-none bg-transparent text-right text-sm font-semibold text-slate-900 outline-none"
+              className="w-20 border-none bg-transparent text-right text-sm font-semibold text-foreground outline-none"
             />
           </div>
         </div>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-500">
+        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-border bg-surface-muted p-4">
+          <p className="text-sm font-medium text-muted">
             Inwestycje — łączne wydatki w danym roku
           </p>
 
           <div className="mt-auto">
             {loading ? (
-              <div className="h-8 w-32 animate-pulse rounded bg-slate-200" />
+              <div className="h-8 w-32 animate-pulse rounded bg-border" />
             ) : (
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-foreground">
                 {formatSummaryCurrency(summary?.investmentSum ?? 0, showValues)}
               </p>
             )}
           </div>
         </div>
 
-        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-500">
+        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-border bg-surface-muted p-4">
+          <p className="text-sm font-medium text-muted">
             IP Box — szacowany zwrot za dany rok dotychczas
           </p>
 
           <div className="mt-auto">
             {loading || summary == null ? (
-              <div className="h-8 w-32 animate-pulse rounded bg-slate-200" />
+              <div className="h-8 w-32 animate-pulse rounded bg-border" />
             ) : (
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-foreground">
                 {formatSummaryCurrency(summary.ipBoxSum, showValues)}
               </p>
             )}
           </div>
 
           {selectedBudget && selectedMonthBelongsToYear && (
-            <div className="mt-2 border-t border-slate-200 pt-2">
-              <div className="flex items-center justify-between gap-2 text-xs font-medium text-slate-500">
+            <div className="mt-2 border-t border-border pt-2">
+              <div className="flex items-center justify-between gap-2 text-xs font-medium text-muted">
                 <span>Kwota dla {selectedBudget.month}</span>
                 {editingIpBox ? null : (
                   <button
@@ -195,7 +195,7 @@ const YearlyInvestmentSummary = ({
                       setIpBoxInputValue(selectedMonthIpBox.toFixed(2));
                       setEditingIpBox(true);
                     }}
-                    className="rounded p-1 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    className="rounded p-1 text-muted transition hover:bg-border hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     aria-label="Edytuj kwotę IP Box dla wybranego miesiąca"
                     title="Edytuj kwotę IP Box"
                   >
@@ -217,19 +217,19 @@ const YearlyInvestmentSummary = ({
                       if (event.key === "Enter") saveIpBoxValue();
                       if (event.key === "Escape") setEditingIpBox(false);
                     }}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-right text-sm font-semibold text-slate-900 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                    className="min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-2 py-1 text-right text-sm font-semibold text-foreground outline-none focus:border-border-strong focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
                     disabled={updateBudgetMutation.isPending}
                     onClick={saveIpBoxValue}
-                    className="rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-lg bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Zapisz
                   </button>
                 </div>
               ) : (
-                <p className="mt-1 text-sm font-semibold text-slate-800">
+                <p className="mt-1 text-sm font-semibold text-foreground-soft">
                   {formatSummaryCurrency(selectedMonthIpBox, showValues)}
                 </p>
               )}
@@ -243,7 +243,7 @@ const YearlyInvestmentSummary = ({
             planned={summary?.travelPlanned ?? null}
             actual={summary?.travelActual ?? null}
             loading={loading}
-            baseColor="rgb(254, 205, 211)"
+            baseColor="var(--category-9)"
           />
         </div>
 
@@ -253,7 +253,7 @@ const YearlyInvestmentSummary = ({
             planned={summary?.clothesPlanned ?? null}
             actual={summary?.clothesActual ?? null}
             loading={loading}
-            baseColor="rgb(165, 243, 252)"
+            baseColor="var(--category-11)"
           />
         </div>
       </div>
@@ -278,12 +278,13 @@ const YearlyInvestmentSummary = ({
                   dispatch(setSelectedCategory(category));
                 }
               }}
-              className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-medium text-slate-800 transition hover:brightness-95 ${
-                active ? "shadow-sm" : "bg-white"
+              className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-medium text-foreground-soft transition hover:brightness-95 ${
+                active ? "shadow-sm" : "bg-surface"
               }`}
               style={{
                 backgroundColor: active ? color : undefined,
                 borderColor: color,
+                color: active ? "var(--app-chart-label)" : undefined,
               }}
             >
               {category}

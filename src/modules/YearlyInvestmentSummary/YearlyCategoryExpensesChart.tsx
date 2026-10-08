@@ -158,25 +158,25 @@ const YearlyCategoryExpensesChart = ({
   }, [average, visibleValues]);
 
   return (
-    <section className="mt-4 min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <section className="mt-4 min-w-0 rounded-2xl border border-border bg-surface-muted p-4">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">
+          <h3 className="text-sm font-semibold text-foreground">
             Wydatki miesięczne — {category || "wybierz kategorię"}
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             Suma wydatków w poszczególnych miesiącach.
           </p>
         </div>
         {!loading && category && (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-foreground">
               {formatSummaryCurrency(total, showValues)}
             </p>
             <button
               type="button"
               onClick={() => setShowMonthlyValues((visible) => !visible)}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-foreground-soft transition hover:bg-surface-subtle"
               aria-pressed={showMonthlyValues}
               aria-label={
                 showMonthlyValues
@@ -194,7 +194,7 @@ const YearlyCategoryExpensesChart = ({
             <button
               type="button"
               onClick={() => setShowAverage((visible) => !visible)}
-              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+              className="rounded-xl border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-foreground-soft transition hover:bg-surface-subtle"
               aria-pressed={showAverage}
             >
               {showAverage ? "Ukryj średnią" : "Pokaż średnią"}
@@ -204,9 +204,9 @@ const YearlyCategoryExpensesChart = ({
       </div>
 
       {loading ? (
-        <div className="mt-5 h-[260px] animate-pulse rounded-xl bg-slate-200" />
+        <div className="mt-5 h-[260px] animate-pulse rounded-xl bg-border" />
       ) : !category ? (
-        <div className="mt-5 flex h-[260px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white text-sm text-slate-500">
+        <div className="mt-5 flex h-[260px] items-center justify-center rounded-xl border border-dashed border-border bg-surface text-sm text-muted">
           Brak kategorii do wyświetlenia.
         </div>
       ) : (
@@ -224,7 +224,7 @@ const YearlyCategoryExpensesChart = ({
                   x2={CHART_WIDTH - PADDING.right}
                   y1={gridLine.y}
                   y2={gridLine.y}
-                  stroke="#cbd5e1"
+                  stroke="var(--app-border)"
                   strokeDasharray="4 4"
                 />
                 {showMonthlyValues && (
@@ -232,7 +232,7 @@ const YearlyCategoryExpensesChart = ({
                     x={PADDING.left - 10}
                     y={gridLine.y + 4}
                     textAnchor="end"
-                    className="fill-slate-500 text-[11px]"
+                    className="fill-muted text-[11px]"
                   >
                     {showValues
                       ? `${Math.round(gridLine.value)} zł`
@@ -258,7 +258,7 @@ const YearlyCategoryExpensesChart = ({
                   x2={CHART_WIDTH - PADDING.right}
                   y1={chart.averageY}
                   y2={chart.averageY}
-                  stroke="#2563eb"
+                  stroke="var(--app-info)"
                   strokeWidth="2"
                   strokeDasharray="7 5"
                 />
@@ -266,7 +266,11 @@ const YearlyCategoryExpensesChart = ({
                   x={CHART_WIDTH - PADDING.right}
                   y={Math.max(PADDING.top + 12, chart.averageY - 7)}
                   textAnchor="end"
-                  className="fill-blue-600 text-[11px] font-semibold"
+                  className="fill-info text-xs font-bold"
+                  paintOrder="stroke"
+                  stroke="var(--app-surface-muted)"
+                  strokeWidth="3"
+                  strokeLinejoin="round"
                 >
                   {showValues
                     ? `Średnia: ${formatSummaryCurrency(average, true)}`
@@ -282,7 +286,7 @@ const YearlyCategoryExpensesChart = ({
                     x={point.x}
                     y={Math.max(PADDING.top - 8, point.y - 12)}
                     textAnchor="middle"
-                    className="fill-slate-700 text-[11px] font-medium"
+                    className="fill-foreground-soft text-[11px] font-medium"
                   >
                     {showValues
                       ? formatSummaryCurrency(point.value, true)
@@ -293,7 +297,7 @@ const YearlyCategoryExpensesChart = ({
                   cx={point.x}
                   cy={point.y}
                   r="5"
-                  fill="#fff"
+                  fill="var(--app-surface)"
                   stroke={color}
                   strokeWidth="3"
                 >
@@ -303,7 +307,7 @@ const YearlyCategoryExpensesChart = ({
                   x={point.x}
                   y={CHART_HEIGHT - 12}
                   textAnchor="middle"
-                  className="fill-slate-500 text-[11px]"
+                  className="fill-muted text-[11px]"
                 >
                   {monthLabels[index]}
                 </text>

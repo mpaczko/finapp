@@ -33,7 +33,7 @@ const TotalExpensesCard = ({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-950 p-3 text-sm text-white shadow-md">
+    <div className="rounded-2xl border border-border bg-summary p-3 text-sm text-summary-foreground shadow-md">
       <div className="grid gap-3">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-semibold">
@@ -43,7 +43,7 @@ const TotalExpensesCard = ({
 
         <div className="grid gap-2 sm:grid-cols-4">
           <div className="rounded-xl bg-white/10 p-2.5">
-            <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
+            <div className="text-[10px] font-medium uppercase tracking-wide text-summary-muted">
               Przychód
             </div>
             <div className="mt-1 text-sm font-bold tabular-nums text-blue-200 sm:text-base">
@@ -74,7 +74,7 @@ const TotalExpensesCard = ({
                       setEditingIncome(true);
                       setIncomeInputValue(totals.income);
                     }}
-                    className="rounded p-1 text-blue-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="rounded p-1 text-blue-200 transition hover:bg-white/10 hover:text-summary-foreground focus:outline-none focus:ring-2 focus:ring-blue-200"
                   >
                     <Pencil size={14} aria-hidden="true" />
                   </button>
@@ -132,7 +132,7 @@ type SummaryMetricProps = { label: string; value: string; className: string };
 
 const SummaryMetric = ({ label, value, className }: SummaryMetricProps) => (
   <div className="rounded-xl bg-white/10 p-2.5">
-    <div className="text-[10px] font-medium uppercase tracking-wide text-slate-300">
+    <div className="text-[10px] font-medium uppercase tracking-wide text-summary-muted">
       {label}
     </div>
     <div

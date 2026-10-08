@@ -100,23 +100,23 @@ const ExpensesDialog = () => {
         />
       </div>
 
-      <DialogContent className="overflow-visible rounded-3xl border-slate-100 bg-white p-0 shadow-2xl sm:max-w-3xl">
-        <DialogHeader className="border-b border-slate-100 px-6 py-5 pr-12">
-          <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">
+      <DialogContent className="overflow-visible rounded-3xl border-border-soft bg-surface p-0 shadow-2xl sm:max-w-3xl">
+        <DialogHeader className="border-b border-border-soft px-6 py-5 pr-12">
+          <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
             Dodaj kilka wydatków
           </DialogTitle>
-          <DialogDescription className="pt-1 text-sm text-slate-500">
+          <DialogDescription className="pt-1 text-sm text-muted">
             Sprawdź dane i dodaj wszystkie pozycje jednocześnie albo zapisz je pojedynczo.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(65vh,680px)] space-y-4 overflow-y-auto px-6 py-5">
-          <p className="text-sm text-slate-600">
-            Poprawne wydatki: <span className="font-semibold text-slate-900">{expenses.length}</span>. Błędne wiersze: {invalidRows.length}.
+          <p className="text-sm text-muted">
+            Poprawne wydatki: <span className="font-semibold text-foreground">{expenses.length}</span>. Błędne wiersze: {invalidRows.length}.
           </p>
 
           {expenses.map(({ id, ...expense }) => (
-            <div key={id} className="overflow-visible rounded-2xl border border-slate-100 bg-slate-50 shadow-sm">
+            <div key={id} className="overflow-visible rounded-2xl border border-border-soft bg-surface-muted shadow-sm">
               <ExpenseForm
                 ref={(form) => {
                   formRefs.current[id] = form;
@@ -132,19 +132,19 @@ const ExpensesDialog = () => {
 
           {(invalidRows.length > 0 || warnings.length > 0) && (
             <div className="space-y-2">
-              {invalidRows.map((issue, index) => <p key={`error-${index}`} className="text-sm text-red-600">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
-              {warnings.map((issue, index) => <p key={`warning-${index}`} className="text-sm text-amber-600">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
+              {invalidRows.map((issue, index) => <p key={`error-${index}`} className="text-sm text-danger">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
+              {warnings.map((issue, index) => <p key={`warning-${index}`} className="text-sm text-warning">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-6 py-5">
+        <div className="flex items-center justify-between gap-3 border-t border-border-soft px-6 py-5">
           <Button
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
             disabled={createManyMutation.isPending}
-            className="rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-xl text-muted hover:bg-surface-subtle hover:text-foreground"
           >
             Anuluj
           </Button>
@@ -152,7 +152,7 @@ const ExpensesDialog = () => {
             type="button"
             onClick={() => void importAllExpenses()}
             disabled={!expenses.length || createManyMutation.isPending}
-            className="rounded-xl bg-slate-900 px-5 text-white shadow-sm hover:bg-slate-800"
+            className="rounded-xl bg-primary px-5 text-primary-foreground shadow-sm hover:bg-primary-hover"
           >
             {createManyMutation.isPending
               ? "Dodawanie..."
@@ -161,7 +161,7 @@ const ExpensesDialog = () => {
         </div>
 
         {createManyMutation.error && (
-          <p className="px-6 pb-5 text-sm text-red-600">
+          <p className="px-6 pb-5 text-sm text-danger">
             Nie udało się dodać wydatków: {createManyMutation.error.message}
           </p>
         )}

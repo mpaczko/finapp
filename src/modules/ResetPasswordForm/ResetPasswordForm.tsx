@@ -76,8 +76,8 @@ export default function ResetPasswordForm({
         onSubmit={handleSubmit(onSubmit)}
       >
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Ustaw nowe hasło</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-foreground">Ustaw nowe hasło</h1>
+          <p className="mt-1 text-sm text-muted">
             Wpisz nowe hasło, którego użyjesz przy następnym logowaniu.
           </p>
         </div>
@@ -107,14 +107,14 @@ export default function ResetPasswordForm({
         {errorMessage ? (
           <div
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
           >
             <p>{errorMessage}</p>
             {!/połączenie/i.test(errorMessage) ? (
               <Button
                 type="button"
                 variant="link"
-                className="mt-2 h-auto px-0 text-red-700"
+                className="mt-2 h-auto px-0 text-danger"
                 onClick={onRequestPasswordReset}
               >
                 Poproś o nowy link
@@ -131,8 +131,8 @@ function ResetPasswordError({ onRequestPasswordReset }: Pick<Props, "onRequestPa
   return (
     <div className="flex w-[370px] flex-col gap-4 rounded-2xl p-10 shadow-sm">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Nieprawidłowy link</h1>
-        <p className="mt-1 text-sm text-slate-600">{INVALID_TOKEN_MESSAGE}</p>
+        <h1 className="text-xl font-semibold text-foreground">Nieprawidłowy link</h1>
+        <p className="mt-1 text-sm text-muted">{INVALID_TOKEN_MESSAGE}</p>
       </div>
       <Button type="button" onClick={onRequestPasswordReset}>
         Poproś o nowy link

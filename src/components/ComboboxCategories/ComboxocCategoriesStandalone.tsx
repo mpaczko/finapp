@@ -48,7 +48,7 @@ export function ComboboxCategoriesStandalone({
             variant="outline"
             role="combobox"
             aria-expanded={!!value}
-            className="flex-1 min-w-0 w-full h-10 justify-between text-left truncate rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            className="flex-1 min-w-0 w-full h-10 justify-between text-left truncate rounded-xl border border-border bg-surface-muted px-3 text-sm text-foreground focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-border"
           >
             <span className="truncate">
               {value
@@ -61,7 +61,7 @@ export function ComboboxCategoriesStandalone({
 
         <PopoverPortal>
           <PopoverContent
-            className="w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white p-0 shadow-lg max-h-80"
+            className="w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface p-0 shadow-lg max-h-80"
             align="start"
             onWheel={(event) => event.stopPropagation()}
           >

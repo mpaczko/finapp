@@ -30,13 +30,13 @@ function FormDatePicker<T extends FieldValues>({ name, label }: Props<T>) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-slate-700">{label}</label>
+      <label className="text-sm font-medium text-foreground-soft">{label}</label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="outline"
-            className="h-10 w-full justify-start rounded-xl border-slate-200 bg-slate-50 px-3 text-left font-normal text-slate-900 shadow-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-200"
+            className="h-10 w-full justify-start rounded-xl border-border bg-surface-muted px-3 text-left font-normal text-foreground shadow-none hover:bg-surface-subtle focus-visible:ring-2 focus-visible:ring-border"
           >
             {selectedDate
               ? selectedDate.toLocaleDateString("pl-PL")
@@ -45,7 +45,7 @@ function FormDatePicker<T extends FieldValues>({ name, label }: Props<T>) {
         </PopoverTrigger>
         <PopoverPortal>
           <PopoverContent
-            className="z-[60] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl"
+            className="z-[60] rounded-2xl border border-border bg-surface p-3 shadow-xl"
             align="start"
             side="top"
             sideOffset={8}

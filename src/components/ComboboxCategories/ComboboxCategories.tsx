@@ -50,7 +50,7 @@ export function ComboboxCategories({
           className={cn("text-start flex-1 min-w-[200px] w-full", className)}
         >
           {label && (
-            <FormLabel className="flex gap-1 text-sm font-medium text-slate-700">
+            <FormLabel className="flex gap-1 text-sm font-medium text-foreground-soft">
               {label}
             </FormLabel>
           )}
@@ -62,7 +62,7 @@ export function ComboboxCategories({
                   role="combobox"
                   aria-expanded={open}
                   className={cn(
-                    "h-10 w-full min-w-0 justify-between rounded-xl border-slate-200 bg-slate-50 px-3 text-left text-slate-900 shadow-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-200",
+                    "h-10 w-full min-w-0 justify-between rounded-xl border-border bg-surface-muted px-3 text-left text-foreground shadow-none hover:bg-surface-subtle focus-visible:ring-2 focus-visible:ring-border",
                   )}
                 >
                   <span className="truncate">
@@ -77,7 +77,7 @@ export function ComboboxCategories({
 
               <PopoverPortal>
                 <PopoverContent
-                  className="z-[60] max-h-80 w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white p-1 shadow-xl"
+                  className="z-[60] max-h-80 w-[--radix-popover-trigger-width] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface p-1 shadow-xl"
                   align="start"
                   sideOffset={8}
                   onWheel={(event) => event.stopPropagation()}
