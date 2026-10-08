@@ -34,7 +34,7 @@ const Main = ({ userId, selectedMonth }: Props) => {
           <TableSkeleton rows={7} columns={4} className="min-h-[420px]" />
         </div>
         <div className="grid min-w-0 gap-8">
-          <div className="h-56 animate-pulse rounded-3xl bg-slate-100" />
+          <div className="h-56 animate-pulse rounded-3xl bg-surface-subtle" />
           <TableSkeleton rows={8} columns={5} className="min-h-[520px]" />
         </div>
       </main>
@@ -44,14 +44,14 @@ const Main = ({ userId, selectedMonth }: Props) => {
   if (hasError) {
     return (
       <main className="flex min-h-[60vh] items-center justify-center px-4 pt-20">
-        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-100 text-lg font-semibold text-red-600">
+        <div className="w-full max-w-md rounded-2xl border border-danger-border bg-danger-surface p-6 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-danger-surface text-lg font-semibold text-danger">
             !
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Nie udało się pobrać danych
           </h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted">
             Odśwież stronę i spróbuj ponownie.
           </p>
         </div>
@@ -68,7 +68,7 @@ const Main = ({ userId, selectedMonth }: Props) => {
         <Suspense
           fallback={
             <div
-              className="h-48 animate-pulse rounded-3xl bg-slate-100"
+              className="h-48 animate-pulse rounded-3xl bg-surface-subtle"
               aria-label="Ładowanie rocznego podsumowania"
             />
           }

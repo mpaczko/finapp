@@ -19,7 +19,7 @@ const DeferredExpenseDialog = ({ triggerLabel, ...props }: Props) => {
     <Suspense
       fallback={
         <Button disabled className="animate-pulse">
-          <span className="inline-block h-4 w-16 rounded bg-slate-200" />
+          <span className="inline-block h-4 w-16 rounded bg-border" />
         </Button>
       }
     >

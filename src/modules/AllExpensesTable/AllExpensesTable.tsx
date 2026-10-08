@@ -10,7 +10,7 @@ import {
   useExpensesQuery,
 } from "../../features/expenses/queries";
 
-const ROW_COLORS = ["bg-white", "bg-gray-100"];
+const ROW_COLORS = ["bg-surface", "bg-surface-muted"];
 const ROWS_PER_PAGE_OPTIONS = [8, 15, 20, 50] as const;
 type RowsPerPage = (typeof ROWS_PER_PAGE_OPTIONS)[number];
 const DEFAULT_ROWS_PER_PAGE: RowsPerPage = 8;
@@ -145,7 +145,7 @@ const ElementsTable = () => {
 
   return (
     <div className="flex min-h-[720px] min-w-0 flex-col gap-4 overflow-x-auto">
-      <h2 className="text-xl font-semibold text-gray-800">Moje wydatki</h2>
+      <h2 className="text-xl font-semibold text-foreground">Moje wydatki</h2>
 
       <ExpenseFilters filters={filters} onFilterChange={setFilters} />
 
@@ -169,15 +169,15 @@ const ElementsTable = () => {
 
       {!isTableLoading && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted">
             Pokazano {paginatedExpenses.length} z {filteredExpenses.length}{" "}
             wydatków
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Wiersze:</span>
-              <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white">
+              <span className="text-sm text-muted">Wiersze:</span>
+              <div className="inline-flex overflow-hidden rounded-xl border border-border bg-surface">
                 {ROWS_PER_PAGE_OPTIONS.map((option) => {
                   const isActive = rowsPerPage === option;
 
@@ -189,8 +189,8 @@ const ElementsTable = () => {
                       onClick={() => setRowsPerPage(option)}
                       className={`px-3 py-1.5 text-sm font-medium transition ${
                         isActive
-                          ? "bg-slate-900 text-white"
-                          : "text-slate-600 hover:bg-slate-50"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted hover:bg-surface-muted"
                       }`}
                     >
                       {option}

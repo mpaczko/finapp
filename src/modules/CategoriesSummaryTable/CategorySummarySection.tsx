@@ -46,10 +46,10 @@ const CategorySummarySection = ({
   };
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-      <div className="flex flex-col gap-1 border-b border-slate-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-border-soft bg-surface shadow-sm">
+      <div className="flex flex-col gap-1 border-b border-border-soft px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+        <h3 className="text-sm font-semibold text-foreground-soft">{title}</h3>
+        <div className="flex items-center gap-2 text-xs font-medium text-muted">
           <span>Suma kategorii:</span>
           <span>{formatSummaryCurrency(totals.actual, showValues)}</span>
         </div>
@@ -64,27 +64,27 @@ const CategorySummarySection = ({
         </colgroup>
 
         <thead>
-          <tr className="bg-slate-50 text-left text-[11px] uppercase tracking-wide text-slate-500">
-            <th className="border-b border-slate-100 px-2.5 py-2 font-medium sm:px-3">
+          <tr className="bg-surface-muted text-left text-[11px] uppercase tracking-wide text-muted">
+            <th className="border-b border-border-soft px-2.5 py-2 font-medium sm:px-3">
               Kategoria
             </th>
-            <th className="border-b border-slate-100 px-1.5 py-2 text-right font-medium sm:px-2">
+            <th className="border-b border-border-soft px-1.5 py-2 text-right font-medium sm:px-2">
               Planowane
             </th>
-            <th className="border-b border-slate-100 px-1.5 py-2 text-right font-medium sm:px-2">
+            <th className="border-b border-border-soft px-1.5 py-2 text-right font-medium sm:px-2">
               Wydatki
             </th>
-            <th className="border-b border-slate-100 px-1.5 py-2 text-right font-medium sm:px-2">
+            <th className="border-b border-border-soft px-1.5 py-2 text-right font-medium sm:px-2">
               Różnica
             </th>
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-slate-100 text-slate-900">
+        <tbody className="divide-y divide-row-divider text-foreground">
           {rows.length === 0 ? (
             <tr>
               <td
-                className="px-3 py-5 text-center text-xs text-slate-500"
+                className="px-3 py-5 text-center text-xs text-muted"
                 colSpan={4}
               >
                 Brak pozycji w tej grupie.
@@ -99,7 +99,7 @@ const CategorySummarySection = ({
               return (
                 <tr
                   key={row.name}
-                  className="text-slate-900 transition-colors hover:bg-slate-50"
+                  className="text-foreground transition-colors hover:bg-surface-muted"
                 >
                   <td
                     className="min-w-0 cursor-pointer px-2.5 py-2 sm:px-3"
@@ -109,7 +109,7 @@ const CategorySummarySection = ({
                       <span
                         className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
                         style={{
-                          backgroundColor: colorMap[row.name] || "#cbd5e1",
+                          backgroundColor: colorMap[row.name] || "var(--app-border-strong)",
                         }}
                       />
                       <span className="min-w-0 truncate text-xs font-medium leading-snug sm:text-sm">
@@ -137,7 +137,7 @@ const CategorySummarySection = ({
                           if (event.key === "Enter") saveEditedValue(row.name);
                           if (event.key === "Escape") setEditingCategory(null);
                         }}
-                        className="w-full max-w-[82px] rounded border border-slate-200 px-1.5 py-1 text-right text-xs outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-200"
+                        className="w-full max-w-[82px] rounded border border-border px-1.5 py-1 text-right text-xs outline-none transition focus:border-border-strong focus:ring-1 focus:ring-border"
                       />
                     ) : (
                       <span className="whitespace-nowrap">
@@ -147,7 +147,7 @@ const CategorySummarySection = ({
                   </td>
 
                   <td
-                    className={`px-1.5 py-2 text-right text-[11px] font-semibold tabular-nums sm:px-2 sm:text-xs ${actual > planned ? "text-red-700" : actual === planned ? "text-amber-600" : "text-emerald-600"}`}
+                    className={`px-1.5 py-2 text-right text-[11px] font-semibold tabular-nums sm:px-2 sm:text-xs ${actual > planned ? "text-danger" : actual === planned ? "text-warning" : "text-success"}`}
                   >
                     <span className="whitespace-nowrap">
                       {formatSummaryCurrency(row.actual, showValues)}
@@ -163,7 +163,7 @@ const CategorySummarySection = ({
             })
           )}
 
-          <tr className="bg-slate-100 text-xs font-semibold text-slate-900">
+          <tr className="bg-surface-subtle text-xs font-semibold text-foreground">
             <td className="px-2.5 py-2 sm:px-3">Suma</td>
             <td className="px-1.5 py-2 text-right tabular-nums sm:px-2">
               <span className="whitespace-nowrap">

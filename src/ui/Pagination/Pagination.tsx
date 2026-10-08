@@ -41,7 +41,7 @@ export default function Pagination({
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      <span className="text-sm text-gray-700">
+      <span className="text-sm text-foreground-soft">
         Strona {currentPage} / {totalPages}
       </span>
 
