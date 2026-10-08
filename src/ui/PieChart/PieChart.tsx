@@ -75,33 +75,33 @@ export default function PieChart({
 
   return (
     <div
-      className={`rounded-3xl border border-gray-200 bg-white p-4 shadow-sm ${className ?? ""}`}
+      className={`rounded-3xl border border-border bg-surface p-4 shadow-sm ${className ?? ""}`}
     >
       <div className="flex items-center justify-between gap-3 mb-4">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         {totalLabel ? (
-          <span className="text-xs text-gray-500">{totalLabel}</span>
+          <span className="text-xs text-muted">{totalLabel}</span>
         ) : null}
       </div>
 
       {total === 0 ? (
-        <div className="flex h-[260px] min-h-[260px] flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-500">
+        <div className="flex h-[260px] min-h-[260px] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface-muted text-sm text-muted">
           Brak danych do wyświetlenia
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <div className="flex items-center justify-center">
             <svg width={220} height={220} viewBox="0 0 220 220">
-              <circle cx="110" cy="110" r="90" fill="#f8fafc" />
+              <circle cx="110" cy="110" r="90" fill="var(--app-surface-muted)" />
               {sliceData.map((slice) => (
                 <path key={slice.label} d={slice.path} fill={slice.color} />
               ))}
-              <circle cx="110" cy="110" r="50" fill="#ffffff" />
+              <circle cx="110" cy="110" r="50" fill="var(--app-surface)" />
               <text
                 x="110"
                 y="98"
                 textAnchor="middle"
-                className="text-sm font-semibold fill-slate-900"
+                className="text-sm font-semibold fill-foreground"
               >
                 {total.toFixed(0)} zł
               </text>
@@ -109,7 +109,7 @@ export default function PieChart({
                 x="110"
                 y="118"
                 textAnchor="middle"
-                className="text-xs fill-slate-500"
+                className="text-xs fill-muted"
               >
                 suma
               </text>
@@ -120,20 +120,20 @@ export default function PieChart({
             {sliceData.map((slice) => (
               <div
                 key={slice.label}
-                className="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-2xl bg-surface-muted px-3 py-2"
               >
                 <div className="flex items-center gap-2">
                   <span
                     className="h-3.5 w-3.5 rounded-full"
                     style={{ backgroundColor: slice.color }}
                   />
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-foreground">
                     {slice.label}
                   </span>
                 </div>
-                <div className="text-right text-slate-700">
+                <div className="text-right text-foreground-soft">
                   <div>{slice.value.toFixed(2)} zł</div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-muted">
                     {slice.percentage.toFixed(0)}%
                   </div>
                 </div>
