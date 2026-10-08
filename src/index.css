@@ -5,23 +5,25 @@
 /* Shared palette for utilities, controls, and SVG charts. */
 :root {
   color-scheme: light;
-  --app-canvas: #f5f7fb;
+  --app-canvas: #f4f4f4;
   --app-surface: #ffffff;
-  --app-surface-muted: #f0f3f9;
-  --app-surface-subtle: #e7ecf5;
-  --app-border-soft: #e5eaf2;
-  --app-border: #d3dce9;
-  --app-border-strong: #a9b7ca;
-  --app-row-divider: #d3dce9;
+  --app-surface-muted: #ffffff;
+  --app-surface-subtle: #f7f7f8;
+  --app-border-soft: #eeeeef;
+  --app-border: #e3e3e6;
+  --app-border-strong: #c6c7ce;
+  --app-row-divider: #e8e8eb;
   --app-foreground: #172033;
   --app-foreground-soft: #334155;
   --app-muted: #58677d;
   --app-subtle: #64748b;
-  --app-primary: #0f766e;
-  --app-primary-hover: #115e59;
+  --app-primary: #2d58e7;
+  --app-primary-hover: #2449c9;
+  --app-primary-gradient: linear-gradient(135deg, #2d58e7, #2449c9);
+  --app-primary-hover-gradient: linear-gradient(135deg, #2449c9, #2d58e7);
   --app-on-primary: #ffffff;
-  --app-accent: #d9f3ef;
-  --app-accent-foreground: #0b5d56;
+  --app-accent: #e7ecff;
+  --app-accent-foreground: #2449c9;
   --app-danger: #b42339;
   --app-on-danger: #ffffff;
   --app-danger-surface: #fff0f2;
@@ -31,8 +33,8 @@
   --app-success-border: #b6ebcb;
   --app-warning: #9a5700;
   --app-warning-surface: #fff6de;
-  --app-info: #2855be;
-  --app-feature: #0e7490;
+  --app-info: #2d58e7;
+  --app-feature: #2449c9;
   --app-summary: #1e293b;
   --app-summary-foreground: #f8fafc;
   --app-summary-muted: #cbd5e1;
@@ -70,6 +72,8 @@
   --app-subtle: #8fa1b9;
   --app-primary: #2563eb;
   --app-primary-hover: #1d4ed8;
+  --app-primary-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
+  --app-primary-hover-gradient: linear-gradient(135deg, #1d4ed8, #2563eb);
   --app-on-primary: #ffffff;
   --app-accent: #1e3a5f;
   --app-accent-foreground: #dbeafe;
@@ -86,7 +90,7 @@
   --app-feature: #93c5fd;
   --app-summary: #202c43;
   --app-summary-foreground: #f8fafc;
-  --app-summary-muted: #cbd5e1;
+  --app-summary-muted: #ffffff;
   --app-chart-label: #0b1220;
   --app-overlay: rgb(2 6 23 / 70%);
 }
@@ -132,10 +136,39 @@
 }
 
 @layer base {
-  html { background: var(--app-canvas); }
-  body { min-width: 320px; min-height: 100vh; background: var(--app-canvas); color: var(--app-foreground); }
-  button:not(:disabled):not([aria-disabled="true"]) { cursor: pointer; }
-  input, select, textarea { color: var(--app-foreground); }
-  input:not([class*="bg-"]), select:not([class*="bg-"]), textarea:not([class*="bg-"]) { background-color: var(--app-surface); }
-  ::placeholder { color: var(--app-subtle); }
+  html {
+    background: var(--app-canvas);
+  }
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    background: var(--app-canvas);
+    color: var(--app-foreground);
+  }
+  button:not(:disabled):not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  input,
+  select,
+  textarea {
+    color: var(--app-foreground);
+  }
+  input:not([class*="bg-"]),
+  select:not([class*="bg-"]),
+  textarea:not([class*="bg-"]) {
+    background-color: var(--app-surface);
+  }
+  ::placeholder {
+    color: var(--app-subtle);
+  }
+}
+
+@layer utilities {
+  .bg-primary {
+    background-image: var(--app-primary-gradient);
+  }
+
+  .hover\:bg-primary-hover:hover {
+    background-image: var(--app-primary-hover-gradient);
+  }
 }

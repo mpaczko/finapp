@@ -117,10 +117,15 @@ const CategoryBudgetBars = ({
                         className="absolute inset-y-0 left-0 flex items-center justify-end rounded-full px-3 text-xs font-semibold"
                         style={{
                           width: actualWidth,
-                          backgroundColor: isOverBudget ? "var(--app-danger)" : baseColor,
+                          backgroundColor: isOverBudget
+                            ? "var(--app-danger)"
+                            : "var(--app-primary)",
+                          backgroundImage: isOverBudget
+                            ? "linear-gradient(135deg, var(--app-danger), color-mix(in srgb, var(--app-danger) 78%, black))"
+                            : "var(--app-primary-gradient)",
                           color: isOverBudget
                             ? "var(--app-on-danger)"
-                            : "var(--app-chart-label)",
+                            : "var(--app-on-primary)",
                         }}
                       >
                         {isOverBudget ? "Ponad plan" : spentLabel}
