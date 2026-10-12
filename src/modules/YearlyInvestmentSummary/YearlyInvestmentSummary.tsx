@@ -189,9 +189,16 @@ const YearlyInvestmentSummary = ({
   };
 
   const clearComparisonSlot = (slotIndex: number) => {
-    setComparisonSlots((slots) =>
-      slots.map((category, index) => (index === slotIndex ? null : category)),
-    );
+    setComparisonSlots((slots) => {
+      const remainingCategories = slots.filter(
+        (category, index) => category && index !== slotIndex,
+      );
+
+      return Array.from(
+        { length: COMPARISON_SLOTS_COUNT },
+        (_, index) => remainingCategories[index] ?? null,
+      );
+    });
   };
 
   const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
@@ -354,6 +361,8 @@ const YearlyInvestmentSummary = ({
         </div>
 
         {comparisonSlots.map((category, slotIndex) => {
+          if (slotIndex > 0 && !comparisonSlots[slotIndex - 1]) return null;
+
           const comparison = category ? comparisonData[category] : null;
 
           const dropHandlers = {
