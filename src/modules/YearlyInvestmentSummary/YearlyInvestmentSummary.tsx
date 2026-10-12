@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import {
   useBudgetQuery,
+  useYearlyBudgetsQuery,
   useUpdateBudgetMutation,
 } from "../../features/budgets/queries";
 import { useYearlySummaryQuery } from "../../features/summary/queries";
@@ -21,7 +22,9 @@ type YearlyInvestmentSummaryProps = {
 };
 
 const SELECTED_CATEGORY_COOKIE = "finapp.yearlyChartSelectedCategory";
+const COMPARISON_SLOTS_STORAGE_KEY = "finapp.yearlyComparisonSlots";
 const DEFAULT_SELECTED_CATEGORY = "jedzenie";
+const COMPARISON_SLOTS_COUNT = 2;
 
 const getSelectedCategoryFromCookie = () => {
   const cookie = document.cookie
@@ -37,6 +40,27 @@ const saveSelectedCategoryToCookie = (category: string) => {
   document.cookie = `${SELECTED_CATEGORY_COOKIE}=${encodeURIComponent(category)}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 };
 
+const getComparisonSlotsFromStorage = (): (string | null)[] => {
+  if (typeof window === "undefined") {
+    return Array.from({ length: COMPARISON_SLOTS_COUNT }, () => null);
+  }
+
+  try {
+    const savedValue = window.localStorage.getItem(
+      COMPARISON_SLOTS_STORAGE_KEY,
+    );
+    const parsed = savedValue ? JSON.parse(savedValue) : [];
+
+    if (!Array.isArray(parsed)) throw new Error("Invalid comparison slots");
+
+    return Array.from({ length: COMPARISON_SLOTS_COUNT }, (_, index) =>
+      typeof parsed[index] === "string" ? parsed[index] : null,
+    );
+  } catch {
+    return Array.from({ length: COMPARISON_SLOTS_COUNT }, () => null);
+  }
+};
+
 const YearlyInvestmentSummary = ({
   userId,
   selectedMonth,
@@ -49,11 +73,16 @@ const YearlyInvestmentSummary = ({
   const [selectedCategory, setSelectedCategoryForChart] = useState(
     getSelectedCategoryFromCookie,
   );
+  const [comparisonSlots, setComparisonSlots] = useState(
+    getComparisonSlotsFromStorage,
+  );
   const dispatch = useAppDispatch();
   const globallySelectedCategory = useAppSelector(
     (state) => state.config.selectedCategory,
   );
   const { data: budgets = [] } = useBudgetQuery(selectedMonth, Boolean(userId));
+  const { data: yearlyBudgets = [], isLoading: yearlyBudgetsLoading } =
+    useYearlyBudgetsQuery(year, Boolean(userId));
   const selectedBudget = budgets[0];
   const updateBudgetMutation = useUpdateBudgetMutation(selectedMonth);
   const { data: summary, isLoading: loading } = useYearlySummaryQuery(
@@ -81,6 +110,33 @@ const YearlyInvestmentSummary = ({
       ),
     [availableCategories],
   );
+  const categoryKeys = useMemo(
+    () =>
+      Object.fromEntries(
+        categories.map((category) => [category.name, category.key]),
+      ),
+    [categories],
+  );
+
+  const comparisonData = useMemo(() => {
+    return Object.fromEntries(
+      availableCategories.map((category) => {
+        const categoryKey = categoryKeys[category];
+        const planned = yearlyBudgets.reduce((sum, budget) => {
+          if (!categoryKey) return sum;
+
+          return (
+            sum + Number((budget as Record<string, unknown>)[categoryKey] ?? 0)
+          );
+        }, 0);
+        const actual = monthlyTotals
+          .filter((entry) => entry.category === category)
+          .reduce((sum, entry) => sum + entry.total, 0);
+
+        return [category, { planned, actual }];
+      }),
+    ) as Record<string, { planned: number; actual: number }>;
+  }, [availableCategories, categoryKeys, monthlyTotals, yearlyBudgets]);
 
   useEffect(() => {
     if (!availableCategories.includes(selectedCategory)) {
@@ -97,6 +153,46 @@ const YearlyInvestmentSummary = ({
       }
     }
   }, [availableCategories, selectedCategory]);
+
+  useEffect(() => {
+    setComparisonSlots((slots) =>
+      slots.map((category) =>
+        category && availableCategories.includes(category) ? category : null,
+      ),
+    );
+  }, [availableCategories]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        COMPARISON_SLOTS_STORAGE_KEY,
+        JSON.stringify(comparisonSlots),
+      );
+    } catch {
+      // Slots still work during the current session when storage is unavailable.
+    }
+  }, [comparisonSlots]);
+
+  const placeCategoryInComparisonSlot = (
+    slotIndex: number,
+    category: string,
+  ) => {
+    if (!availableCategories.includes(category)) return;
+
+    setComparisonSlots((slots) => {
+      const nextSlots = slots.map((slotCategory) =>
+        slotCategory === category ? null : slotCategory,
+      );
+      nextSlots[slotIndex] = category;
+      return nextSlots;
+    });
+  };
+
+  const clearComparisonSlot = (slotIndex: number) => {
+    setComparisonSlots((slots) =>
+      slots.map((category, index) => (index === slotIndex ? null : category)),
+    );
+  };
 
   const selectedMonthIpBox = Number(selectedBudget?.ip_box ?? 0);
   const selectedMonthBelongsToYear = selectedBudget?.month.startsWith(
@@ -256,6 +352,66 @@ const YearlyInvestmentSummary = ({
             baseColor="var(--category-11)"
           />
         </div>
+
+        {comparisonSlots.map((category, slotIndex) => {
+          const comparison = category ? comparisonData[category] : null;
+
+          const dropHandlers = {
+            onDragOver: (event: React.DragEvent<HTMLElement>) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+            },
+            onDrop: (event: React.DragEvent<HTMLElement>) => {
+              event.preventDefault();
+              placeCategoryInComparisonSlot(
+                slotIndex,
+                event.dataTransfer.getData("text/plain"),
+              );
+            },
+          };
+
+          return (
+            <div key={slotIndex} className="min-w-0" {...dropHandlers}>
+              {category && comparison ? (
+                <ComparisonCard
+                  title={`${category} — planowane vs zrealizowane`}
+                  planned={comparison.planned}
+                  actual={comparison.actual}
+                  loading={monthlyTotalsLoading || yearlyBudgetsLoading}
+                  baseColor={categoryColors[category] ?? categoryChartColors[0]}
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => clearComparisonSlot(slotIndex)}
+                      className="rounded-lg p-1 text-muted transition hover:bg-surface hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label={`Usuń kategorię ${category} z porównania`}
+                      title="Usuń z porównania"
+                    >
+                      <X size={16} aria-hidden="true" />
+                    </button>
+                  }
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    placeCategoryInComparisonSlot(slotIndex, selectedCategory)
+                  }
+                  className="flex min-h-[150px] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border-strong bg-surface-muted p-4 text-center text-sm font-medium text-muted transition hover:border-primary hover:bg-surface-subtle hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label={`Dodaj kategorię do pola porównania ${slotIndex + 1}`}
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-current">
+                    <Plus size={20} aria-hidden="true" />
+                  </span>
+                  <span>Przeciągnij tutaj kategorię</span>
+                  <span className="text-xs font-normal">
+                    lub dodaj wybraną kategorię
+                  </span>
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div
@@ -270,6 +426,11 @@ const YearlyInvestmentSummary = ({
             <button
               key={category}
               type="button"
+              draggable
+              onDragStart={(event) => {
+                event.dataTransfer.effectAllowed = "copy";
+                event.dataTransfer.setData("text/plain", category);
+              }}
               aria-pressed={active}
               onClick={() => {
                 setSelectedCategoryForChart(category);
@@ -278,7 +439,7 @@ const YearlyInvestmentSummary = ({
                   dispatch(setSelectedCategory(category));
                 }
               }}
-              className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-medium text-foreground-soft transition hover:brightness-95 ${
+              className={`shrink-0 cursor-grab rounded-xl border px-3 py-2 text-sm font-medium text-foreground-soft transition hover:brightness-95 active:cursor-grabbing ${
                 active ? "shadow-sm" : "bg-surface"
               }`}
               style={{

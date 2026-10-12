@@ -8,6 +8,7 @@ type ComparisonCardProps = {
   actual: number | null;
   loading: boolean;
   baseColor: string;
+  action?: React.ReactNode;
 };
 
 const ComparisonCard = ({
@@ -16,6 +17,7 @@ const ComparisonCard = ({
   actual,
   loading,
   baseColor,
+  action,
 }: ComparisonCardProps) => {
   const [showValues] = useSummaryVisibility();
 
@@ -26,7 +28,7 @@ const ComparisonCard = ({
 
   return (
     <div className="flex h-full min-h-[150px] w-full flex-col rounded-2xl border border-border bg-surface-muted p-4">
-      <div className="flex min-w-0 items-center justify-between gap-2">
+      <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span
             className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
@@ -36,6 +38,7 @@ const ComparisonCard = ({
             {title}
           </span>
         </div>
+        {action}
       </div>
 
       <div className="mt-auto space-y-2 pt-5">
