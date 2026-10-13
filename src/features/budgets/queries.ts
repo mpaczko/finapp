@@ -4,12 +4,25 @@ import { budgetsApi, UpdateBudgetPayload } from "../../lib/budgetsApi";
 
 export const budgetQueryKey = (month: string) => ["budgets", month] as const;
 
+export const yearlyBudgetsQueryKey = (year: number) =>
+  ["budgets", "yearly", year] as const;
+
 export const useBudgetQuery = (month: string, enabled = true) =>
   useQuery({
     queryKey: budgetQueryKey(month),
     queryFn: ({ signal }) => budgetsApi.listByMonth(month, signal),
     enabled,
     staleTime: 2 * 60_000,
+  });
+
+export const useYearlyBudgetsQuery = (year: number, enabled = true) =>
+  useQuery({
+    queryKey: yearlyBudgetsQueryKey(year),
+    queryFn: ({ signal }) => budgetsApi.list(signal),
+    enabled,
+    staleTime: 2 * 60_000,
+    select: (budgets) =>
+      budgets.filter((budget) => budget.month.startsWith(`${year}-`)),
   });
 
 export const useUpdateBudgetMutation = (month: string) => {
@@ -20,6 +33,9 @@ export const useUpdateBudgetMutation = (month: string) => {
       budgetsApi.update(id, budget),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: budgetQueryKey(month) });
+      void queryClient.invalidateQueries({
+        queryKey: ["budgets", "yearly"],
+      });
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
     },
   });
