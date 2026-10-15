@@ -14,9 +14,15 @@ type Props = {
   expenses: Expense[];
   rowColorByDate: Map<string, string>;
   handleDelete: (id?: string) => Promise<void> | void;
+  deleting: boolean;
 };
 
-const ExpensesTable = ({ expenses, rowColorByDate, handleDelete }: Props) => {
+const ExpensesTable = ({
+  expenses,
+  rowColorByDate,
+  handleDelete,
+  deleting,
+}: Props) => {
   return (
     <div className="mx-auto max-w-[1360px] overflow-x-auto rounded-3xl border border-border-soft bg-surface shadow-sm">
       <table className="w-full min-w-[680px] table-fixed">
@@ -61,8 +67,10 @@ const ExpensesTable = ({ expenses, rowColorByDate, handleDelete }: Props) => {
                       triggerLabel="Edytuj"
                     />
                     <button
-                      onClick={() => handleDelete(el.id)}
-                      className="px-2 py-1 text-sm rounded-lg border border-danger-border text-danger hover:bg-danger-surface"
+                      type="button"
+                      disabled={deleting}
+                      onClick={() => void handleDelete(el.id)}
+                      className="rounded-lg border border-danger-border px-2 py-1 text-sm text-danger hover:bg-danger-surface disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Usuń
                     </button>
