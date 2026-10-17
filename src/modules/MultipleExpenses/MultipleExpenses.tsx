@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { useCreateManyExpensesMutation } from "../../features/expenses/queries";
 import { Button } from "../../ui/Button";
@@ -39,28 +39,25 @@ const ExpensesDialog = () => {
     if (!isOpen) resetImport();
   };
 
-  useEffect(() => {
-    if (open && expenses.length === 0) {
-      setOpen(false);
-      setInvalidRows([]);
-      setWarnings([]);
-      formRefs.current = {};
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }, [expenses.length, open]);
-
   const handleFiles = async (files: File[]) => {
     const results = await Promise.all(
-      files.map(async (file) => ({ fileName: file.name, result: parseCSV(await file.text()) })),
+      files.map(async (file) => ({
+        fileName: file.name,
+        result: parseCSV(await file.text()),
+      })),
     );
 
     setExpenses(results.flatMap(({ result }) => result.validRows));
-    setInvalidRows(results.flatMap(({ fileName, result }) =>
-      result.invalidRows.map((issue) => ({ ...issue, fileName })),
-    ));
-    setWarnings(results.flatMap(({ fileName, result }) =>
-      result.warnings.map((issue) => ({ ...issue, fileName })),
-    ));
+    setInvalidRows(
+      results.flatMap(({ fileName, result }) =>
+        result.invalidRows.map((issue) => ({ ...issue, fileName })),
+      ),
+    );
+    setWarnings(
+      results.flatMap(({ fileName, result }) =>
+        result.warnings.map((issue) => ({ ...issue, fileName })),
+      ),
+    );
     setOpen(true);
   };
 
@@ -76,10 +73,15 @@ const ExpensesDialog = () => {
 
     const forms = expenses
       .map((expense) => formRefs.current[expense.id])
-      .filter((form): form is ExpenseFormHandle => form !== null && form !== undefined);
+      .filter(
+        (form): form is ExpenseFormHandle =>
+          form !== null && form !== undefined,
+      );
     if (forms.length !== expenses.length) return;
 
-    const validationResults = await Promise.all(forms.map((form) => form.validate()));
+    const validationResults = await Promise.all(
+      forms.map((form) => form.validate()),
+    );
     if (validationResults.some((isValid) => !isValid)) return;
 
     await createManyMutation.mutateAsync(forms.map((form) => form.getValues()));
@@ -89,14 +91,18 @@ const ExpensesDialog = () => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div className="flex">
-        <Button onClick={() => fileInputRef.current?.click()}>Wgraj plik CSV</Button>
+        <Button onClick={() => fileInputRef.current?.click()}>
+          Wgraj plik CSV
+        </Button>
         <input
           ref={fileInputRef}
           type="file"
           multiple
           accept=".csv,text/csv"
           className="hidden"
-          onChange={(event) => void handleFiles(Array.from(event.target.files ?? []))}
+          onChange={(event) =>
+            void handleFiles(Array.from(event.target.files ?? []))
+          }
         />
       </div>
 
@@ -106,17 +112,25 @@ const ExpensesDialog = () => {
             Dodaj kilka wydatków
           </DialogTitle>
           <DialogDescription className="pt-1 text-sm text-muted">
-            Sprawdź dane i dodaj wszystkie pozycje jednocześnie albo zapisz je pojedynczo.
+            Sprawdź dane i dodaj wszystkie pozycje jednocześnie albo zapisz je
+            pojedynczo.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(65vh,680px)] space-y-4 overflow-y-auto px-6 py-5">
           <p className="text-sm text-muted">
-            Poprawne wydatki: <span className="font-semibold text-foreground">{expenses.length}</span>. Błędne wiersze: {invalidRows.length}.
+            Poprawne wydatki:{" "}
+            <span className="font-semibold text-foreground">
+              {expenses.length}
+            </span>
+            . Błędne wiersze: {invalidRows.length}.
           </p>
 
           {expenses.map(({ id, ...expense }) => (
-            <div key={id} className="overflow-visible rounded-2xl border border-border-soft bg-surface-muted shadow-sm">
+            <div
+              key={id}
+              className="overflow-visible rounded-2xl border border-border-soft bg-surface-muted shadow-sm"
+            >
               <ExpenseForm
                 ref={(form) => {
                   formRefs.current[id] = form;
@@ -132,22 +146,43 @@ const ExpensesDialog = () => {
 
           {(invalidRows.length > 0 || warnings.length > 0) && (
             <div className="space-y-2">
-              {invalidRows.map((issue, index) => <p key={`error-${index}`} className="text-sm text-danger">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
-              {warnings.map((issue, index) => <p key={`warning-${index}`} className="text-sm text-warning">{issue.fileName ? `${issue.fileName}, ` : ""}wiersz {issue.line}: {issue.reason}</p>)}
+              {invalidRows.map((issue, index) => (
+                <p key={`error-${index}`} className="text-sm text-danger">
+                  {issue.fileName ? `${issue.fileName}, ` : ""}wiersz{" "}
+                  {issue.line}: {issue.reason}
+                </p>
+              ))}
+              {warnings.map((issue, index) => (
+                <p key={`warning-${index}`} className="text-sm text-warning">
+                  {issue.fileName ? `${issue.fileName}, ` : ""}wiersz{" "}
+                  {issue.line}: {issue.reason}
+                </p>
+              ))}
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-border-soft px-6 py-5">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => handleOpenChange(false)}
-            disabled={createManyMutation.isPending}
-            className="rounded-xl text-muted hover:bg-surface-subtle hover:text-foreground"
-          >
-            Anuluj
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={createManyMutation.isPending}
+              className="rounded-xl"
+            >
+              Wybierz inny plik
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => handleOpenChange(false)}
+              disabled={createManyMutation.isPending}
+              className="rounded-xl text-muted hover:bg-surface-subtle hover:text-foreground"
+            >
+              Anuluj
+            </Button>
+          </div>
           <Button
             type="button"
             onClick={() => void importAllExpenses()}
