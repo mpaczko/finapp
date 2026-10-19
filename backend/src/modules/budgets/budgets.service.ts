@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { PrismaService } from "../../prisma/prisma.service";
+import { OptionalMonthQueryDto } from "../../common/dto/optional-month-query.dto";
 import { CreateBudgetDto } from "./dto/create-budget.dto";
 import { UpdateBudgetDto } from "./dto/update-budget.dto";
 
@@ -37,11 +38,21 @@ type BudgetPayload = BudgetNumberData & {
 export class BudgetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(userId: string, month?: string) {
+  async findAll(userId: string, query: OptionalMonthQueryDto = {}) {
+    const { month, year } = query;
     const budgets = await this.prisma.budget.findMany({
       where: {
         user_id: userId,
-        ...(month ? { month } : {}),
+        ...(month
+          ? { month }
+          : year
+            ? {
+                month: {
+                  gte: `${year}-01`,
+                  lte: `${year}-12`,
+                },
+              }
+            : {}),
       },
       orderBy: { month: "desc" },
     });

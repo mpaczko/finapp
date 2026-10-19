@@ -52,6 +52,11 @@ export type UpdateBudgetPayload = Partial<CreateBudgetPayload>;
 export const budgetsApi = {
   list: (signal?: AbortSignal) => apiRequest<Budget[]>("/budgets", { signal }),
 
+  listByYear: (year: number, signal?: AbortSignal) =>
+    apiRequest<Budget[]>(`/budgets?year=${encodeURIComponent(year)}`, {
+      signal,
+    }),
+
   listByMonth: (month: string, signal?: AbortSignal) =>
     apiRequest<Budget[]>(`/budgets?month=${encodeURIComponent(month)}`, {
       signal,

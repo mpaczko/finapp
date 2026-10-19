@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { OptionalMonthQueryDto } from "../../common/dto/optional-month-query.dto";
@@ -12,8 +22,11 @@ export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
   @Get()
-  findAll(@CurrentUser() user: AuthUser, @Query() query: OptionalMonthQueryDto) {
-    return this.budgetsService.findAll(user.id, query.month);
+  findAll(
+    @CurrentUser() user: AuthUser,
+    @Query() query: OptionalMonthQueryDto,
+  ) {
+    return this.budgetsService.findAll(user.id, query);
   }
 
   @Post()

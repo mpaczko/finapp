@@ -18,11 +18,9 @@ export const useBudgetQuery = (month: string, enabled = true) =>
 export const useYearlyBudgetsQuery = (year: number, enabled = true) =>
   useQuery({
     queryKey: yearlyBudgetsQueryKey(year),
-    queryFn: ({ signal }) => budgetsApi.list(signal),
+    queryFn: ({ signal }) => budgetsApi.listByYear(year, signal),
     enabled,
     staleTime: 2 * 60_000,
-    select: (budgets) =>
-      budgets.filter((budget) => budget.month.startsWith(`${year}-`)),
   });
 
 export const useUpdateBudgetMutation = (month: string) => {
