@@ -12,6 +12,9 @@ const apiPath = "*/api";
 
 export const handlers = [
   http.get(`${apiPath}/auth/me`, () => HttpResponse.json(createAuthUser())),
+  http.post(`${apiPath}/auth/login`, () =>
+    HttpResponse.json({ user: createAuthUser() }),
+  ),
   http.get(`${apiPath}/expenses/monthly-totals`, () =>
     HttpResponse.json([
       {
