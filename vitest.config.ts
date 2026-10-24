@@ -3,7 +3,25 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx}"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "logic",
+          include: ["src/**/*.test.ts"],
+          environment: "node",
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "components",
+          include: ["src/**/*.test.tsx"],
+          environment: "jsdom",
+          setupFiles: ["./src/test/setup.ts"],
+        },
+      },
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
