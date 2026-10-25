@@ -7,6 +7,7 @@ const { JwtService } = require("@nestjs/jwt");
 const { AuthService } = require("../dist/modules/auth/auth.service");
 const { AuthController } = require("../dist/modules/auth/auth.controller");
 const { JwtAuthGuard } = require("../dist/common/guards/jwt-auth.guard");
+const { validateEnv } = require("../dist/config/env.validation");
 
 const testConfig = {
   getOrThrow: (key) => {
@@ -18,6 +19,18 @@ const testConfig = {
   },
   get: (key) => (key === "COOKIE_SECURE" ? "false" : undefined),
 };
+
+test("Environment validation rejects wildcard CORS for cookie sessions", () => {
+  assert.throws(
+    () =>
+      validateEnv({
+        DATABASE_URL: "postgresql://localhost/finapp",
+        JWT_SECRET: "test-only-secret",
+        CORS_ORIGIN: "*",
+      }),
+    /cannot use '\*'/,
+  );
+});
 
 test("AuthService registers a user with an Argon2 hash and omits it from the response", async () => {
   let createdUser;

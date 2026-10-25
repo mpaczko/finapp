@@ -13,11 +13,7 @@ import {
 import { AppModule } from "./app.module";
 
 const parseCorsOrigin = (value?: string) => {
-  if (!value || value === "*") {
-    return true;
-  }
-
-  return value.split(",").map((origin) => origin.trim());
+  return value?.split(",").map((origin) => origin.trim()) ?? [];
 };
 
 async function bootstrap() {

@@ -1,6 +1,39 @@
 const DEFAULT_PORT = "4000";
 const DEFAULT_CORS_ORIGIN = "http://localhost:5173";
 
+const validateCorsOrigins = (value: unknown) => {
+  const origins = String(value ?? DEFAULT_CORS_ORIGIN)
+    .split(",")
+    .map((origin) => origin.trim());
+
+  if (origins.length === 0 || origins.some((origin) => !origin)) {
+    throw new Error("CORS_ORIGIN must contain at least one origin");
+  }
+
+  if (origins.includes("*")) {
+    throw new Error(
+      "CORS_ORIGIN cannot use '*' when authentication uses cookies",
+    );
+  }
+
+  for (const origin of origins) {
+    try {
+      const url = new URL(origin);
+
+      if (
+        (url.protocol !== "http:" && url.protocol !== "https:") ||
+        url.origin !== origin
+      ) {
+        throw new Error();
+      }
+    } catch {
+      throw new Error("CORS_ORIGIN must contain valid HTTP(S) origins");
+    }
+  }
+
+  return origins.join(",");
+};
+
 export const validateEnv = (config: Record<string, unknown>) => {
   if (!config.DATABASE_URL) {
     throw new Error("DATABASE_URL is required");
@@ -33,7 +66,7 @@ export const validateEnv = (config: Record<string, unknown>) => {
   return {
     ...config,
     PORT: config.PORT ?? DEFAULT_PORT,
-    CORS_ORIGIN: config.CORS_ORIGIN ?? DEFAULT_CORS_ORIGIN,
+    CORS_ORIGIN: validateCorsOrigins(config.CORS_ORIGIN),
     JWT_EXPIRES_IN: config.JWT_EXPIRES_IN ?? "8h",
     COOKIE_SECURE: config.COOKIE_SECURE ?? "false",
     FRONTEND_URL: frontendUrl,
