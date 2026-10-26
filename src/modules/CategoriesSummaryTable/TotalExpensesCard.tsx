@@ -46,7 +46,7 @@ const TotalExpensesCard = ({
             <div className="text-[10px] font-medium uppercase tracking-wide text-summary-muted">
               Przychód
             </div>
-            <div className="mt-1 text-sm font-bold tabular-nums text-blue-200 sm:text-base">
+            <div className="mt-1 text-sm font-bold tabular-nums text-[color:var(--app-summary-income)] sm:text-base">
               {editingIncome ? (
                 <input
                   type="number"
@@ -108,12 +108,12 @@ const TotalExpensesCard = ({
           <SummaryMetric
             label="Planowane"
             value={formatSummaryCurrency(totals.planned, showValues)}
-            className="text-amber-200"
+            className="text-[color:var(--app-summary-planned)]"
           />
           <SummaryMetric
             label="Rzeczywiste"
             value={formatSummaryCurrency(totals.actual, showValues)}
-            className="text-rose-200"
+            className="text-[color:var(--app-summary-actual)]"
           />
           <SummaryMetric
             label="Różnica"
