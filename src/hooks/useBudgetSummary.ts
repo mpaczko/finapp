@@ -3,12 +3,19 @@ import { useAppSelector } from "../store/reduxHook";
 import { useBudgetQuery, useSetIncomeReceivedMutation, useUpdateBudgetMutation } from "../features/budgets/queries";
 import { useCategoriesQuery } from "../features/categories/queries";
 import { useExpensesQuery } from "../features/expenses/queries";
+import type { Budget, UpdateBudgetPayload } from "../lib/budgetsApi";
 
 export interface CategorySummary {
   name: string;
   actual: string;
   planned: string;
 }
+
+const getBudgetValue = (budget: Budget, key: string) => {
+  const value = budget[key as keyof Budget];
+
+  return typeof value === "number" ? value : 0;
+};
 
 export const useBudgetSummary = () => {
   const selectedMonth = useAppSelector((state) => state.config.selectedMonth);
@@ -42,8 +49,7 @@ export const useBudgetSummary = () => {
       const newMap: Record<string, number> = {};
       categories.forEach((cat) => {
         const key = cat.key || cat.name;
-        const plannedValue = (budget as any)[key];
-        newMap[cat.name] = plannedValue ?? 0;
+        newMap[cat.name] = getBudgetValue(budget, key);
       });
       setPlannedMap(newMap);
     } else {
@@ -110,7 +116,7 @@ export const useBudgetSummary = () => {
     try {
       await updateBudgetMutation.mutateAsync({
         id: budget.id,
-        budget: { [key]: newValue } as any,
+        budget: { [key]: newValue } as UpdateBudgetPayload,
       });
     } catch (error) {
       console.error("Błąd podczas zapisu:", error);
