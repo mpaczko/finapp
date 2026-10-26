@@ -38,6 +38,13 @@
   --app-summary: #1e293b;
   --app-summary-foreground: #f8fafc;
   --app-summary-muted: #cbd5e1;
+  --app-summary-income: #93c5fd;
+  --app-summary-planned: #fcd34d;
+  --app-summary-actual: #fda4af;
+  --app-chart-income: #2563eb;
+  --app-chart-planned: #b45309;
+  --app-chart-actual: #e11d48;
+  --app-chart-investments: #7c3aed;
   --app-chart-label: #172033;
   --app-overlay: rgb(15 23 42 / 26%);
   --category-1: #f9a8d4;
@@ -91,6 +98,13 @@
   --app-summary: #202c43;
   --app-summary-foreground: #f8fafc;
   --app-summary-muted: #ffffff;
+  --app-summary-income: #93c5fd;
+  --app-summary-planned: #fcd34d;
+  --app-summary-actual: #fda4af;
+  --app-chart-income: #60a5fa;
+  --app-chart-planned: #fbbf24;
+  --app-chart-actual: #fb7185;
+  --app-chart-investments: #c4b5fd;
   --app-chart-label: #0b1220;
   --app-overlay: rgb(2 6 23 / 70%);
 }

@@ -15,6 +15,7 @@ import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
 import ComparisonCard from "./ComparisonCard";
 import YearlyCategoryExpensesChart from "./YearlyCategoryExpensesChart";
+import YearlyIncomeAndExpensesChart from "./YearlyIncomeAndExpensesChart";
 
 type YearlyInvestmentSummaryProps = {
   userId: string | null;
@@ -117,6 +118,12 @@ const YearlyInvestmentSummary = ({
       ),
     [categories],
   );
+  const investmentCategoryName = useMemo(
+    () =>
+      categories.find((category) => category.key === "investments")?.name ??
+      "inwestycje",
+    [categories],
+  );
 
   const comparisonData = useMemo(() => {
     return Object.fromEntries(
@@ -137,6 +144,39 @@ const YearlyInvestmentSummary = ({
       }),
     ) as Record<string, { planned: number; actual: number }>;
   }, [availableCategories, categoryKeys, monthlyTotals, yearlyBudgets]);
+
+  const monthlyOverview = useMemo(() => {
+    const values = Array.from({ length: 12 }, () => ({
+      income: 0,
+      planned: 0,
+      actual: 0,
+      investments: 0,
+    }));
+
+    yearlyBudgets.forEach((budget) => {
+      const monthIndex = Number(budget.month?.slice(5, 7)) - 1;
+      if (monthIndex < 0 || monthIndex > 11) return;
+
+      values[monthIndex].income += Number(budget.income ?? 0);
+      values[monthIndex].planned += Object.values(categoryKeys).reduce(
+        (sum, key) =>
+          sum + Number((budget as Record<string, unknown>)[key] ?? 0),
+        0,
+      );
+    });
+
+    monthlyTotals.forEach((entry) => {
+      const monthIndex = entry.month - 1;
+      if (monthIndex >= 0 && monthIndex < 12) {
+        values[monthIndex].actual += entry.total;
+        if (entry.category === investmentCategoryName) {
+          values[monthIndex].investments += entry.total;
+        }
+      }
+    });
+
+    return values;
+  }, [categoryKeys, investmentCategoryName, monthlyTotals, yearlyBudgets]);
 
   useEffect(() => {
     if (!availableCategories.includes(selectedCategory)) {
@@ -469,6 +509,13 @@ const YearlyInvestmentSummary = ({
         year={year}
         monthlyTotals={monthlyTotals}
         loading={monthlyTotalsLoading}
+        showValues={showValues}
+      />
+
+      <YearlyIncomeAndExpensesChart
+        year={year}
+        monthlyOverview={monthlyOverview}
+        loading={monthlyTotalsLoading || yearlyBudgetsLoading}
         showValues={showValues}
       />
     </div>
