@@ -45,8 +45,8 @@ const MonthlySummary = ({ userId, selectedMonth }: Props) => {
         <div className="min-w-0">
           <TableSkeleton rows={7} columns={4} className="min-h-[420px]" />
         </div>
-        <div className="grid min-w-0 gap-8">
-          <div className="h-56 animate-pulse rounded-3xl bg-surface-subtle" />
+        <div className="grid min-w-0 gap-4">
+          <div className="h-56 animate-pulse rounded-3xl border border-border-soft bg-surface" />
           <TableSkeleton rows={8} columns={5} className="min-h-[520px]" />
         </div>
       </div>
@@ -76,14 +76,14 @@ const MonthlySummary = ({ userId, selectedMonth }: Props) => {
       <div className="min-w-0">
         <CategoriesSummaryTable />
       </div>
-      <div className="grid min-w-0 content-start gap-8 p-4">
+      <section className="grid min-w-0 content-start gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-semibold text-foreground sm:text-xl">
-          Podsumowanie ogólne wybranego miesiąca
+          Bilans wybranego miesiąca
         </h2>
         <SummaryTable />
         <MonthlyExpensesTotal />
         <ElementsTable />
-      </div>
+      </section>
     </div>
   );
 };

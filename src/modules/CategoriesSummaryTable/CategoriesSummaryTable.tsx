@@ -57,9 +57,9 @@ const CategoriesSummaryTable = () => {
   };
 
   return (
-    <div className="grid min-w-0 gap-8 p-4">
+    <section className="grid min-w-0 gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5">
       <h2 className="text-lg font-semibold text-foreground sm:text-xl">
-        Podsumowanie wydatków według kategorii
+        Wydatki według kategorii
       </h2>
 
       <div className="grid min-w-0 gap-8 min-[2400px]:grid-cols-[minmax(0,1fr)_minmax(420px,1fr)] min-[2400px]:items-start">
@@ -88,7 +88,7 @@ const CategoriesSummaryTable = () => {
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

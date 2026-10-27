@@ -34,21 +34,17 @@ const Nav = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border-soft bg-surface px-6 py-3 shadow-sm">
-      <div className="flex items-center justify-start">
-        <Button
-          className="inline-flex items-center gap-1.5 whitespace-nowrap"
-          onClick={() => setShowValues((current) => !current)}
-          aria-label={
-            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+      <div className="flex items-center justify-start gap-3">
+        <Suspense
+          fallback={
+            <Button disabled className="animate-pulse">
+              <span className="inline-block h-4 w-20 rounded bg-border" />
+            </Button>
           }
         >
-          {showValues ? (
-            <EyeOff size={16} aria-hidden="true" />
-          ) : (
-            <Eye size={16} aria-hidden="true" />
-          )}
-          {showValues ? "Ukryj dane" : "Pokaż dane"}
-        </Button>
+          <MultipleExpenses />
+        </Suspense>
+        <DeferredExpenseDialog />
       </div>
 
       <div className="flex items-center justify-center gap-4">
@@ -66,16 +62,6 @@ const Nav = () => {
       </div>
 
       <div className="flex items-center justify-end gap-3">
-        <Suspense
-          fallback={
-            <Button disabled className="animate-pulse">
-              <span className="inline-block h-4 w-20 rounded bg-border" />
-            </Button>
-          }
-        >
-          <MultipleExpenses />
-        </Suspense>
-        <DeferredExpenseDialog />
         <Button
           type="button"
           variant="outline"
@@ -87,6 +73,22 @@ const Nav = () => {
         >
           {theme === "light" ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
           <span className="hidden xl:inline">{theme === "light" ? "Ciemny" : "Jasny"}</span>
+        </Button>
+        <Button
+          className="inline-flex items-center gap-1.5 whitespace-nowrap"
+          onClick={() => setShowValues((current) => !current)}
+          aria-label={
+            showValues ? "Ukryj wartości liczbowe" : "Pokaż wartości liczbowe"
+          }
+        >
+          {showValues ? (
+            <EyeOff size={16} aria-hidden="true" />
+          ) : (
+            <Eye size={16} aria-hidden="true" />
+          )}
+          <span className="hidden xl:inline">
+            {showValues ? "Ukryj dane" : "Pokaż dane"}
+          </span>
         </Button>
 
         <Popover>
