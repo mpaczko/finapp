@@ -2,10 +2,8 @@ import { categoryChartColors } from "../../lib/categoryColors";
 import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch } from "../../store/reduxHook";
 import { useBudgetSummary } from "../../hooks/useBudgetSummary";
-import SummaryTable from "../SummaryTable";
 import CategoryBudgetBars from "./CategoryBudgetBars";
 import CategorySummarySection from "./CategorySummarySection";
-import TotalExpensesCard from "./TotalExpensesCard";
 import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
 
 const excludedCategoryNames = ["inwestycje", "koszty związane z firmą"];
@@ -24,19 +22,11 @@ const excludedCategoryKeys = new Set(
 const CategoriesSummaryTable = () => {
   const {
     summary,
-    totals,
     editingCategory,
     inputValue,
-    editingIncome,
-    incomeInputValue,
-    incomeReceived,
     setEditingCategory,
     setInputValue,
-    setEditingIncome,
-    setIncomeInputValue,
     savePlannedValue,
-    saveIncomeValue,
-    setIncomeReceived,
     loading,
   } = useBudgetSummary();
   const dispatch = useAppDispatch();
@@ -84,18 +74,6 @@ const CategoriesSummaryTable = () => {
             rows={secondarySummary}
             {...sectionProps}
           />
-          <TotalExpensesCard
-            totals={totals}
-            editingIncome={editingIncome}
-            incomeInputValue={incomeInputValue}
-            incomeReceived={incomeReceived}
-            loading={loading}
-            setEditingIncome={setEditingIncome}
-            setIncomeInputValue={setIncomeInputValue}
-            saveIncomeValue={saveIncomeValue}
-            setIncomeReceived={setIncomeReceived}
-          />
-          <SummaryTable />
         </div>
 
         <div className="min-w-0">

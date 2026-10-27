@@ -19,12 +19,6 @@ const SummaryTable = () => {
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold text-foreground">
-          Podsumowanie ogólne wybranego miesiąca
-        </h2>
-      </div>
-
       {loading ? (
         <TableSkeleton rows={2} columns={3} className="min-h-[180px]" />
       ) : (
