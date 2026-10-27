@@ -295,229 +295,245 @@ const YearlyInvestmentSummary = ({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-border bg-surface-muted p-4">
-          <p className="text-sm font-medium text-muted">
-            Inwestycje — łączne wydatki w danym roku
-          </p>
-
-          <div className="mt-auto">
-            {loading ? (
-              <div className="h-8 w-32 animate-pulse rounded bg-border" />
-            ) : (
-              <p className="text-2xl font-bold text-foreground">
-                {formatSummaryCurrency(summary?.investmentSum ?? 0, showValues)}
+      <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(320px,0.85fr)_minmax(0,1.5fr)] xl:items-start">
+        <section className="min-w-0">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border border-border bg-surface-muted p-4">
+              <p className="text-sm font-medium text-muted">
+                Inwestycje — łączne wydatki w danym roku
               </p>
-            )}
-          </div>
-        </div>
 
-        <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-border bg-surface-muted p-4">
-          <p className="text-sm font-medium text-muted">
-            IP Box — szacowany zwrot za dany rok dotychczas
-          </p>
+              <div className="mt-auto">
+                {loading ? (
+                  <div className="h-8 w-32 animate-pulse rounded bg-border" />
+                ) : (
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatSummaryCurrency(
+                      summary?.investmentSum ?? 0,
+                      showValues,
+                    )}
+                  </p>
+                )}
+              </div>
+            </div>
 
-          <div className="mt-auto">
-            {loading || summary == null ? (
-              <div className="h-8 w-32 animate-pulse rounded bg-border" />
-            ) : (
-              <p className="text-2xl font-bold text-foreground">
-                {formatSummaryCurrency(summary.ipBoxSum, showValues)}
+            <div className="flex min-h-[150px] min-w-0 flex-col rounded-2xl border gap-2 border-border bg-surface-muted p-4">
+              <p className="text-sm font-medium text-muted">
+                IP Box — szacowany zwrot za dany rok dotychczas
               </p>
-            )}
-          </div>
 
-          {selectedBudget && selectedMonthBelongsToYear && (
-            <div className="mt-2 border-t border-border pt-2">
-              <div className="flex items-center justify-between gap-2 text-xs font-medium text-muted">
-                <span>Kwota dla {selectedBudget.month}</span>
-                {editingIpBox ? null : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIpBoxInputValue(selectedMonthIpBox.toFixed(2));
-                      setEditingIpBox(true);
-                    }}
-                    className="rounded p-1 text-muted transition hover:bg-border hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label="Edytuj kwotę IP Box dla wybranego miesiąca"
-                    title="Edytuj kwotę IP Box"
-                  >
-                    <Pencil size={14} aria-hidden="true" />
-                  </button>
+              <div className="mt-auto">
+                {loading || summary == null ? (
+                  <div className="h-8 w-32 animate-pulse rounded bg-border" />
+                ) : (
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatSummaryCurrency(summary.ipBoxSum, showValues)}
+                  </p>
                 )}
               </div>
 
-              {editingIpBox ? (
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    autoFocus
-                    value={ipBoxInputValue}
-                    onChange={(event) => setIpBoxInputValue(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") saveIpBoxValue();
-                      if (event.key === "Escape") setEditingIpBox(false);
-                    }}
-                    className="min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-2 py-1 text-right text-sm font-semibold text-foreground outline-none focus:border-border-strong focus:ring-1 focus:ring-primary"
-                  />
-                  <button
-                    type="button"
-                    disabled={updateBudgetMutation.isPending}
-                    onClick={saveIpBoxValue}
-                    className="rounded-lg bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Zapisz
-                  </button>
+              {selectedBudget && selectedMonthBelongsToYear && (
+                <div className="mt-2 border-t border-border pt-2">
+                  <div className="flex items-center justify-between gap-2 text-xs font-medium text-muted">
+                    <span>Kwota dla {selectedBudget.month}</span>
+                    {editingIpBox ? null : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIpBoxInputValue(selectedMonthIpBox.toFixed(2));
+                          setEditingIpBox(true);
+                        }}
+                        className="rounded p-1 text-muted transition hover:bg-border hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        aria-label="Edytuj kwotę IP Box dla wybranego miesiąca"
+                        title="Edytuj kwotę IP Box"
+                      >
+                        <Pencil size={14} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+
+                  {editingIpBox ? (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        autoFocus
+                        value={ipBoxInputValue}
+                        onChange={(event) =>
+                          setIpBoxInputValue(event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") saveIpBoxValue();
+                          if (event.key === "Escape") setEditingIpBox(false);
+                        }}
+                        className="min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-2 py-1 text-right text-sm font-semibold text-foreground outline-none focus:border-border-strong focus:ring-1 focus:ring-primary"
+                      />
+                      <button
+                        type="button"
+                        disabled={updateBudgetMutation.isPending}
+                        onClick={saveIpBoxValue}
+                        className="rounded-lg bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Zapisz
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-sm font-semibold text-foreground-soft">
+                      {formatSummaryCurrency(selectedMonthIpBox, showValues)}
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <p className="mt-1 text-sm font-semibold text-foreground-soft">
-                  {formatSummaryCurrency(selectedMonthIpBox, showValues)}
-                </p>
               )}
             </div>
-          )}
-        </div>
 
-        <div className="min-w-0">
-          <ComparisonCard
-            title="Podróże — planowane vs zrealizowane"
-            planned={summary?.travelPlanned ?? null}
-            actual={summary?.travelActual ?? null}
-            loading={loading}
-            baseColor="var(--category-9)"
-          />
-        </div>
+            <div className="min-w-0">
+              <ComparisonCard
+                title="Podróże — planowane vs zrealizowane"
+                planned={summary?.travelPlanned ?? null}
+                actual={summary?.travelActual ?? null}
+                loading={loading}
+                baseColor="var(--category-9)"
+              />
+            </div>
 
-        <div className="min-w-0">
-          <ComparisonCard
-            title="Ubrania / sprzęt sportowy — planowane vs zrealizowane"
-            planned={summary?.clothesPlanned ?? null}
-            actual={summary?.clothesActual ?? null}
-            loading={loading}
-            baseColor="var(--category-11)"
-          />
-        </div>
+            <div className="min-w-0">
+              <ComparisonCard
+                title="Ubrania / sprzęt sportowy — planowane vs zrealizowane"
+                planned={summary?.clothesPlanned ?? null}
+                actual={summary?.clothesActual ?? null}
+                loading={loading}
+                baseColor="var(--category-11)"
+              />
+            </div>
 
-        {comparisonSlots.map((category, slotIndex) => {
-          if (slotIndex > 0 && !comparisonSlots[slotIndex - 1]) return null;
+            {comparisonSlots.map((category, slotIndex) => {
+              if (slotIndex > 0 && !comparisonSlots[slotIndex - 1]) return null;
 
-          const comparison = category ? comparisonData[category] : null;
+              const comparison = category ? comparisonData[category] : null;
 
-          const dropHandlers = {
-            onDragOver: (event: React.DragEvent<HTMLElement>) => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-            },
-            onDrop: (event: React.DragEvent<HTMLElement>) => {
-              event.preventDefault();
-              placeCategoryInComparisonSlot(
-                slotIndex,
-                event.dataTransfer.getData("text/plain"),
-              );
-            },
-          };
+              const dropHandlers = {
+                onDragOver: (event: React.DragEvent<HTMLElement>) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "copy";
+                },
+                onDrop: (event: React.DragEvent<HTMLElement>) => {
+                  event.preventDefault();
+                  placeCategoryInComparisonSlot(
+                    slotIndex,
+                    event.dataTransfer.getData("text/plain"),
+                  );
+                },
+              };
 
-          return (
-            <div key={slotIndex} className="min-w-0" {...dropHandlers}>
-              {category && comparison ? (
-                <ComparisonCard
-                  title={`${category} — planowane vs zrealizowane`}
-                  planned={comparison.planned}
-                  actual={comparison.actual}
-                  loading={monthlyTotalsLoading || yearlyBudgetsLoading}
-                  baseColor={categoryColors[category] ?? categoryChartColors[0]}
-                  action={
+              return (
+                <div key={slotIndex} className="min-w-0" {...dropHandlers}>
+                  {category && comparison ? (
+                    <ComparisonCard
+                      title={`${category} — planowane vs zrealizowane`}
+                      planned={comparison.planned}
+                      actual={comparison.actual}
+                      loading={monthlyTotalsLoading || yearlyBudgetsLoading}
+                      baseColor={
+                        categoryColors[category] ?? categoryChartColors[0]
+                      }
+                      action={
+                        <button
+                          type="button"
+                          onClick={() => clearComparisonSlot(slotIndex)}
+                          className="rounded-lg p-1 text-muted transition hover:bg-surface hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          aria-label={`Usuń kategorię ${category} z porównania`}
+                          title="Usuń z porównania"
+                        >
+                          <X size={16} aria-hidden="true" />
+                        </button>
+                      }
+                    />
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => clearComparisonSlot(slotIndex)}
-                      className="rounded-lg p-1 text-muted transition hover:bg-surface hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      aria-label={`Usuń kategorię ${category} z porównania`}
-                      title="Usuń z porównania"
+                      onClick={() =>
+                        placeCategoryInComparisonSlot(
+                          slotIndex,
+                          selectedCategory,
+                        )
+                      }
+                      className="flex min-h-[150px] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border-strong bg-surface-muted p-4 text-center text-sm font-medium text-muted transition hover:border-primary hover:bg-surface-subtle hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label={`Dodaj kategorię do pola porównania ${slotIndex + 1}`}
                     >
-                      <X size={16} aria-hidden="true" />
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-current">
+                        <Plus size={20} aria-hidden="true" />
+                      </span>
+                      <span>Przeciągnij tutaj kategorię</span>
+                      <span className="text-xs font-normal">
+                        lub dodaj wybraną kategorię
+                      </span>
                     </button>
-                  }
-                />
-              ) : (
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="min-w-0">
+          <div
+            className="flex flex-wrap gap-2"
+            aria-label="Wybór kategorii wykresu"
+          >
+            {availableCategories.map((category) => {
+              const active = category === selectedCategory;
+              const color = categoryColors[category];
+
+              return (
                 <button
+                  key={category}
                   type="button"
-                  onClick={() =>
-                    placeCategoryInComparisonSlot(slotIndex, selectedCategory)
-                  }
-                  className="flex min-h-[150px] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border-strong bg-surface-muted p-4 text-center text-sm font-medium text-muted transition hover:border-primary hover:bg-surface-subtle hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  aria-label={`Dodaj kategorię do pola porównania ${slotIndex + 1}`}
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = "copy";
+                    event.dataTransfer.setData("text/plain", category);
+                  }}
+                  aria-pressed={active}
+                  onClick={() => {
+                    setSelectedCategoryForChart(category);
+                    saveSelectedCategoryToCookie(category);
+                    if (globallySelectedCategory !== category) {
+                      dispatch(setSelectedCategory(category));
+                    }
+                  }}
+                  className={`shrink-0 cursor-grab rounded-xl border px-3 py-2 text-sm font-medium text-foreground-soft transition hover:brightness-95 active:cursor-grabbing ${
+                    active ? "shadow-sm" : "bg-surface"
+                  }`}
+                  style={{
+                    backgroundColor: active ? color : undefined,
+                    borderColor: color,
+                    color: active ? "var(--app-chart-label)" : undefined,
+                  }}
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-current">
-                    <Plus size={20} aria-hidden="true" />
-                  </span>
-                  <span>Przeciągnij tutaj kategorię</span>
-                  <span className="text-xs font-normal">
-                    lub dodaj wybraną kategorię
-                  </span>
+                  {category}
                 </button>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+
+          <YearlyCategoryExpensesChart
+            category={selectedCategory}
+            color={categoryColors[selectedCategory] ?? categoryChartColors[0]}
+            year={year}
+            monthlyTotals={monthlyTotals}
+            loading={monthlyTotalsLoading}
+            showValues={showValues}
+          />
+
+          <YearlyIncomeAndExpensesChart
+            year={year}
+            monthlyOverview={monthlyOverview}
+            loading={monthlyTotalsLoading || yearlyBudgetsLoading}
+            showValues={showValues}
+          />
+        </section>
       </div>
-
-      <div
-        className="mt-4 flex flex-wrap gap-2"
-        aria-label="Wybór kategorii wykresu"
-      >
-        {availableCategories.map((category) => {
-          const active = category === selectedCategory;
-          const color = categoryColors[category];
-
-          return (
-            <button
-              key={category}
-              type="button"
-              draggable
-              onDragStart={(event) => {
-                event.dataTransfer.effectAllowed = "copy";
-                event.dataTransfer.setData("text/plain", category);
-              }}
-              aria-pressed={active}
-              onClick={() => {
-                setSelectedCategoryForChart(category);
-                saveSelectedCategoryToCookie(category);
-                if (globallySelectedCategory !== category) {
-                  dispatch(setSelectedCategory(category));
-                }
-              }}
-              className={`shrink-0 cursor-grab rounded-xl border px-3 py-2 text-sm font-medium text-foreground-soft transition hover:brightness-95 active:cursor-grabbing ${
-                active ? "shadow-sm" : "bg-surface"
-              }`}
-              style={{
-                backgroundColor: active ? color : undefined,
-                borderColor: color,
-                color: active ? "var(--app-chart-label)" : undefined,
-              }}
-            >
-              {category}
-            </button>
-          );
-        })}
-      </div>
-
-      <YearlyCategoryExpensesChart
-        category={selectedCategory}
-        color={categoryColors[selectedCategory] ?? categoryChartColors[0]}
-        year={year}
-        monthlyTotals={monthlyTotals}
-        loading={monthlyTotalsLoading}
-        showValues={showValues}
-      />
-
-      <YearlyIncomeAndExpensesChart
-        year={year}
-        monthlyOverview={monthlyOverview}
-        loading={monthlyTotalsLoading || yearlyBudgetsLoading}
-        showValues={showValues}
-      />
     </div>
   );
 };
