@@ -105,40 +105,51 @@ const Main = ({ userId, selectedMonth }: Props) => {
     window.location.hash = SUMMARY_VIEW_HASHES[view];
   };
 
+  const toggleSummaryView = () => {
+    selectSummaryView(summaryView === "monthly" ? "yearly" : "monthly");
+  };
+
   return (
     <main className="px-4 pb-20 pt-25 sm:px-6">
       <div className="mx-auto max-w-[1800px]">
-        <div
-          className="mb-6 inline-flex rounded-2xl border border-border bg-surface-muted p-1 shadow-sm"
-          role="tablist"
-          aria-label="Zakres podsumowania"
-        >
-          {(
-            [
-              ["monthly", "Miesiąc"],
-              ["yearly", "Rok"],
-            ] as const
-          ).map(([view, label]) => {
-            const active = summaryView === view;
-
-            return (
-              <button
-                key={view}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => selectSummaryView(view)}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-primary ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted hover:bg-surface hover:text-foreground"
-                }`}
-              >
-                Podsumowanie: {label}
-              </button>
-            );
-          })}
-        </div>
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Podsumowanie
+          </h1>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={summaryView === "yearly"}
+            aria-label={`Przełącz na podsumowanie ${summaryView === "monthly" ? "roczne" : "miesięczne"}`}
+            onClick={toggleSummaryView}
+            className="relative inline-flex h-10 w-44 items-center rounded-full border border-border bg-surface-muted p-1 text-sm font-semibold shadow-sm transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute inset-y-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-sm transition-transform duration-200 ease-out ${
+                summaryView === "yearly" ? "translate-x-full" : "translate-x-0"
+              }`}
+            />
+            <span
+              className={`relative z-10 flex-1 text-center transition-colors ${
+                summaryView === "monthly"
+                  ? "text-primary-foreground"
+                  : "text-muted"
+              }`}
+            >
+              Miesiąc
+            </span>
+            <span
+              className={`relative z-10 flex-1 text-center transition-colors ${
+                summaryView === "yearly"
+                  ? "text-primary-foreground"
+                  : "text-muted"
+              }`}
+            >
+              Rok
+            </span>
+          </button>
+        </header>
 
         {summaryView === "monthly" ? (
           <MonthlySummary userId={userId} selectedMonth={selectedMonth} />
