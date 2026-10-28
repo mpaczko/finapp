@@ -7,6 +7,7 @@ import { CreateExpensesBatchDto } from "./dto/create-expenses-batch.dto";
 import { ExpensesQueryDto } from "./dto/expenses-query.dto";
 import { MonthlyExpenseTotalsQueryDto } from "./dto/monthly-expense-totals-query.dto";
 import { UpdateExpenseDto } from "./dto/update-expense.dto";
+import { YearlyExpensesQueryDto } from "./dto/yearly-expenses-query.dto";
 import { ExpensesService } from "./expenses.service";
 
 @Controller("expenses")
@@ -16,6 +17,14 @@ export class ExpensesController {
   @Get()
   findAll(@CurrentUser() user: AuthUser, @Query() query: ExpensesQueryDto) {
     return this.expensesService.findAll(user.id, query);
+  }
+
+  @Get("yearly")
+  findYearPage(
+    @CurrentUser() user: AuthUser,
+    @Query() query: YearlyExpensesQueryDto,
+  ) {
+    return this.expensesService.findYearPage(user.id, query);
   }
 
   @Get("monthly-totals")

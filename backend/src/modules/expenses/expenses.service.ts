@@ -5,6 +5,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
 import { ExpensesQueryDto } from "./dto/expenses-query.dto";
 import { UpdateExpenseDto } from "./dto/update-expense.dto";
+import { YearlyExpensesQueryDto } from "./dto/yearly-expenses-query.dto";
 
 const toDatabaseDate = (value: string) => new Date(`${value}T00:00:00.000Z`);
 const toDateOnly = (value: Date | string) =>
@@ -55,6 +56,28 @@ export class ExpensesService {
       month,
       total: toNumber(total),
     }));
+  }
+
+  async findYearPage(userId: string, query: YearlyExpensesQueryDto) {
+    const from = toDatabaseDate(`${query.year}-01-01`);
+    const to = toDatabaseDate(`${query.year}-12-31`);
+    const expenses = await this.prisma.expense.findMany({
+      where: {
+        user_id: userId,
+        date: { gte: from, lte: to },
+      },
+      orderBy: [{ date: "desc" }, { id: "desc" }],
+      cursor: query.cursor ? { id: query.cursor } : undefined,
+      skip: query.cursor ? 1 : 0,
+      take: query.limit + 1,
+    });
+    const hasNextPage = expenses.length > query.limit;
+    const items = hasNextPage ? expenses.slice(0, query.limit) : expenses;
+
+    return {
+      items: items.map(this.mapExpense),
+      nextCursor: hasNextPage ? items.at(-1)?.id ?? null : null,
+    };
   }
 
   async create(userId: string, dto: CreateExpenseDto) {
