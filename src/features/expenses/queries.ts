@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
 import { expensesApi } from "../../lib/expensesApi";
@@ -12,6 +17,20 @@ export const useExpensesQuery = (month: string, enabled = true) =>
     queryFn: ({ signal }) => expensesApi.listByMonth(month, signal),
     enabled,
     staleTime: 45_000,
+  });
+
+export const yearlyExpensesQueryKey = (year: number) =>
+  ["expenses", "year", year] as const;
+
+export const useYearlyExpensesQuery = (year: number, enabled = true) =>
+  useInfiniteQuery({
+    queryKey: yearlyExpensesQueryKey(year),
+    queryFn: ({ pageParam, signal }) =>
+      expensesApi.listYearPage(year, pageParam, signal),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled,
+    staleTime: 2 * 60_000,
   });
 
 export const yearlyExpenseTotalsQueryKey = (year: number) =>

@@ -15,6 +15,7 @@ import { setSelectedCategory } from "../../store/configSlice/configSlice";
 import { useAppDispatch, useAppSelector } from "../../store/reduxHook";
 import ComparisonCard from "./ComparisonCard";
 import YearlyCategoryExpensesChart from "./YearlyCategoryExpensesChart";
+import YearlyExpensesList from "./YearlyExpensesList";
 import YearlyIncomeAndExpensesChart from "./YearlyIncomeAndExpensesChart";
 
 type YearlyInvestmentSummaryProps = {
@@ -534,6 +535,8 @@ const YearlyInvestmentSummary = ({
           />
         </section>
       </div>
+
+      <YearlyExpensesList year={year} enabled={Boolean(userId)} />
     </div>
   );
 };

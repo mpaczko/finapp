@@ -16,6 +16,11 @@ export type MonthlyExpenseTotal = {
   total: number;
 };
 
+export type YearlyExpensesPage = {
+  items: Expense[];
+  nextCursor: string | null;
+};
+
 export type CreateExpenseDto = IAddExpenseForm;
 
 const toExpenseDto = ({
@@ -35,6 +40,15 @@ export const expensesApi = {
     apiRequest<Expense[]>(`/expenses?month=${encodeURIComponent(month)}`, {
       signal,
     }),
+
+  listYearPage: (year: number, cursor?: string, signal?: AbortSignal) => {
+    const query = new URLSearchParams({ year: String(year), limit: "100" });
+    if (cursor) query.set("cursor", cursor);
+
+    return apiRequest<YearlyExpensesPage>(`/expenses/yearly?${query}`, {
+      signal,
+    });
+  },
 
   getMonthlyTotals: (year: number, signal?: AbortSignal) =>
     apiRequest<MonthlyExpenseTotal[]>(
