@@ -59,12 +59,21 @@ export class ExpensesService {
   }
 
   async findYearPage(userId: string, query: YearlyExpensesQueryDto) {
-    const from = toDatabaseDate(`${query.year}-01-01`);
-    const to = toDatabaseDate(`${query.year}-12-31`);
+    const month = query.month ?? 1;
+    const from = toDatabaseDate(
+      `${query.year}-${String(month).padStart(2, "0")}-01`,
+    );
+    const nextMonth =
+      query.month === undefined || query.month === 12
+        ? toDatabaseDate(`${query.year + 1}-01-01`)
+        : toDatabaseDate(
+            `${query.year}-${String(query.month + 1).padStart(2, "0")}-01`,
+          );
     const expenses = await this.prisma.expense.findMany({
       where: {
         user_id: userId,
-        date: { gte: from, lte: to },
+        category: query.category || undefined,
+        date: { gte: from, lt: nextMonth },
       },
       orderBy: [{ date: "desc" }, { id: "desc" }],
       cursor: query.cursor ? { id: query.cursor } : undefined,

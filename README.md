@@ -72,7 +72,7 @@ Z katalogu `backend`:
 npm run start:dev      # API w trybie obserwacji
 npm run build          # build API
 npm run prisma:generate
-npm run prisma:migrate
+npm run prisma:db-push # synchronizacja schema.prisma z bazą
 ```
 
 ## Import CSV

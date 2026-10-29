@@ -9,7 +9,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:db-push": "prisma db push",
     "prisma:studio": "prisma studio",
     "test:auth": "npm run build && node --test test/auth.test.cjs",
     "test:mail": "npm run build && node --test test/mail.test.cjs"

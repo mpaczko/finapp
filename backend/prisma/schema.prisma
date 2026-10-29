@@ -42,7 +42,7 @@ model Expense {
   cost       Decimal  @db.Decimal(12, 2)
   user_id    String   @db.Uuid
 
-  @@index([user_id, date])
+  @@index([user_id, date(sort: Desc), id(sort: Desc)])
   @@map("expenses")
 }
 

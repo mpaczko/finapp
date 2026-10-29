@@ -1,5 +1,13 @@
 import { Type } from "class-transformer";
-import { IsInt, IsOptional, IsUUID, Max, Min } from "class-validator";
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from "class-validator";
 
 export class YearlyExpensesQueryDto {
   @Type(() => Number)
@@ -18,4 +26,16 @@ export class YearlyExpensesQueryDto {
   @Min(1)
   @Max(200)
   limit = 100;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  category?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month?: number;
 }

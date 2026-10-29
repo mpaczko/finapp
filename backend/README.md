@@ -46,14 +46,17 @@ The API starts on `http://localhost:4000/api` by default.
 
 ## Database
 
-The Prisma schema maps to the existing Supabase table names. If the database already exists, use:
+`prisma/schema.prisma` is the source of truth for the shared Supabase database.
+Generate the Prisma client after installing dependencies:
 
 ```bash
 npm run prisma:generate
 ```
 
-For a new local database, create a migration:
+After a schema change, synchronize the configured database with:
 
 ```bash
-npm run prisma:migrate
+npm run prisma:db-push
 ```
+
+`db push` will stop and ask for confirmation if a schema change could delete data.
