@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 
 import { useYearlyExpensesQuery } from "../../features/expenses/queries";
+import { useCategoriesQuery } from "../../features/categories/queries";
 import { useSummaryVisibility } from "../../hooks/useSummaryVisibility";
 import { formatSummaryCurrency } from "../../lib/summaryVisibility";
 import TableSkeleton from "../../ui/TableSkeleton/TableSkeleton";
@@ -15,8 +16,26 @@ type YearlyExpensesListProps = {
 const ROW_HEIGHT = 52;
 const VIEWPORT_HEIGHT = 520;
 const OVERSCAN = 8;
+const MONTHS = [
+  "Styczeń",
+  "Luty",
+  "Marzec",
+  "Kwiecień",
+  "Maj",
+  "Czerwiec",
+  "Lipiec",
+  "Sierpień",
+  "Wrzesień",
+  "Październik",
+  "Listopad",
+  "Grudzień",
+];
 
 const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
+  const [filters, setFilters] = useState<{
+    category?: string;
+    month?: number;
+  }>({});
   const {
     data,
     isLoading,
@@ -26,7 +45,8 @@ const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
     isFetchNextPageError,
     fetchNextPage,
     refetch,
-  } = useYearlyExpensesQuery(year, enabled);
+  } = useYearlyExpensesQuery(year, filters, enabled);
+  const { data: categories = [] } = useCategoriesQuery(enabled);
   const [showValues] = useSummaryVisibility();
   const [scrollTop, setScrollTop] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -39,8 +59,8 @@ const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
   useEffect(() => {
     setScrollTop(0);
     setActiveIndex(0);
-    viewportRef.current?.scrollTo({ top: 0 });
-  }, [year]);
+    viewportRef.current?.scrollTo?.({ top: 0 });
+  }, [year, filters.category, filters.month]);
 
   useEffect(() => {
     setActiveIndex((index) => Math.min(index, Math.max(expenses.length - 1, 0)));
@@ -120,6 +140,7 @@ const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
     };
   }, [expenses, scrollTop]);
   const totalRowCount = expenses.length + (hasNextPage ? 1 : 0);
+  const hasActiveFilters = Boolean(filters.category || filters.month);
 
   return (
     <section className="mt-6 min-w-0 rounded-2xl border border-border-soft bg-surface shadow-sm">
@@ -144,6 +165,60 @@ const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
         )}
       </div>
 
+      <div className="flex flex-wrap items-end gap-3 border-b border-border-soft px-4 py-3 sm:px-5">
+        <label className="flex min-w-44 flex-1 flex-col gap-1 text-sm font-medium text-foreground-soft">
+          Kategoria
+          <select
+            value={filters.category ?? ""}
+            onChange={(event) =>
+              setFilters((current) => ({
+                ...current,
+                category: event.target.value || undefined,
+              }))
+            }
+            className="rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-foreground focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-border"
+          >
+            <option value="">Wszystkie kategorie</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex min-w-36 flex-1 flex-col gap-1 text-sm font-medium text-foreground-soft">
+          Miesiąc
+          <select
+            value={filters.month ?? ""}
+            onChange={(event) =>
+              setFilters((current) => ({
+                ...current,
+                month: event.target.value ? Number(event.target.value) : undefined,
+              }))
+            }
+            className="rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-foreground focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-border"
+          >
+            <option value="">Wszystkie miesiące</option>
+            {MONTHS.map((month, index) => (
+              <option key={month} value={index + 1}>
+                {month}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={() => setFilters({})}
+            className="rounded-lg border border-border-soft px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
+          >
+            Wyczyść filtry
+          </button>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="p-4 sm:p-5">
           <TableSkeleton rows={10} columns={4} className="min-h-[520px]" />
@@ -163,7 +238,9 @@ const YearlyExpensesList = ({ year, enabled }: YearlyExpensesListProps) => {
         </div>
       ) : expenses.length === 0 ? (
         <p className="px-4 py-10 text-center text-sm text-muted sm:px-5">
-          Brak wydatków w wybranym roku.
+          {hasActiveFilters
+            ? "Brak wydatków spełniających wybrane filtry."
+            : "Brak wydatków w wybranym roku."}
         </p>
       ) : (
         <div className="overflow-x-auto">

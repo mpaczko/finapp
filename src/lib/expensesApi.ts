@@ -21,6 +21,11 @@ export type YearlyExpensesPage = {
   nextCursor: string | null;
 };
 
+export type YearlyExpensesFilters = {
+  category?: string;
+  month?: number;
+};
+
 export type CreateExpenseDto = IAddExpenseForm;
 
 const toExpenseDto = ({
@@ -41,8 +46,15 @@ export const expensesApi = {
       signal,
     }),
 
-  listYearPage: (year: number, cursor?: string, signal?: AbortSignal) => {
+  listYearPage: (
+    year: number,
+    filters: YearlyExpensesFilters,
+    cursor?: string,
+    signal?: AbortSignal,
+  ) => {
     const query = new URLSearchParams({ year: String(year), limit: "100" });
+    if (filters.category) query.set("category", filters.category);
+    if (filters.month) query.set("month", String(filters.month));
     if (cursor) query.set("cursor", cursor);
 
     return apiRequest<YearlyExpensesPage>(`/expenses/yearly?${query}`, {

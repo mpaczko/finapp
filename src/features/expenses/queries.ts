@@ -6,7 +6,10 @@ import {
 } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
-import { expensesApi } from "../../lib/expensesApi";
+import {
+  expensesApi,
+  type YearlyExpensesFilters,
+} from "../../lib/expensesApi";
 import { IAddExpenseForm } from "../../modules/ExpenseDialog/ExpenseForm/addExpenseForm.config";
 
 export const expensesQueryKey = (month: string) => ["expenses", month] as const;
@@ -19,14 +22,21 @@ export const useExpensesQuery = (month: string, enabled = true) =>
     staleTime: 45_000,
   });
 
-export const yearlyExpensesQueryKey = (year: number) =>
-  ["expenses", "year", year] as const;
+export const yearlyExpensesQueryKey = (
+  year: number,
+  filters: YearlyExpensesFilters,
+) =>
+  ["expenses", "year", year, filters.category ?? null, filters.month ?? null] as const;
 
-export const useYearlyExpensesQuery = (year: number, enabled = true) =>
+export const useYearlyExpensesQuery = (
+  year: number,
+  filters: YearlyExpensesFilters,
+  enabled = true,
+) =>
   useInfiniteQuery({
-    queryKey: yearlyExpensesQueryKey(year),
+    queryKey: yearlyExpensesQueryKey(year, filters),
     queryFn: ({ pageParam, signal }) =>
-      expensesApi.listYearPage(year, pageParam, signal),
+      expensesApi.listYearPage(year, filters, pageParam, signal),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled,
