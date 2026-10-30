@@ -4,6 +4,27 @@ import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
 import { server } from "./mocks/server";
 
+const installJsdomStorage = () => {
+  const domWindow = (
+    globalThis as typeof globalThis & { jsdom?: { window: Window } }
+  ).jsdom?.window;
+
+  if (!domWindow) return;
+
+  Object.defineProperties(globalThis, {
+    localStorage: {
+      configurable: true,
+      value: domWindow.localStorage,
+    },
+    sessionStorage: {
+      configurable: true,
+      value: domWindow.sessionStorage,
+    },
+  });
+};
+
+installJsdomStorage();
+
 const clearCookies = () => {
   document.cookie.split(";").forEach((cookie) => {
     const name = cookie.split("=")[0]?.trim();

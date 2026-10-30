@@ -18,7 +18,7 @@ Finapp to aplikacja do zarządzania osobistym budżetem. Pozwala rejestrować wy
 
 ## Wymagania
 
-- Node.js 20 lub nowszy;
+- Node.js 26 lub nowszy;
 - dostęp do bazy PostgreSQL (np. Supabase);
 
 ## Uruchomienie lokalne
