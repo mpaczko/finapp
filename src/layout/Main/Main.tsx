@@ -65,7 +65,7 @@ const MonthlySummary = ({ userId, selectedMonth }: Props) => {
     const observer = new ResizeObserver(updateHeight);
     observer.observe(balancePanel);
     return () => observer.disconnect();
-  }, []);
+  }, [hasError, loading]);
 
   if (loading) {
     return (
