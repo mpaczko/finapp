@@ -39,7 +39,7 @@ const CategoryBudgetBars = ({
   }
 
   return (
-    <section className="rounded-3xl border border-border-soft bg-surface p-4 shadow-sm">
+    <section className="flex min-h-0 flex-col rounded-3xl border border-border-soft bg-surface p-4 shadow-sm xl:h-full">
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h3 className="text-sm font-semibold text-foreground">
@@ -66,7 +66,10 @@ const CategoryBudgetBars = ({
         </div>
       </div>
 
-      <div className="grid gap-3">
+      <div
+        className="budget-bars-scroll grid gap-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-2"
+        aria-label="Lista planów i wydatków według kategorii"
+      >
         {parsedRows.map((row) => {
           const baseColor = colorMap[row.name] || "var(--app-border-strong)";
           const actualPercent =

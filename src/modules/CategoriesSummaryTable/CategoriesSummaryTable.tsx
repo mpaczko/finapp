@@ -57,12 +57,12 @@ const CategoriesSummaryTable = () => {
   };
 
   return (
-    <section className="grid min-w-0 gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5">
+    <section className="grid min-w-0 gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5 xl:h-full xl:grid-rows-[auto_minmax(0,1fr)]">
       <h2 className="text-lg font-semibold text-foreground sm:text-xl">
         Wydatki według kategorii
       </h2>
 
-      <div className="grid min-w-0 gap-8 min-[2400px]:grid-cols-[minmax(0,1fr)_minmax(420px,1fr)] min-[2400px]:items-start">
+      <div className="grid min-w-0 grid-cols-1 gap-8 xl:min-h-0 xl:grid-rows-[auto_minmax(0,1fr)]">
         <div className="grid min-w-0 auto-rows-max content-start gap-8">
           <CategorySummarySection
             title="Kategorie (bez Inwestycji i Kosztów firmy)"
@@ -76,7 +76,7 @@ const CategoriesSummaryTable = () => {
           />
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 xl:min-h-0">
           {loading ? (
             <TableSkeleton rows={6} columns={3} className="min-h-[420px]" />
           ) : (

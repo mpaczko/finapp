@@ -1,4 +1,12 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import CategoriesSummaryTable from "../../modules/CategoriesSummaryTable";
 import MonthlyExpensesTotal from "../../modules/CategoriesSummaryTable/MonthlyExpensesTotal";
 import SummaryTable from "../../modules/SummaryTable";
@@ -38,6 +46,26 @@ const MonthlySummary = ({ userId, selectedMonth }: Props) => {
     categoriesQuery.isLoading;
   const hasError =
     expensesQuery.isError || budgetQuery.isError || categoriesQuery.isError;
+  const balancePanelRef = useRef<HTMLElement>(null);
+  const [balancePanelHeight, setBalancePanelHeight] = useState<number>();
+
+  useLayoutEffect(() => {
+    const balancePanel = balancePanelRef.current;
+    if (!balancePanel) return;
+
+    const updateHeight = () =>
+      setBalancePanelHeight(
+        Math.ceil(balancePanel.getBoundingClientRect().height),
+      );
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(balancePanel);
+    return () => observer.disconnect();
+  }, []);
 
   if (loading) {
     return (
@@ -72,11 +100,23 @@ const MonthlySummary = ({ userId, selectedMonth }: Props) => {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start">
-      <div className="min-w-0">
+    <div
+      className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start"
+      style={
+        balancePanelHeight
+          ? ({
+              "--monthly-balance-height": `${balancePanelHeight}px`,
+            } as CSSProperties)
+          : undefined
+      }
+    >
+      <div className="min-w-0 xl:h-[var(--monthly-balance-height)] xl:min-h-0">
         <CategoriesSummaryTable />
       </div>
-      <section className="grid min-w-0 content-start gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5">
+      <section
+        ref={balancePanelRef}
+        className="grid min-w-0 content-start gap-6 rounded-3xl border border-border-soft bg-surface p-4 shadow-sm sm:p-5"
+      >
         <h2 className="text-lg font-semibold text-foreground sm:text-xl">
           Bilans wybranego miesiąca
         </h2>
